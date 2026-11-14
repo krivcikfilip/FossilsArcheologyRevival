@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.SifterBlock;
 import com.github.teamfossilsarcheology.fossil.inventory.SifterMenu;
 import com.github.teamfossilsarcheology.fossil.recipe.ModRecipes;
@@ -94,7 +95,7 @@ public class SifterBlockEntity extends MachineContainerBlockEntity {
 
 
     public boolean isSiftable(ItemStack stack) {
-        return ModRecipes.getSifterRecipeForItem(new SimpleContainer(stack), level) != null;
+        return ModRecipes.getSifterRecipeForItem(MultiOutputAndSlotsRecipe.MachineRecipeInput.of(stack), level) != null;
     }
 
     protected boolean canProcess() {
@@ -114,8 +115,8 @@ public class SifterBlockEntity extends MachineContainerBlockEntity {
 
     protected void createItem() {
         if (canProcess()) {
-            ItemStack result = ModRecipes.getSifterRecipeForItem(new SimpleContainer(items.get(0)), level)
-                    .assemble(this, level.registryAccess()).copy();
+            ItemStack result = ModRecipes.getSifterRecipeForItem(MultiOutputAndSlotsRecipe.MachineRecipeInput.of(items.get(0)), level)
+                    .assemble(level.random).copy(); //PORT(1.21.1): was assemble(this BlockEntity, registryAccess)
             for (int slot = 1; slot <= 5; slot++) {
                 ItemStack stackInSlot = items.get(slot);
                 if (ItemStack.isSameItem(stackInSlot, result) && stackInSlot.getCount() + result.getCount() < 64) {

@@ -3,11 +3,12 @@ package com.github.teamfossilsarcheology.fossil.item;
 import com.github.teamfossilsarcheology.fossil.client.particle.ModParticles;
 import com.github.teamfossilsarcheology.fossil.entity.LaserPointEntity;
 import com.github.teamfossilsarcheology.fossil.entity.ModEntities;
-import net.minecraft.nbt.CompoundTag;
+import com.github.teamfossilsarcheology.fossil.item.component.ModDataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -22,8 +23,7 @@ import java.util.UUID;
 
 public class LaserPointerItem extends Item {
     private static final double LASER_RANGE = 50;
-    private static final String TAG_LASER_ENTITY_UUID = "LaserEntityUUID";
-    private static final String TAG_USE_START_TIME = "UseStartTime";
+    //PORT(1.21.1): NBT keys "LaserEntityUUID"/"UseStartTime" replaced by ModDataComponents.LASER_ENTITY/LASER_USE_START_TIME
 
 
     private static final float LASER_ACTIVE_LIFESPAN_MINUTES = 15f;
@@ -34,7 +34,7 @@ public class LaserPointerItem extends Item {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72000;
     }
 
@@ -52,8 +52,8 @@ public class LaserPointerItem extends Item {
             laserPoint.setPos(player.getX(), player.getEyeY(), player.getZ());
             level.addFreshEntity(laserPoint);
 
-            stack.getOrCreateTag().putUUID(TAG_LASER_ENTITY_UUID, laserPoint.getUUID());
-            stack.getOrCreateTag().putLong(TAG_USE_START_TIME, level.getGameTime());
+            stack.set(ModDataComponents.LASER_ENTITY.get(), laserPoint.getUUID());
+            stack.set(ModDataComponents.LASER_USE_START_TIME.get(), level.getGameTime());
         }
 
         player.startUsingItem(hand);
@@ -63,29 +63,28 @@ public class LaserPointerItem extends Item {
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity living, int timeCharged) {
         if (!level.isClientSide() && living instanceof Player) {
-            CompoundTag tag = stack.getTag();
-            if (tag != null && tag.hasUUID(TAG_LASER_ENTITY_UUID)) {
-                UUID entityUUID = tag.getUUID(TAG_LASER_ENTITY_UUID);
+            UUID entityUUID = stack.get(ModDataComponents.LASER_ENTITY.get());
+            if (entityUUID != null) {
                 Entity entity = ((ServerLevel) level).getEntity(entityUUID);
                 if (entity instanceof LaserPointEntity) {
                     entity.discard();
                 }
-                tag.remove(TAG_LASER_ENTITY_UUID);
+                stack.remove(ModDataComponents.LASER_ENTITY.get());
             }
 
             // apply durability
             // we are only applying durability after release so that the item doesn't keep bobbing
             // every time the durability decreases
-            if (tag != null && tag.contains(TAG_USE_START_TIME)) {
-                long startTime = tag.getLong(TAG_USE_START_TIME);
+            Long startTime = stack.get(ModDataComponents.LASER_USE_START_TIME.get());
+            if (startTime != null) {
                 long useDuration = level.getGameTime() - startTime;
                 int damageToApply = (int) (useDuration / 20); // 1 damage per second
 
+                //PORT(1.21.1): remove the component before hurtAndBreak, the stack may be empty afterwards
+                stack.remove(ModDataComponents.LASER_USE_START_TIME.get());
                 if (damageToApply > 0) {
-                    stack.hurtAndBreak(damageToApply, living, (p) -> p.broadcastBreakEvent(living.getUsedItemHand()));
+                    stack.hurtAndBreak(damageToApply, living, LivingEntity.getSlotForHand(living.getUsedItemHand()));
                 }
-
-                tag.remove(TAG_USE_START_TIME);
             }
         }
     }
@@ -98,20 +97,19 @@ public class LaserPointerItem extends Item {
         // check if the laser should have broken by now (since we are only applying durability after release)
         // this is to prevent players from cheating by just not releasing the laser
         if (!level.isClientSide() && level.getGameTime() % 20 == 0) {
-            CompoundTag tag = stack.getTag();
-            if (tag != null && tag.contains(TAG_USE_START_TIME)) {
-                long startTime = tag.getLong(TAG_USE_START_TIME);
+            Long startTime = stack.get(ModDataComponents.LASER_USE_START_TIME.get());
+            if (startTime != null) {
                 long useDuration = level.getGameTime() - startTime;
                 int damageToApply = (int) (useDuration / 20);
 
                 if (stack.getDamageValue() + damageToApply >= stack.getMaxDamage()) {
                     player.stopUsingItem();
-                    player.broadcastBreakEvent(player.getUsedItemHand());
+                    player.onEquippedItemBroken(stack.getItem(), LivingEntity.getSlotForHand(player.getUsedItemHand()));
+                    // Clean up laser entity
+                    UUID entityUUID = stack.get(ModDataComponents.LASER_ENTITY.get());
                     stack.shrink(1);
 
-                    // Clean up laser entity
-                    if (tag.hasUUID(TAG_LASER_ENTITY_UUID)) {
-                        UUID entityUUID = tag.getUUID(TAG_LASER_ENTITY_UUID);
+                    if (entityUUID != null) {
                         Entity entity = ((ServerLevel) level).getEntity(entityUUID);
                         if (entity instanceof LaserPointEntity) {
                             entity.discard();
@@ -139,9 +137,9 @@ public class LaserPointerItem extends Item {
 
         // move the laser point entity to raycast hit on the server side
         if (!level.isClientSide()) {
-            CompoundTag tag = stack.getTag();
-            if (tag != null && tag.hasUUID(TAG_LASER_ENTITY_UUID)) {
-                Entity entity = ((ServerLevel) level).getEntity(tag.getUUID(TAG_LASER_ENTITY_UUID));
+            UUID entityUUID = stack.get(ModDataComponents.LASER_ENTITY.get());
+            if (entityUUID != null) {
+                Entity entity = ((ServerLevel) level).getEntity(entityUUID);
                 if (entity instanceof LaserPointEntity laserPoint) {
                     laserPoint.updatePosition(hitPos.x(), hitPos.y(), hitPos.z());
                 }

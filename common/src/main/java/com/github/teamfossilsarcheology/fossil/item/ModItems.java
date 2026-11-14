@@ -7,7 +7,7 @@ import com.github.teamfossilsarcheology.fossil.entity.ToyBase;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricEntityInfo;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.VanillaEntityInfo;
 import com.github.teamfossilsarcheology.fossil.material.ModFluids;
-import com.github.teamfossilsarcheology.fossil.sounds.ModSounds;
+import com.github.teamfossilsarcheology.fossil.sounds.ModJukeboxSongs;
 import com.github.teamfossilsarcheology.fossil.util.TimePeriod;
 import dev.architectury.core.item.ArchitecturyBucketItem;
 import dev.architectury.core.item.ArchitecturySpawnEggItem;
@@ -34,14 +34,14 @@ public class ModItems {
             () -> new ArchitecturyBucketItem(ModFluids.TAR, new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET).arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
     public static final RegistrySupplier<Item> TAR_DROP = ITEMS.register("tar_drop",
             () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
-    public static final RegistrySupplier<RecordItem> MUSIC_DISC_BONES = ITEMS.register("music_disc_bones",
-            () -> CustomRecordItem.get(0, ModSounds.MUSIC_BONES, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE), 196));
-    public static final RegistrySupplier<RecordItem> MUSIC_DISC_ANU = ITEMS.register("music_disc_anu",
-            () -> CustomRecordItem.get(1, ModSounds.MUSIC_ANU, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE), 221));
-    public static final RegistrySupplier<RecordItem> MUSIC_DISC_SCARAB = ITEMS.register("music_disc_scarab",
-            () -> CustomRecordItem.get(2, ModSounds.MUSIC_SCARAB, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE), 153));
-    public static final RegistrySupplier<RecordItem> MUSIC_DISC_DISCOVERY = ITEMS.register("music_disc_discovery",
-            () -> CustomRecordItem.get(3, ModSounds.MUSIC_DISCOVERY, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE), 250));
+    public static final RegistrySupplier<Item> MUSIC_DISC_BONES = ITEMS.register("music_disc_bones",
+            () -> CustomRecordItem.get(ModJukeboxSongs.BONES, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE)));
+    public static final RegistrySupplier<Item> MUSIC_DISC_ANU = ITEMS.register("music_disc_anu",
+            () -> CustomRecordItem.get(ModJukeboxSongs.ANU, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE)));
+    public static final RegistrySupplier<Item> MUSIC_DISC_SCARAB = ITEMS.register("music_disc_scarab",
+            () -> CustomRecordItem.get(ModJukeboxSongs.SCARAB, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE)));
+    public static final RegistrySupplier<Item> MUSIC_DISC_DISCOVERY = ITEMS.register("music_disc_discovery",
+            () -> CustomRecordItem.get(ModJukeboxSongs.DISCOVERY, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_OTHER_ITEM_TAB).rarity(Rarity.RARE)));
     public static final RegistrySupplier<Item> BIO_FOSSIL = ITEMS.register("fossil_bio", () -> new FossilItem(TimePeriod.MESOZOIC));
     public static final RegistrySupplier<Item> PlANT_FOSSIL = ITEMS.register("fossil_plant", () -> new FossilItem(null));
     public static final RegistrySupplier<Item> SHALE_FOSSIL = ITEMS.register("fossil_shale", () -> new FossilItem(TimePeriod.PALEOZOIC));
@@ -56,11 +56,13 @@ public class ModItems {
     public static final RegistrySupplier<Item> BROKEN_SWORD = ITEMS.register("broken_sword", () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
     public static final RegistrySupplier<Item> BROKEN_HELMET = ITEMS.register("broken_helmet", () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
     public static final RegistrySupplier<Item> ANCIENT_SWORD = ITEMS.register("ancient_sword", () -> new AncientSwordItem(Tiers.IRON, 3, -2.4f));
-    public static final RegistrySupplier<Item> ANCIENT_HELMET = ITEMS.register("ancient_helmet", () -> AncientHelmetItem.get(ModArmorMaterials.ANCIENT, ArmorItem.Type.HELMET, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+    public static final RegistrySupplier<Item> ANCIENT_HELMET = ITEMS.register("ancient_helmet", () -> AncientHelmetItem.get(ModArmorMaterials.ANCIENT, ArmorItem.Type.HELMET, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+                    .durability(ArmorItem.Type.HELMET.getDurability(ModArmorMaterials.ANCIENT_DURABILITY_MULTIPLIER))));
     public static final RegistrySupplier<Item> FROZEN_MEAT = ITEMS.register("frozen_meat",
             () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
     public static final RegistrySupplier<Item> TOOTH_DAGGER = ITEMS.register("tooth_dagger",
-            () -> new SwordItem(ModToolTiers.TOOTH_DAGGER, 3, -2.4f, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+            () -> new SwordItem(ModToolTiers.TOOTH_DAGGER, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+                    .attributes(SwordItem.createAttributes(ModToolTiers.TOOTH_DAGGER, 3, -2.4f))));
     public static final RegistrySupplier<JavelinItem> WOODEN_JAVELIN = ITEMS.register("wooden_javelin", () -> new JavelinItem(Tiers.WOOD));
     public static final RegistrySupplier<JavelinItem> STONE_JAVELIN = ITEMS.register("stone_javelin", () -> new JavelinItem(Tiers.STONE));
     public static final RegistrySupplier<JavelinItem> GOLD_JAVELIN = ITEMS.register("gold_javelin", () -> new JavelinItem(Tiers.GOLD));
@@ -68,20 +70,29 @@ public class ModItems {
     public static final RegistrySupplier<JavelinItem> DIAMOND_JAVELIN = ITEMS.register("diamond_javelin", () -> new JavelinItem(Tiers.DIAMOND));
     public static final RegistrySupplier<JavelinItem> ANCIENT_JAVELIN = ITEMS.register("ancient_javelin",
             () -> new JavelinItem(Tiers.WOOD, true));
-    public static final RegistrySupplier<SwordItem> SCARAB_SWORD = ITEMS.register("scarab_sword", () -> new SwordItem(ModToolTiers.SCARAB, 3, -2.4f, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
-    public static final RegistrySupplier<PickaxeItem> SCARAB_PICKAXE = ITEMS.register("scarab_pickaxe", () -> new PickaxeItem(ModToolTiers.SCARAB, 1, -2.8f, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
-    public static final RegistrySupplier<AxeItem> SCARAB_AXE = ITEMS.register("scarab_axe", () -> new AxeItem(ModToolTiers.SCARAB, 4, -3, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
-    public static final RegistrySupplier<ShovelItem> SCARAB_SHOVEL = ITEMS.register("scarab_shovel", () -> new ShovelItem(ModToolTiers.SCARAB, 1.5f, -3, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
-    public static final RegistrySupplier<HoeItem> SCARAB_HOE = ITEMS.register("scarab_hoe", () -> new HoeItem(ModToolTiers.SCARAB, -2, -1, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+    public static final RegistrySupplier<SwordItem> SCARAB_SWORD = ITEMS.register("scarab_sword", () -> new SwordItem(ModToolTiers.SCARAB, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+            .attributes(SwordItem.createAttributes(ModToolTiers.SCARAB, 3, -2.4f))));
+    public static final RegistrySupplier<PickaxeItem> SCARAB_PICKAXE = ITEMS.register("scarab_pickaxe", () -> new PickaxeItem(ModToolTiers.SCARAB, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+            .attributes(DiggerItem.createAttributes(ModToolTiers.SCARAB, 1, -2.8f))));
+    public static final RegistrySupplier<AxeItem> SCARAB_AXE = ITEMS.register("scarab_axe", () -> new AxeItem(ModToolTiers.SCARAB, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+            .attributes(DiggerItem.createAttributes(ModToolTiers.SCARAB, 4, -3))));
+    public static final RegistrySupplier<ShovelItem> SCARAB_SHOVEL = ITEMS.register("scarab_shovel", () -> new ShovelItem(ModToolTiers.SCARAB, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+            .attributes(DiggerItem.createAttributes(ModToolTiers.SCARAB, 1.5f, -3))));
+    public static final RegistrySupplier<HoeItem> SCARAB_HOE = ITEMS.register("scarab_hoe", () -> new HoeItem(ModToolTiers.SCARAB, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+            .attributes(DiggerItem.createAttributes(ModToolTiers.SCARAB, -2, -1))));
 
     public static final RegistrySupplier<Item> BONE_HELMET = ITEMS.register("bone_helmet",
-            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.HELMET, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.HELMET, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+                    .durability(ArmorItem.Type.HELMET.getDurability(ModArmorMaterials.BONE_DURABILITY_MULTIPLIER))));
     public static final RegistrySupplier<Item> BONE_CHESTPLATE = ITEMS.register("bone_chestplate",
-            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.CHESTPLATE, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.CHESTPLATE, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+                    .durability(ArmorItem.Type.CHESTPLATE.getDurability(ModArmorMaterials.BONE_DURABILITY_MULTIPLIER))));
     public static final RegistrySupplier<Item> BONE_LEGGINGS = ITEMS.register("bone_leggings",
-            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.LEGGINGS, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.LEGGINGS, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+                    .durability(ArmorItem.Type.LEGGINGS.getDurability(ModArmorMaterials.BONE_DURABILITY_MULTIPLIER))));
     public static final RegistrySupplier<Item> BONE_BOOTS = ITEMS.register("bone_boots",
-            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.BOOTS, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
+            () -> new ArmorItem(ModArmorMaterials.BONE, ArmorItem.Type.BOOTS, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)
+                    .durability(ArmorItem.Type.BOOTS.getDurability(ModArmorMaterials.BONE_DURABILITY_MULTIPLIER))));
     public static final RegistrySupplier<Item> WHIP = ITEMS.register("whip", WhipItem::new);
     public static final RegistrySupplier<Item> CHICKEN_ESSENCE = ITEMS.register("essence_chicken",
             () -> new DescriptiveItem(new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB)));
@@ -113,11 +124,11 @@ public class ModItems {
     public static final RegistrySupplier<Item> MAGIC_CONCH = ITEMS.register("magic_conch",
             () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB)));
     public static final RegistrySupplier<Item> RAW_CHICKEN_SOUP = ITEMS.register("chicken_soup_raw",
-            () -> new FoodBucketItem(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB).craftRemainder(Items.BUCKET).food(new FoodProperties.Builder().nutrition(4).saturationMod(2).build())));
+            () -> new FoodBucketItem(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB).craftRemainder(Items.BUCKET).food(new FoodProperties.Builder().nutrition(4).saturationModifier(2).build())));
     public static final RegistrySupplier<Item> COOKED_CHICKEN_SOUP = ITEMS.register("chicken_soup_cooked",
-            () -> new FoodBucketItem(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB).craftRemainder(Items.BUCKET).food(new FoodProperties.Builder().nutrition(8).saturationMod(2).build())));
+            () -> new FoodBucketItem(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB).craftRemainder(Items.BUCKET).food(new FoodProperties.Builder().nutrition(8).saturationModifier(2).build())));
     public static final RegistrySupplier<Item> COOKED_EGG = ITEMS.register("cooked_egg",
-            () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB).food(new FoodProperties.Builder().nutrition(4).saturationMod(2).build())));
+            () -> new Item(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB).food(new FoodProperties.Builder().nutrition(4).saturationModifier(2).build())));
     public static final RegistrySupplier<Item> ARTIFICIAL_HONEYCOMB = ITEMS.register("artificial_honeycomb",
             () -> new ArtificialHoneycombItem(new Item.Properties().arch$tab(ModTabs.FA_MOB_ITEM_TAB)));
 
@@ -162,6 +173,7 @@ public class ModItems {
     }
 
     public static void register() {
+        ModArmorMaterials.register();
         VanillaEntityInfo.register();
         PrehistoricEntityInfo.register();
 

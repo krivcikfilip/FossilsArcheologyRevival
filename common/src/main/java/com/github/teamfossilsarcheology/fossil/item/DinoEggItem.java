@@ -4,7 +4,7 @@ import com.github.teamfossilsarcheology.fossil.entity.ModEntities;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.DinosaurEgg;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricEntityInfo;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricMobType;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -32,7 +32,7 @@ public class DinoEggItem extends EggItem {
             if (egg == null) {
                 return false;
             }
-            Advancement adv = level.getServer().getAdvancements().getAdvancement(DinosaurEgg.GOLDEN_EGG_ADV);
+            AdvancementHolder adv = level.getServer().getAdvancements().get(DinosaurEgg.GOLDEN_EGG_ADV);
             if (adv != null && player.getAdvancements().getOrStartProgress(adv).isDone()) {
                 egg.setGoldenEgg(level.getRandom().nextFloat() < 0.05);
             }

@@ -45,6 +45,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -63,7 +64,8 @@ public class ModEvents {
         BlockEvent.BREAK.register((level, pos, state, player, xp) -> {
             if (level.dimension() == ModDimensions.ANU_LAIR && level instanceof ServerLevel serverLevel) {
                 if (!isBreakableInAnuLair(state) && !player.isCreative() && serverLevel.getServer().getProfilePermissions(player.getGameProfile()) < serverLevel.getServer().getOperatorUserPermissionLevel()) {
-                    AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(c -> new AnuBoss.AnuLair(), "anu_lair");
+                    //PORT(1.21.1): DimensionDataStorage#get takes a SavedData.Factory (null DataFixTypes is allowed by NeoForge)
+                    AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(new SavedData.Factory<>(AnuBoss.AnuLair::new, (tag, registries) -> new AnuBoss.AnuLair(), null), "anu_lair");
                     if (anuLair == null || !anuLair.isAnuKilled()) {
                         player.displayClientMessage(ANU_BREAK_BLOCK, true);
                         return EventResult.interruptFalse();
@@ -93,9 +95,9 @@ public class ModEvents {
                 @Override
                 public @NotNull ItemStack execute(BlockSource source, ItemStack stack) {
                     DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem) ModItems.TAR_BUCKET.get();
-                    BlockPos blockPos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-                    if (dispensibleContainerItem.emptyContents(null, source.getLevel(), blockPos, null)) {
-                        dispensibleContainerItem.checkExtraContent(null, source.getLevel(), stack, blockPos);
+                    BlockPos blockPos = source.pos().relative(source.state().getValue(DispenserBlock.FACING)); //PORT(1.21.1): BlockSource is a record
+                    if (dispensibleContainerItem.emptyContents(null, source.level(), blockPos, null)) {
+                        dispensibleContainerItem.checkExtraContent(null, source.level(), stack, blockPos);
                         return new ItemStack(Items.BUCKET);
                     } else {
                         return defaultDispenseItemBehavior.dispense(source, stack);
@@ -129,7 +131,7 @@ public class ModEvents {
                 }
             } else if (stack.is(ModItems.WHIP.get())) {
                 if (!player.level().isClientSide && player.isPassenger() && player.getVehicle() == entity) {
-                    stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+                    stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
                     player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
                     player.playSound(ModSounds.WHIP.get(), 1, 1);
                     return EventResult.interruptTrue();
@@ -187,7 +189,7 @@ public class ModEvents {
                     newEntity = parentHorse.getBreedOffspring(level, parentHorse);
                 }
             } else {
-                newHorse.finalizeSpawn(level, level.getCurrentDifficultyAt(newHorse.blockPosition()), MobSpawnType.BREEDING, null, null);
+                newHorse.finalizeSpawn(level, level.getCurrentDifficultyAt(newHorse.blockPosition()), MobSpawnType.BREEDING, null);
             }
         } else if (newEntity instanceof Quagga newQuagga) {
             double health = parent.getAttribute(Attributes.MAX_HEALTH).getBaseValue() + newQuagga.getAttribute(Attributes.MAX_HEALTH).getBaseValue() + newQuagga.getAttribute(Attributes.MAX_HEALTH).getBaseValue();
@@ -198,7 +200,7 @@ public class ModEvents {
             if (parent.getClass().equals(newEntity.getClass())) {
                 newEntity = ((AgeableMob) parent).getBreedOffspring(level, (AgeableMob) parent);
             } else {
-                ageableMob.finalizeSpawn(level, level.getCurrentDifficultyAt(parent.blockPosition()), MobSpawnType.BREEDING, null, null);
+                ageableMob.finalizeSpawn(level, level.getCurrentDifficultyAt(parent.blockPosition()), MobSpawnType.BREEDING, null);
             }
         }
         if (newEntity instanceof Prehistoric prehistoric) {

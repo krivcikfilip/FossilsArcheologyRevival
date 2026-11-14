@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.SavedData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,7 +29,8 @@ public class ExplosionMixin {
     @Inject(method = "explode", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectArrayList;addAll(Ljava/util/Collection;)Z", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILSOFT)
     public void preventExplosion(CallbackInfo ci) {
         if (level.dimension() == ModDimensions.ANU_LAIR && level instanceof ServerLevel serverLevel) {
-            AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(c -> new AnuBoss.AnuLair(), "anu_lair");
+            //PORT(1.21.1): DimensionDataStorage#get takes a SavedData.Factory (null DataFixTypes is allowed by NeoForge)
+            AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(new SavedData.Factory<>(AnuBoss.AnuLair::new, (tag, registries) -> new AnuBoss.AnuLair(), null), "anu_lair");
             if (anuLair == null || !anuLair.isAnuKilled()) {
                 toBlow.clear();
             }

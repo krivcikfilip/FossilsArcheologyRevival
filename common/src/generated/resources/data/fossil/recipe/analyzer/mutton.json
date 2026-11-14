@@ -1,0 +1,12 @@
+{
+  "type": "fossil:analyzer",
+  "input": {
+    "item": "minecraft:mutton"
+  },
+  "outputs": [
+    {
+      "id": "fossil:sheep_dna",
+      "weight": 100.0
+    }
+  ]
+}

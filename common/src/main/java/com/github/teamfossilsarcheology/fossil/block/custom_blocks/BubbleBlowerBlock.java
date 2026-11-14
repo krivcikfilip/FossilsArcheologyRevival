@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.entity.BubbleBlowerBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.client.particle.ModParticles;
@@ -28,6 +29,13 @@ import org.jetbrains.annotations.Nullable;
  * @see BubbleBlowerBlockEntity
  */
 public class BubbleBlowerBlock extends BaseEntityBlock {
+    public static final MapCodec<BubbleBlowerBlock> CODEC = simpleCodec(BubbleBlowerBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 

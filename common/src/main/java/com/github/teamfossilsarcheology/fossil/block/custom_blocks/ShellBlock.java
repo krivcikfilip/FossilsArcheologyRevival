@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -16,6 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ShellBlock extends HorizontalDirectionalBlock {
+    public static final MapCodec<ShellBlock> CODEC = simpleCodec(ShellBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
+
     private static final VoxelShape NORTH_SHAPE = Shapes.or(Block.box(4.5, 0, 3.5, 11.5, 15, 16), Block.box(5, 1, 0.1, 11, 8, 3.6), Block.box(4.5, 0, 0, 11.5, 3, 3.5));
     private static final VoxelShape WEST_SHAPE = Shapes.or(Block.box(3.5, 0, 4.5, 16, 15, 11.5), Block.box(0.1, 1, 5, 3.6, 8, 11), Block.box(0, 0, 4.5, 3.5, 3, 11.5));
     private static final VoxelShape SOUTH_SHAPE = Shapes.or(Block.box(4.5, 0, 0, 11.5, 15, 12.5), Block.box(5, 1, 12.4, 11, 8, 15.9), Block.box(4.5, 0, 12.5, 11.5, 3, 16));
@@ -48,7 +56,7 @@ public class ShellBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 }

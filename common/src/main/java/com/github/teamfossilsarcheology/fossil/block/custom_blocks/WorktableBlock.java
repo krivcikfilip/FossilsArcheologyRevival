@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.block.entity.WorktableBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -26,6 +27,13 @@ import org.jetbrains.annotations.Nullable;
  * @see com.github.teamfossilsarcheology.fossil.client.gui.WorktableScreen
  */
 public class WorktableBlock extends CustomEntityBlock {
+    public static final MapCodec<WorktableBlock> CODEC = simpleCodec(WorktableBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends CustomEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public WorktableBlock(Properties properties) {

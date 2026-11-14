@@ -1,5 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import org.jetbrains.annotations.NotNull;
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.block.entity.SifterBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -17,6 +19,13 @@ import org.jetbrains.annotations.Nullable;
  * @see com.github.teamfossilsarcheology.fossil.client.gui.SifterScreen
  */
 public class SifterBlock extends CustomEntityBlock {
+    public static final MapCodec<SifterBlock> CODEC = simpleCodec(SifterBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends CustomEntityBlock> codec() {
+        return CODEC;
+    }
+
 
     public SifterBlock(Properties properties) {
         super(properties);

@@ -3,6 +3,7 @@ package com.github.teamfossilsarcheology.fossil.mixin;
 import com.github.teamfossilsarcheology.fossil.client.FAPlayerCapes;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,21 +22,16 @@ public class PlayerInfoMixin {
     @Final
     private GameProfile profile;
 
-    @Inject(method = "getCapeLocation", at = @At("RETURN"), cancellable = true)
-    private void fossilsArcheologyRevival$getCape(CallbackInfoReturnable<ResourceLocation> cir) {
+    /**
+     * PORT(1.21.1): getCapeLocation/getElytraLocation were replaced by getSkin() returning a PlayerSkin record (1.20.2)
+     */
+    @Inject(method = "getSkin", at = @At("RETURN"), cancellable = true)
+    private void fossilsArcheologyRevival$getCape(CallbackInfoReturnable<PlayerSkin> cir) {
+        PlayerSkin skin = cir.getReturnValue();
         if (fossilsArcheologyRevival$hasDevCape(profile.getId())) {
-            cir.setReturnValue(FAPlayerCapes.DEVELOPER_CAPE_TEXTURE);
+            cir.setReturnValue(new PlayerSkin(skin.texture(), skin.textureUrl(), FAPlayerCapes.DEVELOPER_CAPE_TEXTURE, FAPlayerCapes.DEVELOPER_ELYTRA_TEXTURE, skin.model(), skin.secure()));
         } else if (fossilsArcheologyRevival$hasContributorCape(profile.getId())) {
-            cir.setReturnValue(FAPlayerCapes.CONTRIBUTOR_CAPE_TEXTURE);
-        }
-    }
-
-    @Inject(method = "getElytraLocation", at = @At("RETURN"), cancellable = true)
-    private void fossilsArcheologyRevival$getElytra(CallbackInfoReturnable<ResourceLocation> cir) {
-        if (fossilsArcheologyRevival$hasDevCape(profile.getId())) {
-            cir.setReturnValue(FAPlayerCapes.DEVELOPER_ELYTRA_TEXTURE);
-        } else if (fossilsArcheologyRevival$hasContributorCape(profile.getId())) {
-            cir.setReturnValue(FAPlayerCapes.CONTRIBUTOR_ELYTRA_TEXTURE);
+            cir.setReturnValue(new PlayerSkin(skin.texture(), skin.textureUrl(), FAPlayerCapes.CONTRIBUTOR_CAPE_TEXTURE, FAPlayerCapes.CONTRIBUTOR_ELYTRA_TEXTURE, skin.model(), skin.secure()));
         }
     }
 

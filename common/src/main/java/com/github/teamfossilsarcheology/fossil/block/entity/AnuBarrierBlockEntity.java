@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import net.minecraft.core.HolderLookup;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.AnuBarrierOriginBlock;
 import net.minecraft.core.BlockPos;
@@ -56,8 +57,8 @@ public class AnuBarrierBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("Height", height);
         tag.putInt("Radius", radius);
         tag.putInt("State", state);
@@ -65,8 +66,8 @@ public class AnuBarrierBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         height = tag.getInt("Height");
         radius = tag.getInt("Radius");
         state = tag.getInt("State");
@@ -74,8 +75,8 @@ public class AnuBarrierBlockEntity extends BlockEntity {
     }
 
     @Override
-    public @NotNull CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
     }
 
     @Nullable

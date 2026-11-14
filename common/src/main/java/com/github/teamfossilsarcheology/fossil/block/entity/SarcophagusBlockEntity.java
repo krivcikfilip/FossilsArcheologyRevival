@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import net.minecraft.core.HolderLookup;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.SarcophagusBlock;
 import com.github.teamfossilsarcheology.fossil.entity.ModEntities;
 import com.github.teamfossilsarcheology.fossil.entity.monster.AnuBoss;
@@ -36,22 +37,22 @@ public class SarcophagusBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("State", state);
         tag.putInt("Timer", doorTimer);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         state = tag.getInt("State");
         doorTimer = tag.getInt("Timer");
     }
 
     @Override
-    public @NotNull CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
     }
 
     @Nullable
@@ -91,7 +92,7 @@ public class SarcophagusBlockEntity extends BlockEntity {
                     BlockPos anuPos = pos.relative(state.getValue(SarcophagusBlock.FACING));
                     anuBoss.moveTo(anuPos, state.getValue(SarcophagusBlock.FACING).toYRot(), 0);
                     anuBoss.yHeadRot = state.getValue(SarcophagusBlock.FACING).toYRot();
-                    anuBoss.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null, null);
+                    anuBoss.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null);
                     Vec3 spawn = anuBoss.position();
                     AABB arenaBounds = new AABB(spawn.x - AnuBoss.ARENA_RADIUS, spawn.y - 10, spawn.z - AnuBoss.ARENA_RADIUS,
                             spawn.x + AnuBoss.ARENA_RADIUS, spawn.y + 10, spawn.z + AnuBoss.ARENA_RADIUS);

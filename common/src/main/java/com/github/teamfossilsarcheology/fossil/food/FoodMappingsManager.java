@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.food;
 
+import net.minecraft.core.component.DataComponents;
 import com.github.teamfossilsarcheology.fossil.FossilMod;
 import com.github.teamfossilsarcheology.fossil.client.ResourceLoader;
 import com.github.teamfossilsarcheology.fossil.network.S2CSyncFoodMappingsMessage;
@@ -79,7 +80,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
                         for (JsonElement entry : entries) {
                             JsonObject object = entry.getAsJsonObject();
                             if (object.has("block")) {
-                                BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(object.get("block").getAsString())).ifPresent(block -> {
+                                BuiltInRegistries.BLOCK.getOptional(ResourceLocation.parse(object.get("block").getAsString())).ifPresent(block -> {
                                     if (object.has("value")) {
                                         innerBlockBuilder.put(block, object.get("value").getAsInt());
                                     } else {
@@ -88,9 +89,9 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
                                 });
                             } else if (object.has("tag")) {
                                 if (object.has("value")) {
-                                    blockTags.put(TagKey.create(Registries.BLOCK, new ResourceLocation(object.get("tag").getAsString())), object.get("value").getAsInt());
+                                    blockTags.put(TagKey.create(Registries.BLOCK, ResourceLocation.parse(object.get("tag").getAsString())), object.get("value").getAsInt());
                                 } else {
-                                    blockTags.put(TagKey.create(Registries.BLOCK, new ResourceLocation(object.get("tag").getAsString())), -1);
+                                    blockTags.put(TagKey.create(Registries.BLOCK, ResourceLocation.parse(object.get("tag").getAsString())), -1);
                                 }
                             }
                         }
@@ -100,20 +101,20 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
                         for (JsonElement entry : entries) {
                             JsonObject object = entry.getAsJsonObject();
                             if (object.has("item")) {
-                                BuiltInRegistries.ITEM.getOptional(new ResourceLocation(object.get("item").getAsString())).ifPresent(item -> {
+                                BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(object.get("item").getAsString())).ifPresent(item -> {
                                     if (object.has("value")) {
                                         innerItemBuilder.put(item, object.get("value").getAsInt());
-                                    } else if (item.getFoodProperties() != null) {
-                                        innerItemBuilder.put(item, item.getFoodProperties().getNutrition() * type.multiplier());
+                                    } else if (item.components().get(DataComponents.FOOD) != null) {
+                                        innerItemBuilder.put(item, item.components().get(DataComponents.FOOD).nutrition() * type.multiplier());
                                     } else {
                                         innerItemBuilder.put(item, type.fallback());
                                     }
                                 });
                             } else if (object.has("tag")) {
                                 if (object.has("value")) {
-                                    itemTags.put(TagKey.create(Registries.ITEM, new ResourceLocation(object.get("tag").getAsString())), object.get("value").getAsInt());
+                                    itemTags.put(TagKey.create(Registries.ITEM, ResourceLocation.parse(object.get("tag").getAsString())), object.get("value").getAsInt());
                                 } else {
-                                    itemTags.put(TagKey.create(Registries.ITEM, new ResourceLocation(object.get("tag").getAsString())), -1);
+                                    itemTags.put(TagKey.create(Registries.ITEM, ResourceLocation.parse(object.get("tag").getAsString())), -1);
                                 }
                             }
                         }
@@ -123,7 +124,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
                         for (JsonElement entry : entries) {
                             JsonObject object = entry.getAsJsonObject();
                             if (object.has("entity")) {
-                                BuiltInRegistries.ENTITY_TYPE.getOptional(new ResourceLocation(object.get("entity").getAsString())).ifPresent(entityType -> {
+                                BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.parse(object.get("entity").getAsString())).ifPresent(entityType -> {
                                     setBuilder.add(entityType);
                                     if (object.has("value")) {
                                         innerEntityBuilder.put(entityType, object.get("value").getAsInt());
@@ -133,7 +134,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
                                     }
                                 });
                             } else if (object.has("tag")) {
-                                entityTags.add(TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(object.get("tag").getAsString())));
+                                entityTags.add(TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse(object.get("tag").getAsString())));
                             }
                         }
                     }
@@ -244,7 +245,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
     }
 
     public void addMeat(ItemLike itemLike) {
-        int food = itemLike.asItem().getFoodProperties() != null ? itemLike.asItem().getFoodProperties().getNutrition() * 7 : 20;
+        int food = itemLike.asItem().components().get(DataComponents.FOOD) != null ? itemLike.asItem().components().get(DataComponents.FOOD).nutrition() * 7 : 20;
         addMeat(itemLike, food);
     }
 
@@ -257,7 +258,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
     }
 
     public void addFish(Item item) {
-        int food = item.getFoodProperties() != null ? item.getFoodProperties().getNutrition() * 7 : 10;
+        int food = item.components().get(DataComponents.FOOD) != null ? item.components().get(DataComponents.FOOD).nutrition() * 7 : 10;
         addFish(item, food);
     }
 
@@ -266,7 +267,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
     }
 
     public void addEgg(Item item) {
-        int food = item.getFoodProperties() != null ? item.getFoodProperties().getNutrition() * 7 : 10;
+        int food = item.components().get(DataComponents.FOOD) != null ? item.components().get(DataComponents.FOOD).nutrition() * 7 : 10;
         addEgg(item, food);
     }
 
@@ -279,7 +280,7 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
     }
 
     public void addPlant(Item item) {
-        int food = item.getFoodProperties() != null ? item.getFoodProperties().getNutrition() * 5 : 17;
+        int food = item.components().get(DataComponents.FOOD) != null ? item.components().get(DataComponents.FOOD).nutrition() * 5 : 17;
         addPlant(item, food);
     }
 
@@ -316,8 +317,8 @@ public class FoodMappingsManager extends ResourceLoader<FoodMappingsManager.MapP
             for (Map.Entry<TagKey<Item>, Integer> entry : itemTags.get(type).entrySet()) {
                 for (Holder<Item> itemHolder : BuiltInRegistries.ITEM.getTagOrEmpty(entry.getKey())) {
                     Item item = itemHolder.value();
-                    if (item.getFoodProperties() != null) {
-                        innerItemBuilder.put(item, item.getFoodProperties().getNutrition() * type.multiplier());
+                    if (item.components().get(DataComponents.FOOD) != null) {
+                        innerItemBuilder.put(item, item.components().get(DataComponents.FOOD).nutrition() * type.multiplier());
                     } else if (entry.getValue() != -1) {
                         innerItemBuilder.put(item, entry.getValue());
                     } else {

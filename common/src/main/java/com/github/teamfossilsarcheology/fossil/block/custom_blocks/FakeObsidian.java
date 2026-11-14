@@ -1,5 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.level.LevelReader;
 import com.github.teamfossilsarcheology.fossil.block.entity.FakeObsidianBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -19,6 +21,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FakeObsidian extends BaseEntityBlock {
+    public static final MapCodec<FakeObsidian> CODEC = simpleCodec(FakeObsidian::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public FakeObsidian(Properties properties) {
         super(properties);
     }
@@ -50,7 +59,7 @@ public class FakeObsidian extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public @NotNull ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         return Blocks.OBSIDIAN.getCloneItemStack(level, pos, state);
     }
 }

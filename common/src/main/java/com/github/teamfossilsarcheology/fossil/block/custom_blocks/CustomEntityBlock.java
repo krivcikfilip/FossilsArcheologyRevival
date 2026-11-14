@@ -1,5 +1,9 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.ItemInteractionResult;
+import com.github.teamfossilsarcheology.fossil.util.InteractionResults;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +22,13 @@ import org.jetbrains.annotations.NotNull;
  * Base class for our "machine" blocks
  */
 public abstract class CustomEntityBlock extends BaseEntityBlock {
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        //PORT(1.21.1): codec required since 1.20.3. The constructor arguments are not serializable, so this codec
+        //always returns this block instance (only used for block type serialization)
+        return MapCodec.unit(this);
+    }
+
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
     protected CustomEntityBlock(Properties properties) {
@@ -33,7 +44,12 @@ public abstract class CustomEntityBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        //PORT(1.21.1): Block#use was split, see InteractionResults
+        return InteractionResults.toItemResult(use(state, level, pos, player, hand, hit));
+    }
+
+    private @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

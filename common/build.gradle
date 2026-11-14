@@ -18,8 +18,11 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury:$architectury_version"
 
-    modCompileOnly "software.bernie.geckolib:geckolib-forge-$minecraft_version:$gecko_lib_version"
-    compileOnly "com.eliotlash.mclib:mclib:20"
+    // PORT(1.21.1): GeckoLib 4 for 1.21.1 publishes a real common artifact (Mojang mapped, like TerraBlender-common);
+    // mclib is gone (GeckoLib 4.5+ ships its own molang parser).
+    // PORT-TODO(1.21.1): if Loom chokes on the mojmap common jar, switch to "geckolib-neoforge-$minecraft_version" (also mojmap)
+    modCompileOnly "software.bernie.geckolib:geckolib-common-$minecraft_version:$gecko_lib_version"
+    // PORT-TODO(1.21.1): More Hitboxes 1.21.1 common artifact name/group assumed unchanged (cloudsmith lists morehitboxes-common-1.21.1)
     modCompileOnly "com.github.darkpred.morehitboxes:morehitboxes-common-$minecraft_version:$more_hitboxes_version"
     modCompileOnly "com.github.glitchfiend:TerraBlender-common:$minecraft_version-$terra_blender_version"
 
@@ -27,5 +30,6 @@ dependencies {
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin:$rei_version"
     modCompileOnly "mezz.jei:jei-$minecraft_version-common-api:$jei_version"
+    // PORT-TODO(1.21.1): verify emi-xplat-intermediary is still published for 1.21.1 (else use emi-xplat-mojmap)
     modCompileOnly "dev.emi:emi-xplat-intermediary:$emi_version+$minecraft_version:api"
 }

@@ -1,44 +1,42 @@
 package com.github.teamfossilsarcheology.fossil.advancements;
 
-import com.github.teamfossilsarcheology.fossil.FossilMod;
-import com.github.teamfossilsarcheology.fossil.item.ModItems;
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 /**
- * Triggers whenever a {@link com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.Prehistoric Prehistoric} is tamed with a {@link ModItems#SCARAB_GEM}
+ * Triggers whenever a scarab is tamed
+ * <p>
+ * PORT(1.21.1): SimpleCriterionTrigger with a Codec (1.20.2+). JSON: {@code "conditions": {"player": ... (optional)}}
  */
-public class ScarabTameTrigger extends SimpleCriterionTrigger<OpenSarcophagusTrigger.TriggerInstance> {
-    private static final ResourceLocation ID = FossilMod.location("scarab_tame");
+public class ScarabTameTrigger extends SimpleCriterionTrigger<ScarabTameTrigger.TriggerInstance> {
 
     public void trigger(ServerPlayer player) {
         trigger(player, triggerInstance -> true);
     }
 
     @Override
-    protected @NotNull OpenSarcophagusTrigger.TriggerInstance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext context) {
-        return new OpenSarcophagusTrigger.TriggerInstance(ID, predicate);
+    public @NotNull Codec<TriggerInstance> codec() {
+        return TriggerInstance.CODEC;
     }
 
-    @Override
-    public @NotNull ResourceLocation getId() {
-        return ID;
-    }
+    public record TriggerInstance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
+        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TriggerInstance::player)
+        ).apply(instance, TriggerInstance::new));
 
-    public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-
-        public TriggerInstance(ResourceLocation resourceLocation, ContextAwarePredicate composite) {
-            super(resourceLocation, composite);
-        }
-
-        public static OpenSarcophagusTrigger.TriggerInstance useScarab() {
-            return new OpenSarcophagusTrigger.TriggerInstance(ID, ContextAwarePredicate.ANY);
+        /**
+         * PORT(1.21.1): returns a Criterion (was a TriggerInstance) for the datagen advancement builders
+         */
+        public static Criterion<TriggerInstance> useScarab() {
+            return ModTriggers.SCARAB_TAME_TRIGGER.createCriterion(new TriggerInstance(Optional.empty()));
         }
     }
 }

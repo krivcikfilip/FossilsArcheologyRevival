@@ -1,7 +1,10 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
+    // PORT(1.21.1): Loom 1.10 supports NeoForge 21.1 (Architectury API 13 itself builds with 1.6). Gradle wrapper 8.14 is fine for it.
     id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
-    id "com.github.johnrengelman.shadow" version "8.1.1" apply false
+    // PORT(1.21.1): johnrengelman shadow 8.1.1 is unmaintained and its ASM cannot read Java 21 class files reliably -> GradleUp fork
+    // (8.3.6 listed on plugins.gradle.org; 8.3.x supports Gradle 8.x + Java 21)
+    id "com.gradleup.shadow" version "8.3.6" apply false
     id "com.modrinth.minotaur" version "2.+" apply false
     id "net.darkhax.curseforgegradle" version "1.1.25" apply false
 }
@@ -47,7 +50,12 @@ subprojects {
                 includeGroup("maven.modrinth")
             }
         }
-        maven { url "https://maven.ladysnake.org/releases" }
+        // PORT(1.21.1): ladysnake (Cardinal Components, fabric only) no longer needed
+        //maven { url "https://maven.ladysnake.org/releases" }
+        maven {
+            name = "NeoForged"
+            url = "https://maven.neoforged.net/releases/"
+        }
         maven {
             name = 'GeckoLib'
             url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
@@ -58,9 +66,10 @@ subprojects {
         }
         maven { url "https://dl.cloudsmith.io/public/darkpred-mods/more-hitboxes/maven/" }
         maven { url "https://maven.shedaniel.me/" }
-        maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://maven.minecraftforge.net/" } // TerraBlender
         maven { url "https://modmaven.dev/" }
-        maven { url "https://dvs1.progwml6.com/files/maven/" }//JEI
+        maven { url "https://maven.blamejared.com/" } // JEI (1.21.1 artifacts live here)
+        maven { url "https://dvs1.progwml6.com/files/maven/" }//JEI (legacy mirror)
         maven {
             name = "tterrag maven"
             url =  "https://maven.tterrag.com/"
@@ -111,20 +120,18 @@ subprojects {
                 "minecraft_version"            : minecraft_version,
                 "minecraft_version_range_lower": minecraft_version_range_lower,
                 "minecraft_version_range_upper": minecraft_version_range_upper,
-                "fabric_version"               : fabric_api_version,
-                "fabric_loader_version"        : fabric_loader_version,
-                "fabric_loader_version_range"  : fabric_loader_version_range,
-                "fabric_mod_authors"           : mod_authors.split(", ").collect { "\"" + it + "\"" },
-                "forge_version"                : forge_version,
-                "forge_version_range"          : forge_version_range,
-                "forge_loader_version_range"   : forge_loader_version_range,
-                "forge_mod_authors"            : mod_authors,
+                "neoforge_version"             : neoforge_version,
+                "neoforge_version_range"       : neoforge_version_range,
+                "neoforge_loader_version_range": neoforge_loader_version_range,
+                "neoforge_mod_authors"         : mod_authors,
+                "architectury_version"         : architectury_version,
+                "gecko_lib_version"            : gecko_lib_version,
                 "java_version"                 : java_version
         ]
 
         processResources {
             inputs.properties(expandProps)
-            filesMatching(["META-INF/mods.toml", "pack.mcmeta", "fabric.mod.json"]) {
+            filesMatching(["META-INF/neoforge.mods.toml", "pack.mcmeta"]) {
                 expand(expandProps)
             }
         }

@@ -16,13 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CameraMixin {
 
     @Shadow
-    protected abstract void move(double distanceOffset, double verticalOffset, double horizontalOffset);
+    protected abstract void move(float distanceOffset, float verticalOffset, float horizontalOffset); //PORT(1.21.1): double -> float params
 
     @Inject(method = "setup", at = @At(value = "RETURN"))
     public void moveCameraWhenRiding(BlockGetter level, Entity entity, boolean detached, boolean thirdPersonReverse, float partialTick, CallbackInfo ci) {
         if (entity instanceof Player player && detached) {
             if (player.getVehicle() instanceof Prehistoric mob && mob.getBbHeight() > 2) {
-                move(-1 * Mth.lerp(Math.min(mob.getBbHeight() - 2, 1.5) / 1.5, 0, 2), 1, 0);
+                move((float) (-1 * Mth.lerp(Math.min(mob.getBbHeight() - 2, 1.5) / 1.5, 0, 2)), 1, 0);
             }
         }
     }

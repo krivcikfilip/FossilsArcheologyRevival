@@ -30,7 +30,7 @@ public class ArtificialHoneycombItem extends DescriptiveItem {
                     ItemStack stack = context.getItemInHand();
                     AgeableMob.AgeableMobGroupData groupData = new AgeableMob.AgeableMobGroupData(1);
                     groupData.increaseGroupSizeByOne();
-                    mob.finalizeSpawn(serverLevel, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.SPAWN_EGG, groupData, stack.getTag());
+                    mob.finalizeSpawn(serverLevel, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.SPAWN_EGG, groupData);
                     mob.playAmbientSound();
                     mob.moveTo(blockPos.getX() + 0.5, blockPos.getY() + 1.0, blockPos.getZ() + 0.5, Mth.wrapDegrees(level.random.nextFloat() * 360), 0.0F);
                     level.addFreshEntity(mob);

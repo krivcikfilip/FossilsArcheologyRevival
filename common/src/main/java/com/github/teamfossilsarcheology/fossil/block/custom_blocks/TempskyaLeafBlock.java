@@ -52,11 +52,11 @@ public class TempskyaLeafBlock extends Block {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         if (type == PathComputationType.AIR && !hasCollision) {
             return true;
         }
-        return super.isPathfindable(state, level, pos, type);
+        return super.isPathfindable(state, type);
     }
 
     @Nullable

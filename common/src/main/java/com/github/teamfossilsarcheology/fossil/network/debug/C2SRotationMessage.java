@@ -1,15 +1,21 @@
 package com.github.teamfossilsarcheology.fossil.network.debug;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.network.PayloadChannel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.util.Version;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-import java.util.function.Supplier;
 
-public class C2SRotationMessage {
+public class C2SRotationMessage implements CustomPacketPayload {
+    public static final Type<C2SRotationMessage> TYPE = new Type<>(FossilMod.location("c2s_rotation"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SRotationMessage> STREAM_CODEC = StreamCodec.ofMember(C2SRotationMessage::write, C2SRotationMessage::new);
+
     public static final byte Y_ROT = 0;
     public static final byte X_ROT = 1;
     private final int entityId;
@@ -32,10 +38,10 @@ public class C2SRotationMessage {
         buf.writeByte(flag);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        contextSupplier.get().queue(() -> {
+    private void apply(NetworkManager.PacketContext context) {
+        context.queue(() -> {
             if (Version.debugEnabled()) {
-                Entity entity = contextSupplier.get().getPlayer().level().getEntity(entityId);
+                Entity entity = context.getPlayer().level().getEntity(entityId);
                 switch (flag) {
                     case 0 -> {
                         if (entity instanceof LivingEntity) {
@@ -55,7 +61,12 @@ public class C2SRotationMessage {
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(C2SRotationMessage.class, C2SRotationMessage::write, C2SRotationMessage::new, C2SRotationMessage::apply);
+    @Override
+    public Type<C2SRotationMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerC2S(TYPE, STREAM_CODEC, C2SRotationMessage::apply);
     }
 }

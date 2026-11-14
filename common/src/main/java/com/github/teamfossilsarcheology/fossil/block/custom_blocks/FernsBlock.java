@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.config.FossilConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +22,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 public class FernsBlock extends BushBlock implements BonemealableBlock {
+    @Override
+    protected @NotNull MapCodec<? extends BushBlock> codec() {
+        //PORT(1.21.1): codec required since 1.20.3. The constructor arguments are not serializable, so this codec
+        //always returns this block instance (only used for block type serialization)
+        return MapCodec.unit(this);
+    }
+
     public static final int LOWER_MAX_AGE = 4;
     public static final int UPPER_MAX_AGE = 6;
     public static final IntegerProperty AGE = IntegerProperty.create("age", 0, 6);
@@ -116,7 +124,7 @@ public class FernsBlock extends BushBlock implements BonemealableBlock {
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
         return true;
     }
 

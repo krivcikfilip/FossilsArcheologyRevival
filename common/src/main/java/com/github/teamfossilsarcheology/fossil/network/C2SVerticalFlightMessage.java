@@ -1,16 +1,21 @@
 package com.github.teamfossilsarcheology.fossil.network;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricFlying;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.function.Supplier;
 
-public class C2SVerticalFlightMessage {
+public class C2SVerticalFlightMessage implements CustomPacketPayload {
+    public static final Type<C2SVerticalFlightMessage> TYPE = new Type<>(FossilMod.location("c2s_vertical_flight"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SVerticalFlightMessage> STREAM_CODEC = StreamCodec.ofMember(C2SVerticalFlightMessage::write, C2SVerticalFlightMessage::new);
+
     private static final int STOP = 0;
     private static final int FLY_UP = 1;
     private static final int FLY_DOWN = 2;
@@ -44,10 +49,10 @@ public class C2SVerticalFlightMessage {
         buf.writeInt(code);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        if (contextSupplier.get().getEnvironment() == Env.CLIENT) return;
-        contextSupplier.get().queue(() -> {
-            Player player = contextSupplier.get().getPlayer();
+    private void apply(NetworkManager.PacketContext context) {
+        if (context.getEnvironment() == Env.CLIENT) return;
+        context.queue(() -> {
+            Player player = context.getPlayer();
             Entity entity = player.level().getEntity(entityId);
             if (entity instanceof PrehistoricFlying mob) {
                 Entity rider = entity.getControllingPassenger();
@@ -67,7 +72,12 @@ public class C2SVerticalFlightMessage {
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(C2SVerticalFlightMessage.class, C2SVerticalFlightMessage::write, C2SVerticalFlightMessage::new, C2SVerticalFlightMessage::apply);
+    @Override
+    public Type<C2SVerticalFlightMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerC2S(TYPE, STREAM_CODEC, C2SVerticalFlightMessage::apply);
     }
 }

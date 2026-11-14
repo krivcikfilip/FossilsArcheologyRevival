@@ -16,7 +16,8 @@ import net.minecraft.world.level.ServerLevelAccessor;
 
 public class AncientSwordItem extends SwordItem {
     public AncientSwordItem(Tier tier, int damage, float attackSpeed) {
-        super(tier, damage, attackSpeed, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB).durability(250));
+        super(tier, new Item.Properties().arch$tab(ModTabs.FA_OTHER_ITEM_TAB).durability(250)
+                .attributes(SwordItem.createAttributes(tier, damage, attackSpeed)));
     }
 
     @Override
@@ -27,7 +28,7 @@ public class AncientSwordItem extends SwordItem {
                 if (target instanceof Pig || target instanceof AbstractPiglin || target instanceof ZombifiedPiglin) {
                     FriendlyPiglin piglin = ModEntities.FRIENDLY_PIGLIN.get().create(level);
                     piglin.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(target.blockPosition()), MobSpawnType.MOB_SUMMONED,
-                            null, null);
+                            null);
                     piglin.moveTo(target.getX(), target.getY(), target.getZ(), target.getYRot(), target.getXRot());
                     piglin.tame(player);
                     if (target instanceof AgeableMob) {

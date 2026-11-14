@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.food;
 
+import net.minecraft.core.component.DataComponents;
 
 import com.github.teamfossilsarcheology.fossil.FossilMod;
 import com.github.teamfossilsarcheology.fossil.config.FossilConfig;
@@ -65,7 +66,7 @@ public abstract class FoodMappings {
                     int mappingPoints = FoodMappingsManager.INSTANCE.getEntityValues(type1).get(entityType);
                     if (mappingPoints > 0) {
                         //Scale points based on difference between current dimensions and base dimensions
-                        float scale = entity.getBbWidth() / entityType.getDimensions().width * entity.getBbHeight() / entityType.getDimensions().height;
+                        float scale = entity.getBbWidth() / entityType.getDimensions().width() * entity.getBbHeight() / entityType.getDimensions().height();
                         return Math.round(mappingPoints * scale);
                     } else {
                         return Math.round(entity.getBbWidth() * entity.getBbHeight() * 10);
@@ -93,7 +94,7 @@ public abstract class FoodMappings {
     }
 
     public static void addMeat(ItemLike itemLike) {
-        int food = itemLike.asItem().getFoodProperties() != null ? itemLike.asItem().getFoodProperties().getNutrition() * 7 : 20;
+        int food = itemLike.asItem().components().get(DataComponents.FOOD) != null ? itemLike.asItem().components().get(DataComponents.FOOD).nutrition() * 7 : 20;
         addMeat(itemLike, food);
     }
 
@@ -106,7 +107,7 @@ public abstract class FoodMappings {
     }
 
     public static void addFish(Item item) {
-        int food = item.getFoodProperties() != null ? item.getFoodProperties().getNutrition() * 7 : 10;
+        int food = item.components().get(DataComponents.FOOD) != null ? item.components().get(DataComponents.FOOD).nutrition() * 7 : 10;
         addFish(item, food);
     }
 
@@ -115,7 +116,7 @@ public abstract class FoodMappings {
     }
 
     public static void addEgg(Item item) {
-        int food = item.getFoodProperties() != null ? item.getFoodProperties().getNutrition() * 7 : 15;
+        int food = item.components().get(DataComponents.FOOD) != null ? item.components().get(DataComponents.FOOD).nutrition() * 7 : 15;
         addEgg(item, food);
     }
 
@@ -128,7 +129,7 @@ public abstract class FoodMappings {
     }
 
     public static void addPlant(Item item) {
-        int food = item.getFoodProperties() != null ? item.getFoodProperties().getNutrition() * 5 : 17;
+        int food = item.components().get(DataComponents.FOOD) != null ? item.components().get(DataComponents.FOOD).nutrition() * 5 : 17;
         addPlant(item, food);
     }
 

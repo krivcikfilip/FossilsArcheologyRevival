@@ -22,7 +22,8 @@ public class DebugMinecraftMixin {
     @Shadow
     private int rightClickDelay;
 
-    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "HEAD"))
+    //PORT(1.21.1): clearLevel(Screen) -> disconnect(Screen, boolean) (all disconnect overloads end there)
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At(value = "HEAD"))
     public void clearDebugEntity(final CallbackInfo ci) {
         if (!Version.debugEnabled()) {
             return;

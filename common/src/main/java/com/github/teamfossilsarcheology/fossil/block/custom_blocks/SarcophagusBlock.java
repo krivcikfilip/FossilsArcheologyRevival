@@ -1,5 +1,8 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.ItemInteractionResult;
+import com.github.teamfossilsarcheology.fossil.util.InteractionResults;
 import com.github.teamfossilsarcheology.fossil.advancements.ModTriggers;
 import com.github.teamfossilsarcheology.fossil.block.entity.AnuBarrierBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
@@ -48,6 +51,13 @@ import java.util.Set;
  * @see com.github.teamfossilsarcheology.fossil.client.renderer.blockentity.SarcophagusRenderer
  */
 public class SarcophagusBlock extends BaseEntityBlock {
+    public static final MapCodec<SarcophagusBlock> CODEC = simpleCodec(SarcophagusBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 2);
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
@@ -60,10 +70,20 @@ public class SarcophagusBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack heldStack, BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        //PORT(1.21.1): Block#use was split, see InteractionResults
+        return InteractionResults.toItemResult(use(blockState, level, pos, player, hand, hit));
+    }
+
+    private @NotNull InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (blockState.getValue(LAYER) != 0) {
             BlockPos below = pos.below(blockState.getValue(LAYER));
-            return level.getBlockState(below).use(level, player, hand, hit.withPosition(below));
+            //PORT(1.21.1): BlockState#use no longer exists, delegate to the bottom part directly
+            BlockState belowState = level.getBlockState(below);
+            if (belowState.getBlock() instanceof SarcophagusBlock sarcophagus) {
+                return sarcophagus.use(belowState, level, below, player, hand, hit.withPosition(below));
+            }
+            return InteractionResult.PASS;
         }
         if (level.getBlockEntity(pos) instanceof SarcophagusBlockEntity blockEntity) {
             if (blockEntity.getState() == SarcophagusBlockEntity.STATE_LOCKED) {
@@ -91,7 +111,7 @@ public class SarcophagusBlock extends BaseEntityBlock {
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
-        return super.use(blockState, level, pos, player, hand, hit);
+        return InteractionResult.PASS; //PORT(1.21.1): was super.use (Block#use returned PASS)
     }
 
     private static void enableBarrier(ServerLevel level, BlockPos pos, Set<BlockPos> barriers) {
@@ -175,7 +195,7 @@ public class SarcophagusBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 

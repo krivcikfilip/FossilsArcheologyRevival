@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.entity.AnuStatueBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -28,6 +29,13 @@ import org.jetbrains.annotations.Nullable;
  * @see com.github.teamfossilsarcheology.fossil.item.AnuStatueBlockItem
  */
 public class AnuStatueBlock extends BaseEntityBlock {
+    public static final MapCodec<AnuStatueBlock> CODEC = simpleCodec(AnuStatueBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(1, 0, 2, 16, 30, 16);
 
@@ -60,7 +68,7 @@ public class AnuStatueBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 

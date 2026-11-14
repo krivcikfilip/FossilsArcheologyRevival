@@ -1,7 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.recipe;
 
 import com.github.teamfossilsarcheology.fossil.inventory.CultureVatMenu;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -9,8 +8,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.NotNull;
 
 public class CultureVatRecipe extends WithFuelRecipe {
-    protected CultureVatRecipe(ResourceLocation location, Ingredient input, Ingredient fuel, ItemStack output, int duration, int fuelDuration) {
-        super(location, input, fuel, output, duration, fuelDuration);
+    protected CultureVatRecipe(Ingredient input, Ingredient fuel, ItemStack output, int duration, int fuelDuration) {
+        super(input, fuel, output, duration, fuelDuration);
     }
 
     @Override

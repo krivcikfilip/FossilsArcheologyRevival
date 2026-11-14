@@ -1,0 +1,28 @@
+{
+  "type": "fossil:analyzer",
+  "input": {
+    "item": "minecraft:leather"
+  },
+  "outputs": [
+    {
+      "id": "fossil:cow_dna",
+      "weight": 57.0
+    },
+    {
+      "id": "fossil:donkey_dna",
+      "weight": 10.0
+    },
+    {
+      "id": "fossil:hoglin_dna",
+      "weight": 5.0
+    },
+    {
+      "id": "fossil:horse_dna",
+      "weight": 27.0
+    },
+    {
+      "id": "fossil:mooshroom_dna",
+      "weight": 1.0
+    }
+  ]
+}

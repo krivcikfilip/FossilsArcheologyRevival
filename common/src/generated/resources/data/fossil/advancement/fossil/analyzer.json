@@ -1,0 +1,39 @@
+{
+  "parent": "fossil:fossil/break_fossil",
+  "criteria": {
+    "analyzer": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "fossil:analyzer"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancements.fossil.analyzer.description"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "count": 1,
+      "id": "fossil:analyzer"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancements.fossil.analyzer.title"
+    }
+  },
+  "requirements": [
+    [
+      "analyzer"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

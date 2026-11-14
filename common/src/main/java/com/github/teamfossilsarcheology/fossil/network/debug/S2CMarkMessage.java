@@ -1,8 +1,12 @@
 package com.github.teamfossilsarcheology.fossil.network.debug;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.network.PayloadChannel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.client.gui.debug.DebugScreen;
 import com.github.teamfossilsarcheology.fossil.util.Version;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,9 +15,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
-public class S2CMarkMessage {
+public class S2CMarkMessage implements CustomPacketPayload {
+    public static final Type<S2CMarkMessage> TYPE = new Type<>(FossilMod.location("s2c_mark"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, S2CMarkMessage> STREAM_CODEC = StreamCodec.ofMember(S2CMarkMessage::write, S2CMarkMessage::new);
+
     private final List<BlockPos> targets;
     private final List<BlockState> blocks;
     private final boolean below;
@@ -54,15 +60,20 @@ public class S2CMarkMessage {
         buf.writeBoolean(below);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        contextSupplier.get().queue(() -> {
+    private void apply(NetworkManager.PacketContext context) {
+        context.queue(() -> {
             if (Version.debugEnabled()) {
-                DebugScreen.showPath(contextSupplier.get().getPlayer(), targets, blocks, below);
+                DebugScreen.showPath(context.getPlayer(), targets, blocks, below);
             }
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(S2CMarkMessage.class, S2CMarkMessage::write, S2CMarkMessage::new, S2CMarkMessage::apply);
+    @Override
+    public Type<S2CMarkMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerS2C(TYPE, STREAM_CODEC, S2CMarkMessage::apply);
     }
 }

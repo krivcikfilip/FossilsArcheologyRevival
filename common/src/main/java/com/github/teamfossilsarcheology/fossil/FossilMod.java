@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil;
 
+import com.github.teamfossilsarcheology.fossil.advancements.ModTriggers;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.client.particle.ModParticles;
@@ -14,6 +15,7 @@ import com.github.teamfossilsarcheology.fossil.food.FoodMappingsManager;
 import com.github.teamfossilsarcheology.fossil.food.FossilFoodMappings;
 import com.github.teamfossilsarcheology.fossil.inventory.ModMenus;
 import com.github.teamfossilsarcheology.fossil.item.ModItems;
+import com.github.teamfossilsarcheology.fossil.item.component.ModDataComponents;
 import com.github.teamfossilsarcheology.fossil.item.ModTabs;
 import com.github.teamfossilsarcheology.fossil.loot.ModLootItemFunctionTypes;
 import com.github.teamfossilsarcheology.fossil.material.ModFluids;
@@ -40,7 +42,7 @@ public class FossilMod {
     public static final Logger LOGGER = LogManager.getLogger("Fossils Archeology");
 
     public static ResourceLocation location(String path) {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static void init() {
@@ -54,6 +56,7 @@ public class FossilMod {
         ModBlocks.register();
         ModParticles.register();
         ModEntities.register(); //Before ModItems
+        ModDataComponents.register(); //Before ModItems
         ModItems.register();
         ModTabs.register();
         ModEnchantments.register();
@@ -69,6 +72,7 @@ public class FossilMod {
         ModEvents.init();
         FossilFoodMappings.register();
         MessageHandler.register();
+        ModTriggers.register(); //PORT(1.21.1): registry based now, see ModTriggers
     }
 
     public static void syncData(ServerPlayer player) {

@@ -1,0 +1,13 @@
+{
+  "type": "fossil:worktable",
+  "duration": 300,
+  "fuel": {
+    "item": "fossil:relic_scrap"
+  },
+  "input": {
+    "item": "fossil:scarab_sword"
+  },
+  "result": {
+    "id": "fossil:scarab_sword"
+  }
+}

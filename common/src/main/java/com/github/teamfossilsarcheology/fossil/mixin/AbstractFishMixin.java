@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(AbstractFish.class)
 public abstract class AbstractFishMixin {
 
+    //PORT-TODO(1.21.1): verify AbstractFish#aiStep still calls onGround() (unchanged as far as known)
     @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/AbstractFish;onGround()Z"))
     private boolean preventNautilusBounce(boolean original) {
         //Prevent bouncing

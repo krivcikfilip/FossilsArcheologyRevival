@@ -1,5 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import org.jetbrains.annotations.NotNull;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -18,6 +20,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 // copied IronBarsBlock but changed the constructor to use a different collisionHeight (so that you can't jump it, like a fence)
 public class ChainFenceBlock extends CrossCollisionBlock {
+    public static final MapCodec<ChainFenceBlock> CODEC = simpleCodec(ChainFenceBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends CrossCollisionBlock> codec() {
+        return CODEC;
+    }
+
     public ChainFenceBlock(Properties properties) {
         super(1.0F, 1.0F, 16.0F, 16.0F, 24.0F, properties);
         this.registerDefaultState(

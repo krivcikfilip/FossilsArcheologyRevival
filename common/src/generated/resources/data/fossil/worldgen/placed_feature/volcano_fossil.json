@@ -17,12 +17,10 @@
       "xz_spread": 0,
       "y_spread": {
         "type": "minecraft:clamped_normal",
-        "value": {
-          "deviation": 4.0,
-          "max_inclusive": -5,
-          "mean": -9.0,
-          "min_inclusive": -16
-        }
+        "deviation": 4.0,
+        "max_inclusive": -5,
+        "mean": -9.0,
+        "min_inclusive": -16
       }
     },
     {

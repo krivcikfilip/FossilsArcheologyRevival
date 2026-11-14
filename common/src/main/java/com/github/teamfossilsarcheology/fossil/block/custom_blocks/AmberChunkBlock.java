@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -15,6 +16,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AmberChunkBlock extends HorizontalDirectionalBlock {
+    public static final MapCodec<AmberChunkBlock> CODEC = simpleCodec(AmberChunkBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return CODEC;
+    }
+
     private static final VoxelShape NORTH_SHAPE = Shapes.or(Block.box(2, 0, 5.8, 6, 5, 10.8), Block.box(5.7, 0, 5, 11.7, 7, 11), Block.box(11, 0, 5.6, 14, 4, 9.6));
     private static final VoxelShape EAST_SHAPE = Shapes.or(Block.box(5.2, 0, 2, 10.2, 5, 6), Block.box(5, 0, 5.7, 11, 7, 11.7), Block.box(6.4, 0, 11, 10.4, 4, 14));
     private static final VoxelShape SOUTH_SHAPE = Shapes.or(Block.box(10, 0, 5.2, 14, 5, 10.2), Block.box(4.3, 0, 5, 10.3, 7, 11), Block.box(2, 0, 6.4, 5, 4, 10.4));

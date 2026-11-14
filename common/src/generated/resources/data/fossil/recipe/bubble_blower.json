@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:gold_ingot"
+    },
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "W": {
+      "item": "minecraft:water_bucket"
+    }
+  },
+  "pattern": [
+    "NIN",
+    "IWI",
+    "NIN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "fossil:bubble_blower"
+  },
+  "show_notification": true
+}

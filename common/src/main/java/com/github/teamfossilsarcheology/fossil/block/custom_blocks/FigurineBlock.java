@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.FossilMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,6 +19,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class FigurineBlock extends HorizontalDirectionalBlock {
+    @Override
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        //PORT(1.21.1): codec required since 1.20.3. The constructor arguments are not serializable, so this codec
+        //always returns this block instance (only used for block type serialization)
+        return MapCodec.unit(this);
+    }
+
     protected final FigurineVariant variant;
 
     protected FigurineBlock(FigurineVariant variant) {
@@ -38,7 +46,7 @@ public abstract class FigurineBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 

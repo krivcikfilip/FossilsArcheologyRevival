@@ -1,6 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
-import com.github.teamfossilsarcheology.fossil.world.dimension.ModDimensions;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,14 +28,15 @@ public class HomePortal extends HalfTransparentBlock {
 
     @Override
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!entity.isPassenger() && !entity.isVehicle() && entity.canChangeDimensions()) {
+        if (!entity.isPassenger() && !entity.isVehicle() && entity.canUsePortal(false)) { //PORT(1.21.1): canChangeDimensions() -> canUsePortal(boolean)
             if (entity.isOnPortalCooldown()) {
                 entity.setPortalCooldown();
                 return;
             }
-            if (!entity.level().isClientSide && !pos.equals(entity.portalEntrancePos)) {
+            //PORT(1.21.1): Entity#portalEntrancePos was removed with the 1.21 portal rework (it was only used by vanilla nether portals)
+            /*if (!entity.level().isClientSide && !pos.equals(entity.portalEntrancePos)) {
                 entity.portalEntrancePos = pos.immutable();
-            }
+            }*/
             Level entityLevel = entity.level();
             MinecraftServer server = entityLevel.getServer();
             if (server != null) {
@@ -47,7 +48,9 @@ public class HomePortal extends HalfTransparentBlock {
                 } else {
                     spawnPoint = overworld.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, overworld.getSharedSpawnPos());
                 }
-                ModDimensions.changeDimension(entity, overworld, new PortalInfo(new Vec3(spawnPoint.getX() + 0.5, spawnPoint.getY(), spawnPoint.getZ() + 0.5), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot()));
+                //PORT(1.21.1): PortalInfo + Forge ITeleporter (ModDimensions.changeDimension) -> vanilla DimensionTransition.
+                //DO_NOTHING = no portal sound, no portal ticket, no portal placement (same as the old ModTeleporter)
+                entity.changeDimension(new DimensionTransition(overworld, new Vec3(spawnPoint.getX() + 0.5, spawnPoint.getY(), spawnPoint.getZ() + 0.5), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING));
             }
         }
     }
@@ -77,7 +80,7 @@ public class HomePortal extends HalfTransparentBlock {
     }
 
     @Override
-    public @NotNull ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public @NotNull ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         return ItemStack.EMPTY;
     }
 

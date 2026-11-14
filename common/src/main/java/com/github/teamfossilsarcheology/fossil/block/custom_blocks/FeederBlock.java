@@ -1,5 +1,9 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.ItemInteractionResult;
+import com.github.teamfossilsarcheology.fossil.util.InteractionResults;
 import com.github.teamfossilsarcheology.fossil.block.entity.FeederBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -27,6 +31,13 @@ import org.jetbrains.annotations.Nullable;
  * @see com.github.teamfossilsarcheology.fossil.client.gui.FeederScreen
  */
 public class FeederBlock extends BaseEntityBlock {
+    public static final MapCodec<FeederBlock> CODEC = simpleCodec(FeederBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
 
     public static final BooleanProperty HERB = BooleanProperty.create("herb");
     public static final BooleanProperty CARN = BooleanProperty.create("carn");
@@ -51,7 +62,12 @@ public class FeederBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        //PORT(1.21.1): Block#use was split, see InteractionResults
+        return InteractionResults.toItemResult(use(state, level, pos, player, hand, hit));
+    }
+
+    private @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

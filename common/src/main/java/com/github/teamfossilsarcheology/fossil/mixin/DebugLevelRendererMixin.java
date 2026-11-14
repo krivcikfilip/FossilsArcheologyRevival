@@ -4,7 +4,9 @@ import com.github.teamfossilsarcheology.fossil.client.gui.debug.instruction.Inst
 import com.github.teamfossilsarcheology.fossil.client.gui.debug.navigation.PathingRenderer;
 import com.github.teamfossilsarcheology.fossil.util.Version;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -27,8 +29,15 @@ public class DebugLevelRendererMixin {
     private Frustum cullingFrustum;
 
     @Inject(method = "renderLevel", at = @At(value = "TAIL"))
-    private void renderDebugPaths(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
+    private void renderDebugPaths(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
+        //PORT(1.21.1): renderLevel no longer gets a PoseStack/partialTick/finishNanoTime. The PoseStack is rebuilt from the
+        //camera rotation matrix (frustumMatrix), finishNanoTime is approximated with the current time.
+        //PORT-TODO(1.21.1): verify debug path rendering in game (debug builds only)
         if (Version.debugEnabled()) {
+            PoseStack poseStack = new PoseStack();
+            poseStack.mulPose(frustumMatrix);
+            float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
+            long finishNanoTime = Util.getNanos();
             MultiBufferSource.BufferSource bufferSource = renderBuffers.bufferSource();
             final Minecraft mc = Minecraft.getInstance();
             final Vec3 viewPosition = mc.gameRenderer.getMainCamera().getPosition();

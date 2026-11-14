@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.inventory;
 
+import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
 import com.github.teamfossilsarcheology.fossil.recipe.ModRecipes;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -57,7 +58,7 @@ public class SifterMenu extends AbstractContainerMenu {
                 if (!moveItemStackTo(current, sifterSlots, bottomRowEnd, true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (ModRecipes.getSifterRecipeForItem(new SimpleContainer(itemStack), player.level()) != null) {
+            } else if (ModRecipes.getSifterRecipeForItem(MultiOutputAndSlotsRecipe.MachineRecipeInput.of(itemStack), player.level()) != null) {
                 if (!moveItemStackTo(current, 0, sifterSlots, false)) {
                     return ItemStack.EMPTY;
                 }

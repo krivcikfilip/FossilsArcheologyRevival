@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.entity.AnuBarrierBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.util.Version;
@@ -26,6 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AnuBarrierOriginBlock extends BaseEntityBlock {
+    public static final MapCodec<AnuBarrierOriginBlock> CODEC = simpleCodec(AnuBarrierOriginBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     protected static final VoxelShape X_AXIS_AABB = Block.box(0, 0, 6, 16, 16, 10);
     protected static final VoxelShape Z_AXIS_AABB = Block.box(6, 0, 0, 10, 16, 16);

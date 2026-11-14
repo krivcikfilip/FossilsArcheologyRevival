@@ -1,11 +1,12 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.AbstractGlassBlock;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,7 +18,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class ClearGlassBlock extends AbstractGlassBlock {
+public class ClearGlassBlock extends TransparentBlock {
+    public static final MapCodec<ClearGlassBlock> CODEC = simpleCodec(ClearGlassBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends TransparentBlock> codec() {
+        return CODEC;
+    }
+
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
     public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;

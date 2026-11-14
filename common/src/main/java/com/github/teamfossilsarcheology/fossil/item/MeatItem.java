@@ -12,11 +12,11 @@ public class MeatItem extends PrehistoricEntityItem {
 
     public MeatItem(EntityInfo info, boolean cooked, float saturation) {
         super(new Item.Properties().food(new FoodProperties.Builder().nutrition(cooked ? 8 : 3)
-                .saturationMod(saturation).build()), info, cooked ? "cooked_meat" : "meat");
+                .saturationModifier(saturation).build()), info, cooked ? "cooked_meat" : "meat");
     }
 
     protected MeatItem(EntityInfo info, boolean cooked, float saturation, String category) {
         super(new Item.Properties().food(new FoodProperties.Builder().nutrition(cooked ? 8 : 3)
-                .saturationMod(saturation).build()), info, category);
+                .saturationModifier(saturation).build()), info, category);
     }
 }

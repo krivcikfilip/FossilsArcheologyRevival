@@ -159,7 +159,8 @@ public class WorktableBlockEntity extends MachineContainerBlockEntity {
             ItemStack input = items.get(WorktableMenu.INPUT_SLOT_ID);
             if (items.get(WorktableMenu.OUTPUT_SLOT_ID).isEmpty()) {
                 items.set(WorktableMenu.OUTPUT_SLOT_ID, result.copy());
-                EnchantmentHelper.setEnchantments(EnchantmentHelper.getEnchantments(input), items.get(WorktableMenu.OUTPUT_SLOT_ID));
+                //PORT(1.21.1): enchantments are a data component (ItemEnchantments) now
+                EnchantmentHelper.setEnchantments(items.get(WorktableMenu.OUTPUT_SLOT_ID), EnchantmentHelper.getEnchantmentsForCrafting(input));
             } else if (items.get(WorktableMenu.OUTPUT_SLOT_ID).getItem() == result.getItem()) {
                 items.get(WorktableMenu.OUTPUT_SLOT_ID).grow(result.getCount());
             }
@@ -202,7 +203,7 @@ public class WorktableBlockEntity extends MachineContainerBlockEntity {
     @Override
     public void setItem(int slot, ItemStack stack) {
         ItemStack itemStack = items.get(slot);
-        boolean sameItem = (!stack.isEmpty() && ItemStack.isSameItem(stack, itemStack) && ItemStack.isSameItemSameTags(stack, itemStack));
+        boolean sameItem = (!stack.isEmpty() && ItemStack.isSameItem(stack, itemStack) && ItemStack.isSameItemSameComponents(stack, itemStack));
         items.set(slot, stack);
         if (stack.getCount() > getMaxStackSize()) {
             stack.setCount(getMaxStackSize());

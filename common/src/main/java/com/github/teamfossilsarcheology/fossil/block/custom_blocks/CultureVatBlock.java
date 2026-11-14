@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.block.PrehistoricPlantInfo;
 import com.github.teamfossilsarcheology.fossil.block.entity.CultureVatBlockEntity;
@@ -49,6 +50,13 @@ import java.util.List;
  * @see com.github.teamfossilsarcheology.fossil.client.gui.CultureVatScreen
  */
 public class CultureVatBlock extends CustomEntityBlock {
+    public static final MapCodec<CultureVatBlock> CODEC = simpleCodec(CultureVatBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends CustomEntityBlock> codec() {
+        return CODEC;
+    }
+
 
     public static final EnumProperty<EmbryoType> EMBRYO = EnumProperty.create("embryo", EmbryoType.class);
 

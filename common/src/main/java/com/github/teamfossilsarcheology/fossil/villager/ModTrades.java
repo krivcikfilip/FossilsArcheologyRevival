@@ -3,6 +3,9 @@ package com.github.teamfossilsarcheology.fossil.villager;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.enchantment.ModEnchantments;
 import com.github.teamfossilsarcheology.fossil.item.ModItems;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -13,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -20,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ModTrades {
 
@@ -54,7 +59,7 @@ public class ModTrades {
                 list.add(new EmeraldForItems(ModBlocks.PIGLIN_FIGURINE_DESTROYED.get(), 2, 1, 2, 8));
             }
             case 5 -> {
-                list.add(new EnchantBookForEmeralds(ModEnchantments.ARCHEOLOGY.get(), 10));
+                list.add(new EnchantBookForEmeralds(ModEnchantments.ARCHEOLOGY, 10));
                 list.add(new ItemsAndEmeraldsToItems(ModItems.BROKEN_HELMET.get(), 1, ModItems.ANCIENT_HELMET.get(), 1, 2, 10));
                 list.add(new ItemsAndEmeraldsToItems(ModItems.BROKEN_SWORD.get(), 1, ModItems.ANCIENT_SWORD.get(), 1, 2, 10));
                 list.add(new ItemsForEmeralds(ModBlocks.ANCIENT_STONE.get(), 4, 4, 6, 12));
@@ -90,7 +95,7 @@ public class ModTrades {
                 list.add(new EmeraldForItems(ModItems.MAGIC_CONCH.get(), 2, 2, 8));
             }
             case 5 -> {
-                list.add(new EnchantBookForEmeralds(ModEnchantments.PALEONTOLOGY.get(), 10));
+                list.add(new EnchantBookForEmeralds(ModEnchantments.PALEONTOLOGY, 10));
                 list.add(new ItemsForEmeralds(ModItems.BONE_HELMET.get(), 3, 1, 2));
                 list.add(new ItemsForEmeralds(ModItems.BONE_CHESTPLATE.get(), 4, 1, 3));
                 list.add(new ItemsForEmeralds(ModItems.BONE_LEGGINGS.get(), 3, 1, 2));
@@ -124,7 +129,8 @@ public class ModTrades {
         @Override
         public MerchantOffer getOffer(Entity trader, RandomSource random) {
             ItemStack itemStack = new ItemStack(this.item, this.cost);
-            return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD, emeraldCount), this.maxUses, this.villagerXp, this.priceMultiplier);
+            //PORT(1.21.1): costs are ItemCosts
+            return new MerchantOffer(new ItemCost(itemStack.getItem(), itemStack.getCount()), new ItemStack(Items.EMERALD, emeraldCount), this.maxUses, this.villagerXp, this.priceMultiplier);
         }
     }
 
@@ -163,7 +169,7 @@ public class ModTrades {
 
         @Override
         public MerchantOffer getOffer(Entity trader, RandomSource random) {
-            return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(this.itemStack.getItem(), this.numberOfItems), this.maxUses, this.villagerXp, this.priceMultiplier);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), new ItemStack(this.itemStack.getItem(), this.numberOfItems), this.maxUses, this.villagerXp, this.priceMultiplier);
         }
     }
 
@@ -195,31 +201,38 @@ public class ModTrades {
         @Override
         @Nullable
         public MerchantOffer getOffer(Entity trader, RandomSource random) {
-            return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(this.fromItem.getItem(), this.fromCount), new ItemStack(this.toItem.getItem(), this.toCount), this.maxUses, this.villagerXp, this.priceMultiplier);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(new ItemCost(this.fromItem.getItem(), this.fromCount)), new ItemStack(this.toItem.getItem(), this.toCount), this.maxUses, this.villagerXp, this.priceMultiplier);
         }
     }
 
     static class EnchantBookForEmeralds implements VillagerTrades.ItemListing {
-        private final Enchantment enchantment;
+        //PORT(1.21.1): enchantments are data driven, resolved from the trader's registry access
+        private final ResourceKey<Enchantment> enchantmentKey;
         private final int villagerXp;
 
-        public EnchantBookForEmeralds(Enchantment enchantment, int villagerXp) {
-            this.enchantment = enchantment;
+        public EnchantBookForEmeralds(ResourceKey<Enchantment> enchantmentKey, int villagerXp) {
+            this.enchantmentKey = enchantmentKey;
             this.villagerXp = villagerXp;
         }
 
         @Override
+        @Nullable
         public MerchantOffer getOffer(Entity trader, RandomSource random) {
-            int level = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+            Optional<Holder.Reference<Enchantment>> optional = ModEnchantments.get(trader.level().registryAccess(), enchantmentKey);
+            if (optional.isEmpty()) {
+                return null;
+            }
+            Holder<Enchantment> enchantment = optional.get();
+            int level = Mth.nextInt(random, enchantment.value().getMinLevel(), enchantment.value().getMaxLevel());
             ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, level));
             int cost = 2 + random.nextInt(5 + level * 10) + 3 * level;
-            if (enchantment.isTreasureOnly()) {
+            if (enchantment.is(EnchantmentTags.TREASURE)) {
                 cost *= 2;
             }
             if (cost > 64) {
                 cost = 64;
             }
-            return new MerchantOffer(new ItemStack(Items.EMERALD, cost), new ItemStack(Items.BOOK), itemStack, 12, this.villagerXp, 0.2f);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, cost), Optional.of(new ItemCost(Items.BOOK)), itemStack, 12, this.villagerXp, 0.2f);
         }
     }
 }

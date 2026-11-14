@@ -1,32 +1,38 @@
 package com.github.teamfossilsarcheology.fossil.recipe;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
+/**
+ * PORT(1.21.1): Recipe<ContainerWithAnyFuel> where ContainerWithAnyFuel is now a {@link RecipeInput} (was a SimpleContainer).
+ * The recipe id lives in the RecipeHolder now (getId() removed).
+ * JSON shape (see PORT_NOTES/data.md):
+ * <pre>{"input": Ingredient, "fuel": Ingredient, "result": ItemStack ({"id", "count"?, "components"?}), "duration": int (optional), "fuel_duration": int (optional)}</pre>
+ * 1.20.1 read "result" as an item id string.
+ */
 public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerWithAnyFuel> {
-    private final ResourceLocation location;
     private final Ingredient input;
     private final Ingredient fuel;
     private final ItemStack result;
     private final int duration;
     private final int fuelDuration;
 
-    protected WithFuelRecipe(ResourceLocation location, Ingredient input, Ingredient fuel, ItemStack result, int duration, int fuelDuration) {
-        this.location = location;
+    protected WithFuelRecipe(Ingredient input, Ingredient fuel, ItemStack result, int duration, int fuelDuration) {
         this.input = input;
         this.fuel = fuel;
         this.result = result;
@@ -40,13 +46,10 @@ public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerW
     }
 
     @Override
-    public @NotNull ItemStack assemble(ContainerWithAnyFuel container, RegistryAccess registryAccess) {
+    public @NotNull ItemStack assemble(ContainerWithAnyFuel container, HolderLookup.Provider registries) {
         ItemStack itemStack = result.copy();
-        CompoundTag compoundTag = container.getItem(0).getTag();
-        if (compoundTag != null) {
-            itemStack.setTag(compoundTag.copy());
-        }
-
+        //PORT(1.21.1): copying the input NBT (setTag) -> copying the input component patch
+        itemStack.applyComponents(container.getItem(0).getComponentsPatch());
         return itemStack;
     }
 
@@ -56,7 +59,7 @@ public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerW
     }
 
     @Override
-    public @NotNull ItemStack getResultItem(RegistryAccess registryAccess) {
+    public @NotNull ItemStack getResultItem(HolderLookup.Provider registries) {
         return result.copy();
     }
 
@@ -72,11 +75,6 @@ public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerW
         return true;
     }
 
-    @Override
-    public @NotNull ResourceLocation getId() {
-        return location;
-    }
-
     public boolean isFuel(ItemStack itemStack) {
         return fuel.test(itemStack);
     }
@@ -89,6 +87,10 @@ public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerW
         return fuel;
     }
 
+    public ItemStack getResult() {
+        return result;
+    }
+
     public int getDuration() {
         return duration;
     }
@@ -97,22 +99,38 @@ public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerW
         return fuelDuration;
     }
 
-    public static class ContainerWithAnyFuel extends SimpleContainer {
+    /**
+     * Slot 0: input, slot 1: fuel. {@code anyFuel} skips the fuel check.
+     */
+    public static class ContainerWithAnyFuel implements RecipeInput {
         public final boolean anyFuel;
+        private final List<ItemStack> items;
 
         public ContainerWithAnyFuel(boolean anyFuel, ItemStack... items) {
-            super(items);
+            this.items = List.of(items);
             this.anyFuel = anyFuel;
         }
 
         public ContainerWithAnyFuel(ItemStack input, ItemStack fuel) {
-            super(input, fuel);
-            this.anyFuel = false;
+            this(false, input, fuel);
+        }
+
+        @Override
+        public @NotNull ItemStack getItem(int index) {
+            //SimpleContainer returned EMPTY for missing slots (e.g. ContainerWithAnyFuel(true, input) has no fuel slot)
+            return index >= 0 && index < items.size() ? items.get(index) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public int size() {
+            return items.size();
         }
     }
 
     public static abstract class WithFuelRecipeSerializer<T extends WithFuelRecipe> implements RecipeSerializer<T> {
         protected final Constructor<T> constructor;
+        private MapCodec<T> codec;
+        private StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
         protected WithFuelRecipeSerializer(Constructor<T> constructor) {
             this.constructor = constructor;
@@ -123,41 +141,37 @@ public abstract class WithFuelRecipe implements Recipe<WithFuelRecipe.ContainerW
         abstract int defaultFuelDuration();
 
         @Override
-        public @NotNull T fromJson(ResourceLocation recipeId, JsonObject serializedRecipe) {
-            JsonElement jsonElement = GsonHelper.getAsJsonObject(serializedRecipe, "input");
-            Ingredient input = Ingredient.fromJson(jsonElement);
-            jsonElement = GsonHelper.getAsJsonObject(serializedRecipe, "fuel");
-            Ingredient fuel = Ingredient.fromJson(jsonElement);
-            String result = GsonHelper.getAsString(serializedRecipe, "result");
-            ItemStack output = new ItemStack(
-                    BuiltInRegistries.ITEM.getOptional(new ResourceLocation(result)).orElseThrow(() -> new IllegalStateException("Item: " + result + " does not exist")));
-            int duration = GsonHelper.getAsInt(serializedRecipe, "duration", defaultDuration());
-            int fuelDuration = GsonHelper.getAsInt(serializedRecipe, "fuel_duration", defaultFuelDuration());
-            return constructor.construct(recipeId, input, fuel, output, duration, fuelDuration);
+        public @NotNull MapCodec<T> codec() {
+            if (codec == null) {
+                //Lazy because the defaults are provided by the subclass
+                codec = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                        Ingredient.CODEC_NONEMPTY.fieldOf("input").forGetter(WithFuelRecipe::getInput),
+                        Ingredient.CODEC_NONEMPTY.fieldOf("fuel").forGetter(WithFuelRecipe::getFuel),
+                        ItemStack.CODEC.fieldOf("result").forGetter(WithFuelRecipe::getResult),
+                        Codec.INT.optionalFieldOf("duration", defaultDuration()).forGetter(WithFuelRecipe::getDuration),
+                        Codec.INT.optionalFieldOf("fuel_duration", defaultFuelDuration()).forGetter(WithFuelRecipe::getFuelDuration)
+                ).apply(instance, constructor::construct));
+            }
+            return codec;
         }
 
         @Override
-        public @NotNull T fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-            Ingredient input = Ingredient.fromNetwork(buffer);
-            Ingredient fuel = Ingredient.fromNetwork(buffer);
-            ItemStack output = buffer.readItem();
-            int duration = buffer.readInt();
-            int fuelDuration = buffer.readInt();
-            return constructor.construct(recipeId, input, fuel, output, duration, fuelDuration);
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buffer, WithFuelRecipe recipe) {
-            recipe.input.toNetwork(buffer);
-            recipe.fuel.toNetwork(buffer);
-            buffer.writeItem(recipe.result);
-            buffer.writeInt(recipe.duration);
-            buffer.writeInt(recipe.fuelDuration);
+        public @NotNull StreamCodec<RegistryFriendlyByteBuf, T> streamCodec() {
+            if (streamCodec == null) {
+                streamCodec = StreamCodec.composite(
+                        Ingredient.CONTENTS_STREAM_CODEC, WithFuelRecipe::getInput,
+                        Ingredient.CONTENTS_STREAM_CODEC, WithFuelRecipe::getFuel,
+                        ItemStack.STREAM_CODEC, WithFuelRecipe::getResult,
+                        ByteBufCodecs.INT, WithFuelRecipe::getDuration,
+                        ByteBufCodecs.INT, WithFuelRecipe::getFuelDuration,
+                        constructor::construct);
+            }
+            return streamCodec;
         }
 
         @FunctionalInterface
         public interface Constructor<R> {
-            R construct(ResourceLocation recipeId, Ingredient input, Ingredient fuel, ItemStack output, int duration, int fuelDuration);
+            R construct(Ingredient input, Ingredient fuel, ItemStack output, int duration, int fuelDuration);
         }
     }
 }

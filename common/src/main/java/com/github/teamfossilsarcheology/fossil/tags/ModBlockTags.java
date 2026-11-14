@@ -24,5 +24,5 @@ public class ModBlockTags {
     public static final TagKey<Block> PLANTABLE_ON_SAND = TagKey.create(key, FossilMod.location("plantable_on_sand"));
 
     //Fabric
-    public static final TagKey<Block> C_GLASS_BLOCKS = TagKey.create(key, new ResourceLocation("c", "glass_blocks"));
+    public static final TagKey<Block> C_GLASS_BLOCKS = TagKey.create(key, ResourceLocation.fromNamespaceAndPath("c", "glass_blocks"));
 }

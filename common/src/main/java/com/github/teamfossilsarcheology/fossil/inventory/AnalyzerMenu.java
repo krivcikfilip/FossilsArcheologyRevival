@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.inventory;
 
+import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
 import com.github.teamfossilsarcheology.fossil.recipe.ModRecipes;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -58,7 +59,7 @@ public class AnalyzerMenu extends AbstractContainerMenu {
                 if (!moveItemStackTo(current, analyzerSlots, bottomRowEnd, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (ModRecipes.getAnalyzerRecipeForItem(new SimpleContainer(itemStack), player.level()) != null) {
+            } else if (ModRecipes.getAnalyzerRecipeForItem(MultiOutputAndSlotsRecipe.MachineRecipeInput.of(itemStack), player.level()) != null) {
                 if (!moveItemStackTo(current, 0, 9, false)) {
                     return ItemStack.EMPTY;
                 }

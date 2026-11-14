@@ -9,6 +9,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.SequencedPriorityIterator;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
@@ -18,6 +19,8 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.pools.*;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
@@ -32,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,9 +54,10 @@ public abstract class JigsawPlacementMixin {
     @Final
     @Shadow
     private ChunkGenerator chunkGenerator;
+    //PORT(1.21.1): Deque -> SequencedPriorityIterator (placement priorities, 1.20.3)
     @Final
     @Shadow
-    Deque<JigsawPlacement.PieceState> placing;
+    SequencedPriorityIterator<JigsawPlacement.PieceState> placing;
     @Final
     @Shadow
     private List<? super PoolElementStructurePiece> pieces;
@@ -63,13 +66,17 @@ public abstract class JigsawPlacementMixin {
     @Final
     private StructureTemplateManager structureTemplateManager;
 
+    //PORT(1.21.1): readPoolName -> readPoolKey with pool aliases (1.20.2)
     @Shadow
-    private static ResourceKey<StructureTemplatePool> readPoolName(StructureTemplate.StructureBlockInfo structureBlockInfo) {
+    private static ResourceKey<StructureTemplatePool> readPoolKey(StructureTemplate.StructureBlockInfo structureBlockInfo, PoolAliasLookup poolAliasLookup) {
         return null;
     }
 
     @Inject(method = "tryPlacingChildren", at = @At(value = "HEAD"), cancellable = true)
-    private void tryPlacingCustomStructures(PoolElementStructurePiece structurePiece, MutableObject<VoxelShape> mutableObject, int depth, boolean bl, LevelHeightAccessor levelHeightAccessor, RandomState randomState, CallbackInfo ci) {
+    private void tryPlacingCustomStructures(PoolElementStructurePiece structurePiece, MutableObject<VoxelShape> mutableObject, int depth, boolean bl, LevelHeightAccessor levelHeightAccessor, RandomState randomState,
+                                            PoolAliasLookup poolAliasLookup, LiquidSettings liquidSettings, CallbackInfo ci) {
+        //PORT(1.21.1): copy updated for pool aliases, liquid settings and placement priorities (vanilla 1.21.1 Placer#tryPlacingChildren)
+        //PORT-TODO(1.21.1): diff against the vanilla 1.21.1 tryPlacingChildren once sources are available (field names pools/maxDepth assumed)
         //This is a copy of the base method that allows us to place some of our structures
         String name = structurePiece.getElement().toString();
         boolean isTop = name.contains("house_taiga_top") || name.contains("house_plains_top") || name.contains("tent_option");
@@ -92,7 +99,7 @@ public abstract class JigsawPlacementMixin {
                 BlockPos expectedJigsawPosition = baseJigsawPosition.relative(baseJigsawDirection);
                 int k = baseJigsawPosition.getY() - baseMinY;
                 int l = -1;
-                ResourceKey<StructureTemplatePool> baseTargetKey = readPoolName(baseStructureJigSaw);
+                ResourceKey<StructureTemplatePool> baseTargetKey = readPoolKey(baseStructureJigSaw, poolAliasLookup);
                 Optional<? extends Holder<StructureTemplatePool>> baseTargetPool = pools.getHolder(baseTargetKey);
                 if (baseTargetPool.isEmpty()) {
                     continue;
@@ -119,6 +126,7 @@ public abstract class JigsawPlacementMixin {
                     list.addAll(baseTarget.value().getShuffledTemplates(random));
                 }
                 list.addAll(baseFallback.value().getShuffledTemplates(random));
+                int placementPriority = baseStructureJigSaw.nbt() != null ? baseStructureJigSaw.nbt().getInt("placement_priority") : 0;
                 for (StructurePoolElement targetElement : list) {
                     if (targetElement == EmptyPoolElement.INSTANCE) {
                         break;
@@ -130,7 +138,7 @@ public abstract class JigsawPlacementMixin {
                             if (!boundingBox2.isInside(structureBlockInfo.pos().relative(JigsawBlock.getFrontFacing(structureBlockInfo.state())))) {
                                 return 0;
                             }
-                            ResourceKey<StructureTemplatePool> resourceKey = readPoolName(structureBlockInfo);
+                            ResourceKey<StructureTemplatePool> resourceKey = readPoolKey(structureBlockInfo, poolAliasLookup);
                             Optional<Holder.Reference<StructureTemplatePool>> optional = pools.getHolder(resourceKey);
                             Optional<Holder<StructureTemplatePool>> optional2 = optional.map(argx -> argx.value().getFallback());
                             int a = optional.map(structureTemplatePool -> structureTemplatePool.value().getMaxSize(structureTemplateManager)).orElse(0);
@@ -174,7 +182,7 @@ public abstract class JigsawPlacementMixin {
                             s = structurePiece.getGroundLevelDelta();
                             int t = targetIsRigid ? s - p : targetElement.getGroundLevelDelta();
                             PoolElementStructurePiece targetStructurePiece = new PoolElementStructurePiece(
-                                    structureTemplateManager, targetElement, blockPos6, t, targetElementRotation, boundingBox4);
+                                    structureTemplateManager, targetElement, blockPos6, t, targetElementRotation, boundingBox4, liquidSettings);
                             if (baseIsRigid) {
                                 u = baseMinY + k;
                             } else if (targetIsRigid) {
@@ -190,7 +198,7 @@ public abstract class JigsawPlacementMixin {
                             pieces.add(targetStructurePiece);
                             //Always place basement even if limit is reached
                             if (!shouldSkip && depth + 1 > this.maxDepth) continue block0;
-                            placing.addLast(new JigsawPlacement.PieceState(targetStructurePiece, mutableObject3, depth + 1));
+                            placing.add(new JigsawPlacement.PieceState(targetStructurePiece, mutableObject3, depth + 1), placementPriority);
                             continue block0;
                         }
                     }

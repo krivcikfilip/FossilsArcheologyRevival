@@ -1,0 +1,13 @@
+{
+  "type": "fossil:worktable",
+  "duration": 300,
+  "fuel": {
+    "item": "fossil:pottery_shard"
+  },
+  "input": {
+    "item": "fossil:figurine_zombie_destroyed"
+  },
+  "result": {
+    "id": "fossil:figurine_zombie_restored"
+  }
+}

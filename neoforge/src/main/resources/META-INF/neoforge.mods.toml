@@ -1,0 +1,134 @@
+modLoader = "javafml"
+loaderVersion = "${neoforge_loader_version_range}"
+
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/TeamFossilsArcheology/FossilsArcheologyRevival/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/fossils"
+
+logoFile = "fossils.png"
+credits = "Original mod by Flammarilva and Team July!"
+authors = "${neoforge_mod_authors}"
+description = "${mod_description}"
+
+# PORT(1.21.1): NeoForge declares mixin configs here (no MixinConfigs manifest entry / loom mixinConfig)
+[[mixins]]
+config = "fossil_common.mixins.json"
+
+[[mixins]]
+config = "fossil_forge.mixins.json"
+
+# PORT(1.21.1): "mandatory = true/false" -> type = "required"/"optional"
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neoforge_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraft_version_range_lower},${minecraft_version_range_upper})"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "architectury"
+type = "required"
+versionRange = "[13.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "geckolib"
+type = "required"
+versionRange = "[4.5,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "roughlyenoughitems"
+type = "optional"
+versionRange = "[16,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "terrablender"
+type = "required"
+versionRange = "[4,)"
+ordering = "NONE"
+side = "BOTH"
+
+# PORT-TODO(1.21.1): More Hitboxes 1.21.1 versions are "1.9.x-alpha"; the range below accepts them
+[[dependencies.${mod_id}]]
+modId = "morehitboxes"
+type = "required"
+versionRange = "[1.9.3-alpha,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "carryon"
+type = "optional"
+versionRange = "[2.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+# PORT(1.21.1): Farmer's Delight mod id is "farmersdelight" (the old "farmers-delight" was never a valid mod id)
+[[dependencies.${mod_id}]]
+modId = "farmersdelight"
+type = "optional"
+versionRange = "[1.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "argentinas_delight"
+type = "optional"
+versionRange = "[1.3,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "culturaldelights"
+type = "optional"
+versionRange = "[0.16.4,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "festive_delight"
+type = "optional"
+versionRange = "[2.0.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "crabbersdelight"
+type = "optional"
+versionRange = "[1.2.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "delightful"
+type = "optional"
+versionRange = "[3.8,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "emi"
+type = "optional"
+versionRange = "[1.1.22,)"
+ordering = "NONE"
+side = "BOTH"
+
+[modproperties.${mod_id}]
+catalogueImageIcon="fossils.png"

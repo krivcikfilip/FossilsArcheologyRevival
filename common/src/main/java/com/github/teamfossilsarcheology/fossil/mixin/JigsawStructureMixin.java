@@ -14,6 +14,10 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
+import net.minecraft.world.level.levelgen.structure.pools.DimensionPadding;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasBinding;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(JigsawStructure.class)
@@ -53,6 +58,16 @@ public class JigsawStructureMixin {
     @Shadow
     @Final
     private int maxDistanceFromCenter;
+    //PORT(1.21.1): new JigsawStructure fields (pool aliases 1.20.2, dimension padding + liquid settings 1.21)
+    @Shadow
+    @Final
+    private List<PoolAliasBinding> poolAliases;
+    @Shadow
+    @Final
+    private DimensionPadding dimensionPadding;
+    @Shadow
+    @Final
+    private LiquidSettings liquidSettings;
 
     @Inject(method = "findGenerationPoint", at = @At("HEAD"), cancellable = true)
     public void overrideReturnValueIfLithostitchedIsInstalled(Structure.GenerationContext context, CallbackInfoReturnable<Optional<Structure.GenerationStub>> cir) {
@@ -62,7 +77,8 @@ public class JigsawStructureMixin {
                 ChunkPos chunkPos = context.chunkPos();
                 int i = startHeight.sample(context.random(), new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
                 BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), i, chunkPos.getMinBlockZ());
-                cir.setReturnValue(JigsawPlacement.addPieces(context, startPool, startJigsawName, maxDepth, blockPos, useExpansionHack, projectStartToHeightmap, maxDistanceFromCenter));
+                cir.setReturnValue(JigsawPlacement.addPieces(context, startPool, startJigsawName, maxDepth, blockPos, useExpansionHack, projectStartToHeightmap, maxDistanceFromCenter,
+                        PoolAliasLookup.create(poolAliases, blockPos, context.seed()), dimensionPadding, liquidSettings));
             }
         }
     }

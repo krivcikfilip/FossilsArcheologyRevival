@@ -1,5 +1,8 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.ItemInteractionResult;
+import com.github.teamfossilsarcheology.fossil.util.InteractionResults;
 import com.github.teamfossilsarcheology.fossil.block.entity.AncientChestBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.item.ModItems;
@@ -31,6 +34,13 @@ import org.jetbrains.annotations.Nullable;
  * @see com.github.teamfossilsarcheology.fossil.item.AncientChestBlockItem
  */
 public class AncientChestBlock extends BaseEntityBlock {
+    public static final MapCodec<AncientChestBlock> CODEC = simpleCodec(AncientChestBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
 
@@ -40,7 +50,12 @@ public class AncientChestBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack heldStack, BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        //PORT(1.21.1): Block#use was split, see InteractionResults
+        return InteractionResults.toItemResult(use(blockState, level, pos, player, hand, hit));
+    }
+
+    private @NotNull InteractionResult use(BlockState blockState, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof AncientChestBlockEntity blockEntity) {
             if (blockEntity.getState() == 0) {
                 ItemStack itemStack = player.getItemInHand(hand);
@@ -58,7 +73,7 @@ public class AncientChestBlock extends BaseEntityBlock {
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
-        return super.use(blockState, level, pos, player, hand, hit);
+        return InteractionResult.PASS; //PORT(1.21.1): was super.use (Block#use returned PASS)
     }
 
     @Nullable
@@ -86,7 +101,7 @@ public class AncientChestBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 

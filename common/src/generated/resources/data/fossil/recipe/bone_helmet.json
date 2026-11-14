@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "item": "minecraft:bone"
+    },
+    "S": {
+      "tag": "fossil:bones_skull"
+    }
+  },
+  "pattern": [
+    "BSB",
+    "B B"
+  ],
+  "result": {
+    "count": 1,
+    "id": "fossil:bone_helmet"
+  },
+  "show_notification": true
+}

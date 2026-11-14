@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import net.minecraft.core.HolderLookup;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.FeederBlock;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.Prehistoric;
 import com.github.teamfossilsarcheology.fossil.food.Diet;
@@ -89,22 +90,22 @@ public class FeederBlockEntity extends BaseContainerBlockEntity implements World
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, this.items);
+        ContainerHelper.loadAllItems(tag, this.items, registries);
         for (int i = 0; i < FOOD_TYPES.length; i++) {
             foodStored.put(FOOD_TYPES[i], (int) tag.getShort(NAMES[i]));
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         for (int i = 0; i < FOOD_TYPES.length; i++) {
             tag.putShort(NAMES[i], (short) (int) foodStored.get(FOOD_TYPES[i]));
         }
-        ContainerHelper.saveAllItems(tag, this.items);
+        ContainerHelper.saveAllItems(tag, this.items, registries);
     }
 
     @Override
@@ -120,6 +121,17 @@ public class FeederBlockEntity extends BaseContainerBlockEntity implements World
     @Override
     public int getContainerSize() {
         return items.size();
+    }
+
+    //PORT(1.21.1): BaseContainerBlockEntity#getItems/setItems are abstract since 1.20.5
+    @Override
+    protected @NotNull NonNullList<ItemStack> getItems() {
+        return items;
+    }
+
+    @Override
+    protected void setItems(@NotNull NonNullList<ItemStack> items) {
+        this.items = items;
     }
 
     @Override

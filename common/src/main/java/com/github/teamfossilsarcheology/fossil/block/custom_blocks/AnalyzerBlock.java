@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.block.entity.AnalyzerBlockEntity;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -26,6 +27,13 @@ import org.jetbrains.annotations.Nullable;
  * @see com.github.teamfossilsarcheology.fossil.client.gui.AnalyzerScreen
  */
 public class AnalyzerBlock extends CustomEntityBlock {
+    public static final MapCodec<AnalyzerBlock> CODEC = simpleCodec(AnalyzerBlock::new);
+
+    @Override
+    protected @NotNull MapCodec<? extends CustomEntityBlock> codec() {
+        return CODEC;
+    }
+
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public AnalyzerBlock(Properties properties) {

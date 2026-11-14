@@ -1,21 +1,25 @@
 package com.github.teamfossilsarcheology.fossil.network;
 
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.FossilMod;
 import com.github.teamfossilsarcheology.fossil.config.FossilConfig;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Sync certain config options on server join to client. Also called when the player joins a client world to reset overrides
  */
-public class S2CSyncConfigMessage {
+public class S2CSyncConfigMessage implements CustomPacketPayload {
+    public static final Type<S2CSyncConfigMessage> TYPE = new Type<>(FossilMod.location("s2c_sync_config"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, S2CSyncConfigMessage> STREAM_CODEC = StreamCodec.ofMember(S2CSyncConfigMessage::write, S2CSyncConfigMessage::new);
+
     private final Map<String, Integer> ints;
     private final Map<String, Boolean> bools;
 
@@ -40,14 +44,19 @@ public class S2CSyncConfigMessage {
         buf.writeMap(bools, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeBoolean);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        if (contextSupplier.get().getEnvironment() == Env.SERVER) return;
+    private void apply(NetworkManager.PacketContext context) {
+        if (context.getEnvironment() == Env.SERVER) return;
         FossilMod.LOGGER.info("Received config from the server: {}", ints.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()).collect(Collectors.joining(", ", "{", "}")));
         FossilMod.LOGGER.info("Received config from the server: {}", bools.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()).collect(Collectors.joining(", ", "{", "}")));
         FossilConfig.overrideEntries(ints, bools);
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(S2CSyncConfigMessage.class, S2CSyncConfigMessage::write, S2CSyncConfigMessage::new, S2CSyncConfigMessage::apply);
+    @Override
+    public Type<S2CSyncConfigMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerS2C(TYPE, STREAM_CODEC, S2CSyncConfigMessage::apply);
     }
 }

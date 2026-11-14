@@ -13,33 +13,27 @@ import java.util.concurrent.locks.ReadWriteLock;
 @Mixin(SynchedEntityData.class)
 public abstract class SyncedEntityDataMixin implements SyncedEntityDataHelper {
 
+    //PORT(1.21.1): since 1.20.5 itemsById is an array and the ReadWriteLock is gone
     @Shadow
     @Final
-    private ReadWriteLock lock;
-
-    @Shadow
-    @Final
-    private Int2ObjectMap<SynchedEntityData.DataItem<?>> itemsById;
+    private SynchedEntityData.DataItem<?>[] itemsById;
 
     @Shadow
     private boolean isDirty;
 
     @Override
     public void fossilsArcheologyRevival$markNonDefaultAsDirty() {
-        lock.readLock().lock();
-
-        for (SynchedEntityData.DataItem<?> item : itemsById.values()) {
+        for (SynchedEntityData.DataItem<?> item : itemsById) {
             if (!item.isSetToDefault()) {
                 item.setDirty(true);
                 isDirty = true;
             }
         }
-        lock.readLock().unlock();
     }
 
     @Override
     public void fossilsArcheologyRevival$markDirty(EntityDataAccessor<Integer> dataAccessor) {
-        itemsById.get(dataAccessor.getId()).setDirty(true);
+        itemsById[dataAccessor.id()].setDirty(true); //PORT-TODO(1.21.1): EntityDataAccessor is a record since 1.20.5 (getId() -> id()), verify
         isDirty = true;
     }
 }

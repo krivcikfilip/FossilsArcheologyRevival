@@ -1,5 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import net.minecraft.world.ItemInteractionResult;
+import com.github.teamfossilsarcheology.fossil.util.InteractionResults;
 import com.github.teamfossilsarcheology.fossil.block.PrehistoricPlantInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -98,7 +100,12 @@ public abstract class TallBerryBushBlock extends DoublePlantBlock implements Ber
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        //PORT(1.21.1): Block#use was split, see InteractionResults
+        return InteractionResults.toItemResult(use(state, level, pos, player, hand, hit));
+    }
+
+    private @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int i = state.getValue(ageProperty());
         boolean isMaxAge = i == info.maxAge();
         if (!isMaxAge && player.getItemInHand(hand).is(Items.BONE_MEAL)) {
@@ -115,7 +122,7 @@ public abstract class TallBerryBushBlock extends DoublePlantBlock implements Ber
             updateAge(level, pos, state, info.berryAge() - 1);
             return InteractionResult.CONSUME;
         }
-        return super.use(state, level, pos, player, hand, hit);
+        return InteractionResult.PASS; //PORT(1.21.1): was super.use (Block#use returned PASS)
     }
 
     @Override
@@ -125,7 +132,7 @@ public abstract class TallBerryBushBlock extends DoublePlantBlock implements Ber
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
         return state.getValue(ageProperty()) < info.maxAge();
     }
 

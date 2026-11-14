@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import net.minecraft.core.HolderLookup;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.CultureVatBlock;
 import com.github.teamfossilsarcheology.fossil.config.FossilConfig;
@@ -78,19 +79,19 @@ public class CultureVatBlockEntity extends EnergyContainerBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         ListTag listTag = tag.getList("FuelItem", Tag.TAG_COMPOUND);
         if (!listTag.isEmpty()) {
-            fuel = ItemStack.of(listTag.getCompound(0));
+            fuel = ItemStack.parseOptional(registries, listTag.getCompound(0));
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         ListTag listTag = new ListTag();
-        listTag.add(fuel.save(new CompoundTag()));
+        listTag.add(fuel.saveOptional(registries)); //PORT(1.21.1): save(CompoundTag) -> saveOptional(provider) (fuel may be empty)
         tag.put("FuelItem", listTag);
     }
 
@@ -244,7 +245,7 @@ public class CultureVatBlockEntity extends EnergyContainerBlockEntity {
     @Override
     public void setItem(int slot, ItemStack stack) {
         ItemStack current = items.get(slot);
-        boolean sameItems = !stack.isEmpty() && ItemStack.isSameItem(stack, current) && ItemStack.isSameItemSameTags(stack, current);
+        boolean sameItems = !stack.isEmpty() && ItemStack.isSameItem(stack, current) && ItemStack.isSameItemSameComponents(stack, current);
         items.set(slot, stack);
         if (stack.getCount() > getMaxStackSize()) {
             stack.setCount(getMaxStackSize());

@@ -24,6 +24,7 @@ public class ServerEntityMixin {
     @Final
     private Entity entity;
 
+    //PORT-TODO(1.21.1): verify that Consumer#accept ordinal 0 in sendChanges is still the ClientboundSetPassengersPacket broadcast
     @WrapOperation(method = "sendChanges", at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", ordinal = 0))
     public void sendPassengersToPlayerIfPlayerIsVehicle(Consumer<Packet<?>> instance, Object t, Operation<Void> original) {
         if (entity instanceof ServerPlayer serverPlayer && fossilsArcheologyRevival$hasFAMobAsPassenger(serverPlayer.getPassengers())) {

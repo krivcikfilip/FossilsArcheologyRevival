@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.AnalyzerBlock;
 import com.github.teamfossilsarcheology.fossil.config.FossilConfig;
 import com.github.teamfossilsarcheology.fossil.inventory.AnalyzerMenu;
@@ -103,7 +104,7 @@ public class AnalyzerBlockEntity extends EnergyContainerBlockEntity {
     }
 
     private boolean isAnalyzable(ItemStack itemStack) {
-        return ModRecipes.getAnalyzerRecipeForItem(new SimpleContainer(itemStack), level) != null;
+        return ModRecipes.getAnalyzerRecipeForItem(MultiOutputAndSlotsRecipe.MachineRecipeInput.of(itemStack), level) != null;
     }
 
     @Override
@@ -132,11 +133,11 @@ public class AnalyzerBlockEntity extends EnergyContainerBlockEntity {
     protected void createItem() {
         if (canProcess()) {
             ItemStack input = items.get(rawIndex);
-            AnalyzerRecipe recipe = ModRecipes.getAnalyzerRecipeForItem(new SimpleContainer(input), level);
+            AnalyzerRecipe recipe = ModRecipes.getAnalyzerRecipeForItem(MultiOutputAndSlotsRecipe.MachineRecipeInput.of(input), level);
             if (recipe == null) {
                 return;
             }
-            ItemStack output = recipe.assemble(this, level.registryAccess()).copy();
+            ItemStack output = recipe.assemble(level.random).copy(); //PORT(1.21.1): was assemble(this BlockEntity, registryAccess)
             if (output.getCount() > 1) {
                 output.setCount(1 + level.random.nextInt(output.getCount() - 1));
             }

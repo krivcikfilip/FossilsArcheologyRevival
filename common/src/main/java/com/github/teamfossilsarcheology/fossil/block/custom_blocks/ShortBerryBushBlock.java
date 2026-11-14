@@ -1,5 +1,8 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.ItemInteractionResult;
+import com.github.teamfossilsarcheology.fossil.util.InteractionResults;
 import com.github.teamfossilsarcheology.fossil.block.PrehistoricPlantInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -27,6 +30,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ShortBerryBushBlock extends BushBlock implements BerryBushBlock, BonemealableBlock {
+    @Override
+    protected @NotNull MapCodec<? extends BushBlock> codec() {
+        //PORT(1.21.1): codec required since 1.20.3. The constructor arguments are not serializable, so this codec
+        //always returns this block instance (only used for block type serialization)
+        return MapCodec.unit(this);
+    }
+
     private final VoxelShape shape;
     private final PrehistoricPlantInfo info;
 
@@ -59,7 +69,12 @@ public abstract class ShortBerryBushBlock extends BushBlock implements BerryBush
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        //PORT(1.21.1): Block#use was split, see InteractionResults
+        return InteractionResults.toItemResult(use(state, level, pos, player, hand, hit));
+    }
+
+    private @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int i = state.getValue(ageProperty());
         boolean isMaxAge = i == info.maxAge();
         if (!isMaxAge && player.getItemInHand(hand).is(Items.BONE_MEAL)) {
@@ -72,7 +87,7 @@ public abstract class ShortBerryBushBlock extends BushBlock implements BerryBush
             updateAge(level, pos, state, info.berryAge() - 1);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
-        return super.use(state, level, pos, player, hand, hit);
+        return InteractionResult.PASS; //PORT(1.21.1): was super.use (Block#use returned PASS)
     }
 
     @Override
@@ -81,7 +96,7 @@ public abstract class ShortBerryBushBlock extends BushBlock implements BerryBush
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
         return state.getValue(ageProperty()) < info.maxAge();
     }
 

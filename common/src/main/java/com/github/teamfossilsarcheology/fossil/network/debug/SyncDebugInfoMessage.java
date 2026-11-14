@@ -1,5 +1,9 @@
 package com.github.teamfossilsarcheology.fossil.network.debug;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.network.PayloadChannel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import com.github.teamfossilsarcheology.fossil.capabilities.ModCapabilities;
 import com.github.teamfossilsarcheology.fossil.client.gui.debug.DebugScreen;
 import com.github.teamfossilsarcheology.fossil.entity.PrehistoricSkeleton;
@@ -7,16 +11,20 @@ import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.DinosaurE
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.Prehistoric;
 import com.github.teamfossilsarcheology.fossil.util.Gender;
 import com.github.teamfossilsarcheology.fossil.util.Version;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.function.Supplier;
 
-public class SyncDebugInfoMessage {
+public class SyncDebugInfoMessage implements PayloadChannel.BidirectionalPayload {
+    //PORT(1.21.1): sent in both directions -> two payload ids (NeoForge forbids registering one id for both directions)
+    public static final Type<SyncDebugInfoMessage> TYPE_S2C = new Type<>(FossilMod.location("s2c_sync_debug_info"));
+    public static final Type<SyncDebugInfoMessage> TYPE_C2S = new Type<>(FossilMod.location("c2s_sync_debug_info"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncDebugInfoMessage> STREAM_CODEC_S2C = StreamCodec.ofMember(SyncDebugInfoMessage::write, buf -> new SyncDebugInfoMessage(buf).withDirection(true));
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncDebugInfoMessage> STREAM_CODEC_C2S = StreamCodec.ofMember(SyncDebugInfoMessage::write, buf -> new SyncDebugInfoMessage(buf).withDirection(false));
+    private boolean clientbound;
     private final int entityId;
     private final String enumString;
     private final int age;
@@ -52,9 +60,9 @@ public class SyncDebugInfoMessage {
         buf.writeInt(mood);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        contextSupplier.get().queue(() -> {
-            Player player = contextSupplier.get().getPlayer();
+    private void apply(NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            Player player = context.getPlayer();
             if (Version.debugEnabled() && player != null) {
                 if (player.level().isClientSide) {
                     if (Minecraft.getInstance().screen instanceof DebugScreen) {
@@ -91,7 +99,28 @@ public class SyncDebugInfoMessage {
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(SyncDebugInfoMessage.class, SyncDebugInfoMessage::write, SyncDebugInfoMessage::new, SyncDebugInfoMessage::apply);
+    private SyncDebugInfoMessage withDirection(boolean clientbound) {
+        SyncDebugInfoMessage message = new SyncDebugInfoMessage(entityId, enumString, age, matingCooldown, playingCooldown, climbingCooldown, hunger, mood);
+        message.clientbound = clientbound;
+        return message;
+    }
+
+    @Override
+    public PayloadChannel.BidirectionalPayload toClientbound() {
+        return withDirection(true);
+    }
+
+    @Override
+    public PayloadChannel.BidirectionalPayload toServerbound() {
+        return withDirection(false);
+    }
+
+    @Override
+    public Type<SyncDebugInfoMessage> type() {
+        return clientbound ? TYPE_S2C : TYPE_C2S;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerBidirectional(TYPE_S2C, STREAM_CODEC_S2C, TYPE_C2S, STREAM_CODEC_C2S, SyncDebugInfoMessage::apply);
     }
 }

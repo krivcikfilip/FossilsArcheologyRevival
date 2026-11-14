@@ -50,7 +50,7 @@ public class FossilItem extends Item {
             return InteractionResult.FAIL;
         }
         if (level instanceof ServerLevel serverLevel) {
-            PrehistoricSkeleton fossil = ModEntities.SKELETON.get().create(serverLevel, null, null, blockPos, MobSpawnType.SPAWN_EGG, false, false);
+            PrehistoricSkeleton fossil = ModEntities.SKELETON.get().create(serverLevel, null, blockPos, MobSpawnType.SPAWN_EGG, false, false);
             if (fossil == null) {
                 return InteractionResult.FAIL;
             }

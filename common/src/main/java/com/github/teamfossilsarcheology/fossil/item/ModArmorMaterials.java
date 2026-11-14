@@ -1,97 +1,65 @@
 package com.github.teamfossilsarcheology.fossil.item;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import dev.architectury.registry.registries.DeferredRegister;
+import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.function.Supplier;
 
-public enum ModArmorMaterials implements ArmorMaterial {
-    ANCIENT("ancient", 15, Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
+/**
+ * PORT(1.21.1): ArmorMaterial is a registered record since 1.20.5 (ArmorItem takes a {@code Holder<ArmorMaterial>}).
+ * The durability is no longer part of the material: use {@link #durability(ArmorItem.Type, int)} or
+ * {@code ArmorItem.Type#getDurability(int)} with {@link #ANCIENT_DURABILITY_MULTIPLIER}/{@link #BONE_DURABILITY_MULTIPLIER}
+ * in the item properties.
+ */
+public class ModArmorMaterials {
+    public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(FossilMod.MOD_ID, Registries.ARMOR_MATERIAL);
+
+    public static final int ANCIENT_DURABILITY_MULTIPLIER = 15;
+    public static final int BONE_DURABILITY_MULTIPLIER = 25;
+
+    //Texture: fossil/textures/item/armor/ancient_helmet.png (geckolib, the layer is unused)
+    public static final RegistrySupplier<ArmorMaterial> ANCIENT = register("ancient", Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
         enumMap.put(ArmorItem.Type.BOOTS, 2);
         enumMap.put(ArmorItem.Type.LEGGINGS, 5);
         enumMap.put(ArmorItem.Type.CHESTPLATE, 6);
         enumMap.put(ArmorItem.Type.HELMET, 2);
-    }), 9, SoundEvents.ARMOR_EQUIP_CHAIN, 0, 0, () -> Ingredient.of(ModItems.SCARAB_GEM.get())),
-    BONE("bone", 25, Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
+    }), 9, SoundEvents.ARMOR_EQUIP_CHAIN, 0, 0, () -> Ingredient.of(ModItems.SCARAB_GEM.get()));
+    //Texture: minecraft/textures/models/armor/bone_layer_{1,2}.png (same location as in 1.20.1)
+    public static final RegistrySupplier<ArmorMaterial> BONE = register("bone", Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
         enumMap.put(ArmorItem.Type.BOOTS, 2);
         enumMap.put(ArmorItem.Type.LEGGINGS, 7);
         enumMap.put(ArmorItem.Type.CHESTPLATE, 6);
         enumMap.put(ArmorItem.Type.HELMET, 2);
     }), 15, SoundEvents.ARMOR_EQUIP_CHAIN, 0, 0, () -> Ingredient.of(Items.BONE));
 
-    private static final EnumMap<ArmorItem.Type, Integer> HEALTH_FUNCTION_FOR_TYPE = Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-        enumMap.put(ArmorItem.Type.BOOTS, 13);
-        enumMap.put(ArmorItem.Type.LEGGINGS, 15);
-        enumMap.put(ArmorItem.Type.CHESTPLATE, 16);
-        enumMap.put(ArmorItem.Type.HELMET, 11);
-    });
-
-    private final String name;
-    private final int durabilityMultiplier;
-    private final EnumMap<ArmorItem.Type, Integer> protectionFunctionForType;
-    private final int enchantmentValue;
-    private final SoundEvent sound;
-    private final float toughness;
-    private final float knockbackResistance;
-    private final LazyLoadedValue<Ingredient> repairIngredient;
-
-    ModArmorMaterials(String name, int durabilityMultiplier, EnumMap<ArmorItem.Type, Integer> protectionFunctionForType,
-                      int enchantmentValue, SoundEvent sound, float toughness, float knockbackResistance, Supplier<Ingredient> repairIngredient) {
-        this.name = name;
-        this.durabilityMultiplier = durabilityMultiplier;
-        this.protectionFunctionForType = protectionFunctionForType;
-        this.enchantmentValue = enchantmentValue;
-        this.sound = sound;
-        this.toughness = toughness;
-        this.knockbackResistance = knockbackResistance;
-        this.repairIngredient = new LazyLoadedValue<>(repairIngredient);
+    private static RegistrySupplier<ArmorMaterial> register(String name, EnumMap<ArmorItem.Type, Integer> defense, int enchantmentValue,
+                                                            Holder<SoundEvent> sound, float toughness, float knockbackResistance, Supplier<Ingredient> repairIngredient) {
+        //1.20.1 used the material name without namespace for the armor texture -> minecraft namespace
+        List<ArmorMaterial.Layer> layers = List.of(new ArmorMaterial.Layer(ResourceLocation.withDefaultNamespace(name)));
+        return ARMOR_MATERIALS.register(name, () -> new ArmorMaterial(defense, enchantmentValue, sound, repairIngredient, layers, toughness, knockbackResistance));
     }
 
-    @Override
-    public int getDurabilityForType(ArmorItem.Type type) {
-        return HEALTH_FUNCTION_FOR_TYPE.get(type) * durabilityMultiplier;
+    /**
+     * Same values as the 1.20.1 {@code HEALTH_FUNCTION_FOR_TYPE * durabilityMultiplier}
+     */
+    public static int durability(ArmorItem.Type type, int durabilityMultiplier) {
+        return type.getDurability(durabilityMultiplier);
     }
 
-    @Override
-    public int getDefenseForType(ArmorItem.Type type) {
-        return protectionFunctionForType.get(type);
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return this.enchantmentValue;
-    }
-
-    @Override
-    public @NotNull SoundEvent getEquipSound() {
-        return this.sound;
-    }
-
-    @Override
-    public @NotNull Ingredient getRepairIngredient() {
-        return this.repairIngredient.get();
-    }
-
-    @Override
-    public @NotNull String getName() {
-        return this.name;
-    }
-
-    @Override
-    public float getToughness() {
-        return this.toughness;
-    }
-
-    @Override
-    public float getKnockbackResistance() {
-        return this.knockbackResistance;
+    public static void register() {
+        ARMOR_MATERIALS.register();
     }
 }

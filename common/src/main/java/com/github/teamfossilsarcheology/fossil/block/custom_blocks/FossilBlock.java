@@ -1,10 +1,10 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.github.teamfossilsarcheology.fossil.enchantment.ModEnchantments;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricEntityInfo;
 import com.github.teamfossilsarcheology.fossil.tags.ModItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -37,9 +37,9 @@ public class FossilBlock extends Block {
                 .withDynamicDrop(ModItemTags.TAIL_BONES.location(), c -> c.accept(new ItemStack(info.tailBoneItem)))
                 .withDynamicDrop(ModItemTags.UNIQUE_BONES.location(), c -> c.accept(new ItemStack(info.uniqueBoneItem)))
                 .withDynamicDrop(ModItemTags.VERTEBRAE_BONES.location(), c -> c.accept(new ItemStack(info.vertebraeBoneItem)));
-        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments( builder.getParameter(LootContextParams.TOOL));
+        //PORT(1.21.1): enchantments are data driven holders
         int count = 1;
-        int fortune = enchantments.getOrDefault(Enchantments.BLOCK_FORTUNE, 0);
+        int fortune = ModEnchantments.getItemEnchantmentLevel(builder.getLevel().registryAccess(), Enchantments.FORTUNE, builder.getParameter(LootContextParams.TOOL));
         if (fortune > 0) {
             count += builder.getLevel().random.nextInt(fortune);
         }

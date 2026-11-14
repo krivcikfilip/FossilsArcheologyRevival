@@ -1,8 +1,11 @@
 package com.github.teamfossilsarcheology.fossil.network;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.food.FoodMappingsManager;
 import com.github.teamfossilsarcheology.fossil.food.FoodType;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,12 +18,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * Sync {@link com.github.teamfossilsarcheology.fossil.food.FoodMappings food mappings} on server join to client
  */
-public class S2CSyncFoodMappingsMessage {
+public class S2CSyncFoodMappingsMessage implements CustomPacketPayload {
+    public static final Type<S2CSyncFoodMappingsMessage> TYPE = new Type<>(FossilMod.location("s2c_sync_food_mappings"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, S2CSyncFoodMappingsMessage> STREAM_CODEC = StreamCodec.ofMember(S2CSyncFoodMappingsMessage::write, S2CSyncFoodMappingsMessage::new);
+
     private final Map<FoodType, Map<Block, Integer>> blockValues;
     private final Map<FoodType, Map<Item, Integer>> itemValues;
     private final Map<FoodType, Map<EntityType<?>, Integer>> entityValues;
@@ -47,12 +52,17 @@ public class S2CSyncFoodMappingsMessage {
         buf.writeCollection(entities, (buf1, entityType) -> buf1.writeResourceLocation(EntityType.getKey(entityType)));
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        if (contextSupplier.get().getEnvironment() == Env.SERVER) return;
-        contextSupplier.get().queue(() -> FoodMappingsManager.INSTANCE.replaceValues(blockValues, itemValues, entityValues, entities));
+    private void apply(NetworkManager.PacketContext context) {
+        if (context.getEnvironment() == Env.SERVER) return;
+        context.queue(() -> FoodMappingsManager.INSTANCE.replaceValues(blockValues, itemValues, entityValues, entities));
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(S2CSyncFoodMappingsMessage.class, S2CSyncFoodMappingsMessage::write, S2CSyncFoodMappingsMessage::new, S2CSyncFoodMappingsMessage::apply);
+    @Override
+    public Type<S2CSyncFoodMappingsMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerS2C(TYPE, STREAM_CODEC, S2CSyncFoodMappingsMessage::apply);
     }
 }

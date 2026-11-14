@@ -3,12 +3,13 @@ package com.github.teamfossilsarcheology.fossil.item;
 import com.github.teamfossilsarcheology.fossil.entity.StoneTablet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -31,9 +32,10 @@ public class StoneTabletItem extends Item {
         }
         Level level = context.getLevel();
         StoneTablet stoneTablet = new StoneTablet(level, placePos, direction);
-        CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag != null) {
-            EntityType.updateCustomEntityTag(level, player, stoneTablet, compoundTag);
+        //PORT(1.21.1): "EntityTag" NBT -> DataComponents.ENTITY_DATA
+        CustomData customData = itemStack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
+        if (!customData.isEmpty()) {
+            EntityType.updateCustomEntityTag(level, player, stoneTablet, customData);
         }
         if (stoneTablet.survives()) {
             if (!level.isClientSide) {

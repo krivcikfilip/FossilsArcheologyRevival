@@ -7,7 +7,6 @@ import com.github.teamfossilsarcheology.fossil.block.custom_blocks.*;
 import com.github.teamfossilsarcheology.fossil.item.*;
 import com.github.teamfossilsarcheology.fossil.material.ModFluids;
 import com.github.teamfossilsarcheology.fossil.util.Version;
-import com.github.teamfossilsarcheology.fossil.world.feature.tree.*;
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.core.block.ArchitecturyLiquidBlock;
 import dev.architectury.registry.CreativeTabRegistry;
@@ -15,6 +14,8 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.util.ColorRGBA;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
@@ -43,7 +44,7 @@ public class ModBlocks {
             () -> new BubbleBlowerBlock(Properties.of().mapColor(MapColor.METAL).strength(3).sound(SoundType.METAL).requiresCorrectToolForDrops())
     );
     public static final RegistrySupplier<Block> ANALYZER = registerBlock("analyzer",
-            () -> new AnalyzerBlock(Properties.copy(BUBBLE_BLOWER.get()).lightLevel(activeBlockEmission(14))));
+            () -> new AnalyzerBlock(Properties.ofLegacyCopy(BUBBLE_BLOWER.get()).lightLevel(activeBlockEmission(14))));
     public static final RegistrySupplier<SifterBlock> SIFTER = registerBlock("sifter",
             () -> new SifterBlock(Properties.of().mapColor(MapColor.WOOD).ignitedByLava().instrument(BASS)
                     .strength(2.5f).sound(SoundType.WOOD)));
@@ -54,10 +55,10 @@ public class ModBlocks {
             Properties.of().mapColor(MapColor.COLOR_BROWN).ignitedByLava().instrument(BASS)
                     .strength(1f).sound(SoundType.WOOD)));
     public static final RegistrySupplier<FeederBlock> FEEDER = registerBlock("feeder",
-            () -> new FeederBlock(Properties.copy(BUBBLE_BLOWER.get())));
+            () -> new FeederBlock(Properties.ofLegacyCopy(BUBBLE_BLOWER.get())));
 
     public static final RegistrySupplier<ArchitecturyLiquidBlock> TAR = blockWithoutBlockItem("tar",
-            () -> TarBlock.get(ModFluids.TAR, Properties.copy(Blocks.WATER).isSuffocating(ModBlocks::always).isViewBlocking(ModBlocks::always)));
+            () -> TarBlock.get(ModFluids.TAR, Properties.ofLegacyCopy(Blocks.WATER).isSuffocating(ModBlocks::always).isViewBlocking(ModBlocks::always)));
 
     public static final RegistrySupplier<AnuStatueBlock> ANU_STATUE = blockWithCustomBlockItem("anu_statue",
             () -> new AnuStatueBlock(Properties.of().noOcclusion().strength(-1, 60000000)),
@@ -66,13 +67,13 @@ public class ModBlocks {
             () -> new AnubiteStatueBlock(Properties.of().noOcclusion().strength(-1, 60000000)),
             block -> AnubiteStatueBlockItem.get(block, new Item.Properties().arch$tab(ModTabs.FA_BLOCK_TAB)));
     public static final RegistrySupplier<AnuBarrierOriginBlock> ANU_BARRIER_ORIGIN = blockWithDebugItem("anu_barrier_origin",
-            () -> new AnuBarrierOriginBlock(Properties.copy(Blocks.BARRIER)));
+            () -> new AnuBarrierOriginBlock(Properties.ofLegacyCopy(Blocks.BARRIER)));
     public static final RegistrySupplier<AnuBarrierFaceBlock> ANU_BARRIER_FACE = blockWithDebugItem("anu_barrier_face",
-            () -> new AnuBarrierFaceBlock(Properties.copy(Blocks.BARRIER)));
+            () -> new AnuBarrierFaceBlock(Properties.ofLegacyCopy(Blocks.BARRIER)));
     public static final RegistrySupplier<AnuPortal> ANU_PORTAL = blockWithDebugItem("anu_portal",
-            () -> new AnuPortal(Properties.copy(Blocks.NETHER_PORTAL)));
+            () -> new AnuPortal(Properties.ofLegacyCopy(Blocks.NETHER_PORTAL)));
     public static final RegistrySupplier<HomePortal> HOME_PORTAL = blockWithDebugItem("home_portal",
-            () -> new HomePortal(Properties.copy(Blocks.NETHER_PORTAL)));
+            () -> new HomePortal(Properties.ofLegacyCopy(Blocks.NETHER_PORTAL)));
     public static final RegistrySupplier<AncientChestBlock> ANCIENT_CHEST = blockWithCustomBlockItem("ancient_chest",
             () -> new AncientChestBlock(Properties.of().mapColor(MapColor.WOOD).instrument(BASS)
                     .noOcclusion().strength(-1, 3600000)),
@@ -81,7 +82,7 @@ public class ModBlocks {
             () -> new SarcophagusBlock(Properties.of().noOcclusion().strength(-1, 60000000)
                     .lightLevel(state -> state.getValue(SarcophagusBlock.LIT) ? 7 : 0)), block -> SarcophagusBlockItem.get(block, new Item.Properties().arch$tab(ModTabs.FA_BLOCK_TAB)));
     public static final RegistrySupplier<Block> FAKE_OBSIDIAN = blockWithDebugItem("fake_obsidian",
-            () -> new FakeObsidian(Properties.copy(Blocks.OBSIDIAN)));
+            () -> new FakeObsidian(Properties.ofLegacyCopy(Blocks.OBSIDIAN)));
     public static final RegistrySupplier<Block> OBSIDIAN_SPIKES = registerBlock("obsidian_spikes",
             () -> new ObsidianSpikesBlock(Properties.of().mapColor(MapColor.COLOR_BLACK).strength(50, 2000).sound(SoundType.STONE)
                     .requiresCorrectToolForDrops().noOcclusion()));
@@ -97,21 +98,21 @@ public class ModBlocks {
     public static final RegistrySupplier<Block> SHELL = registerBlock("shell",
             () -> new ShellBlock(Properties.of().mapColor(MapColor.STONE).instrument(BASEDRUM).strength(1).requiresCorrectToolForDrops().noOcclusion()));
     public static final RegistrySupplier<DropExperienceBlock> AMBER_ORE = registerBlock("amber_ore",
-            () -> new DropExperienceBlock(Properties.of().mapColor(MapColor.STONE).instrument(BASEDRUM).strength(3f).requiresCorrectToolForDrops()));
+            () -> new DropExperienceBlock(ConstantInt.of(0), Properties.of().mapColor(MapColor.STONE).instrument(BASEDRUM).strength(3f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> AMBER_BLOCK = registerBlock("amber_block",
             () -> new Block(Properties.of().mapColor(MapColor.COLOR_YELLOW).instrument(BASEDRUM).strength(3f).requiresCorrectToolForDrops().noOcclusion()
                     .isViewBlocking(ModBlocks::never)));
     public static final RegistrySupplier<Block> AMBER_CHUNK = registerBlock("amber_chunk",
-            () -> new AmberChunkBlock(Properties.copy(AMBER_BLOCK.get()).noOcclusion()));
+            () -> new AmberChunkBlock(Properties.ofLegacyCopy(AMBER_BLOCK.get()).noOcclusion()));
     public static final RegistrySupplier<Block> AMBER_CHUNK_DOMINICAN = registerBlock("amber_chunk_dominican",
-            () -> new AmberChunkBlock(Properties.copy(AMBER_BLOCK.get()).noOcclusion()));
+            () -> new AmberChunkBlock(Properties.ofLegacyCopy(AMBER_BLOCK.get()).noOcclusion()));
     public static final RegistrySupplier<Block> AMBER_CHUNK_MOSQUITO = registerBlock("amber_chunk_mosquito",
-            () -> new AmberChunkBlock(Properties.copy(AMBER_BLOCK.get()).noOcclusion()));
+            () -> new AmberChunkBlock(Properties.ofLegacyCopy(AMBER_BLOCK.get()).noOcclusion()));
 
     public static final RegistrySupplier<IcedDirtBlock> ICED_DIRT = registerBlock("iced_dirt",
             () -> new IcedDirtBlock(Properties.of().mapColor(MapColor.DIRT).strength(1, 4).sound(SoundType.MOSS).randomTicks()));
-    public static final RegistrySupplier<SandBlock> DENSE_SAND = registerBlock("dense_sand",
-            () -> new SandBlock(0x8C765C, Properties.of().mapColor(MapColor.SAND).instrument(SNARE)
+    public static final RegistrySupplier<ColoredFallingBlock> DENSE_SAND = registerBlock("dense_sand",
+            () -> new ColoredFallingBlock(new ColorRGBA(0x8C765C), Properties.of().mapColor(MapColor.SAND).instrument(SNARE)
                     .strength(3f, 15f).sound(SoundType.SAND)));
     public static final RegistrySupplier<SkullBlock> SKULL_BLOCK = registerBlock("skull",
             () -> new SkullBlock(Properties.of().mapColor(MapColor.SAND).instrument(XYLOPHONE).strength(2, 15f)
@@ -120,55 +121,55 @@ public class ModBlocks {
             () -> new SkullBlock(Properties.of().mapColor(MapColor.SAND).instrument(XYLOPHONE).lightLevel(value -> 14).strength(2, 15f)
                     .requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK)));
     public static final RegistrySupplier<Block> SLIME_TRAIL = registerBlock("slime_trail",
-            () -> new RailBlock(Properties.copy(Blocks.SLIME_BLOCK).noCollission()));
+            () -> new RailBlock(Properties.ofLegacyCopy(Blocks.SLIME_BLOCK).noCollission()));
 
     public static final RegistrySupplier<ChainFenceBlock> LARGE_CHAIN_FENCE = registerBlock("large_chain_fence",
-            () -> new ChainFenceBlock(Properties.copy(Blocks.IRON_BARS)));
+            () -> new ChainFenceBlock(Properties.ofLegacyCopy(Blocks.IRON_BARS)));
     public static final RegistrySupplier<ChainFenceBlock> SMALL_CHAIN_FENCE = registerBlock("small_chain_fence",
-            () -> new ChainFenceBlock(Properties.copy(Blocks.IRON_BARS)));
+            () -> new ChainFenceBlock(Properties.ofLegacyCopy(Blocks.IRON_BARS)));
 
     public static final RegistrySupplier<Block> ANCIENT_STONE = registerBlock("ancient_stone",
             () -> new Block(Properties.of().mapColor(MapColor.STONE).instrument(BASEDRUM).strength(1.5f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> ANCIENT_STONE_BRICKS = registerBlock("ancient_stone_bricks",
-            () -> new Block(Properties.copy(ANCIENT_STONE.get())));
+            () -> new Block(Properties.ofLegacyCopy(ANCIENT_STONE.get())));
     public static final RegistrySupplier<SlabBlock> ANCIENT_STONE_SLAB = registerBlock("ancient_stone_slab",
-            () -> new SlabBlock(Properties.copy(ANCIENT_STONE.get())));
+            () -> new SlabBlock(Properties.ofLegacyCopy(ANCIENT_STONE.get())));
     public static final RegistrySupplier<StairBlock> ANCIENT_STONE_STAIRS = registerBlock("ancient_stone_stairs",
-            () -> new StairBlock(ANCIENT_STONE.get().defaultBlockState(), Properties.copy(ANCIENT_STONE.get())));
+            () -> new StairBlock(ANCIENT_STONE.get().defaultBlockState(), Properties.ofLegacyCopy(ANCIENT_STONE.get())));
     public static final RegistrySupplier<WallBlock> ANCIENT_STONE_WALL = registerBlock("ancient_stone_wall",
-            () -> new WallBlock(Properties.copy(ANCIENT_STONE.get())));
+            () -> new WallBlock(Properties.ofLegacyCopy(ANCIENT_STONE.get())));
     public static final RegistrySupplier<Block> ANCIENT_WOOD_PLANKS = registerBlock("ancient_wood_planks",
             () -> new Block(Properties.of().mapColor(MapColor.WOOD).ignitedByLava().instrument(BASS)
                     .strength(2f, 3f).sound(SoundType.WOOD)));
     public static final RegistrySupplier<SlabBlock> ANCIENT_WOOD_SLAB = registerBlock("ancient_wood_slab",
-            () -> new SlabBlock(Properties.copy(ANCIENT_WOOD_PLANKS.get())));
+            () -> new SlabBlock(Properties.ofLegacyCopy(ANCIENT_WOOD_PLANKS.get())));
     public static final RegistrySupplier<RotatedPillarBlock> ANCIENT_WOOD_LOG = registerBlock("ancient_wood_log",
-            () -> FlammableRotatedPillarBlock.get(Properties.copy(ANCIENT_WOOD_PLANKS.get())));
+            () -> FlammableRotatedPillarBlock.get(Properties.ofLegacyCopy(ANCIENT_WOOD_PLANKS.get())));
     public static final RegistrySupplier<StairBlock> ANCIENT_WOOD_STAIRS = registerBlock("ancient_wood_stairs",
-            () -> new StairBlock(ANCIENT_WOOD_PLANKS.get().defaultBlockState(), Properties.copy(ANCIENT_WOOD_PLANKS.get())));
+            () -> new StairBlock(ANCIENT_WOOD_PLANKS.get().defaultBlockState(), Properties.ofLegacyCopy(ANCIENT_WOOD_PLANKS.get())));
     public static final RegistrySupplier<ClearGlassBlock> REINFORCED_GLASS = registerBlock("reinforced_glass",
-            () -> new ClearGlassBlock(Properties.copy(Blocks.GLASS).strength(3f, 25f)));
+            () -> new ClearGlassBlock(Properties.ofLegacyCopy(Blocks.GLASS).strength(3f, 25f)));
     public static final RegistrySupplier<ClearGlassBlock> ANCIENT_GLASS = registerBlock("ancient_glass",
-            () -> new ClearGlassBlock(Properties.copy(Blocks.GLASS).strength(1f)));
+            () -> new ClearGlassBlock(Properties.ofLegacyCopy(Blocks.GLASS).strength(1f)));
 
     //Fossil Blocks
     public static final RegistrySupplier<Block> CALCITE_FOSSIL = registerBlock("fossil_calcite",
-            () -> new FossilBlock(Properties.copy(Blocks.CALCITE).sound(SoundType.CALCITE).strength(1.25f).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.CALCITE).sound(SoundType.CALCITE).strength(1.25f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> DEEPSLATE_FOSSIL = registerBlock("fossil_deepslate",
-            () -> new FossilBlock(Properties.copy(Blocks.DEEPSLATE).sound(SoundType.DEEPSLATE).strength(4, 7).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.DEEPSLATE).sound(SoundType.DEEPSLATE).strength(4, 7).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> DRIPSTONE_FOSSIL = registerBlock("fossil_dripstone",
-            () -> new FossilBlock(Properties.copy(Blocks.DRIPSTONE_BLOCK).sound(SoundType.DRIPSTONE_BLOCK).strength(3, 2).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.DRIPSTONE_BLOCK).sound(SoundType.DRIPSTONE_BLOCK).strength(3, 2).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> RED_SANDSTONE_FOSSIL = registerBlock("fossil_red_sandstone",
-            () -> new FossilBlock(Properties.copy(Blocks.RED_SANDSTONE).strength(1.6f).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.RED_SANDSTONE).strength(1.6f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> SANDSTONE_FOSSIL = registerBlock("fossil_sandstone",
-            () -> new FossilBlock(Properties.copy(Blocks.SANDSTONE).strength(1.6f).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.SANDSTONE).strength(1.6f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> STONE_FOSSIL = registerBlock("fossil_stone",
-            () -> new FossilBlock(Properties.copy(Blocks.STONE).strength(3, 6).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.STONE).strength(3, 6).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> TUFF_FOSSIL = registerBlock("fossil_tuff",
-            () -> new FossilBlock(Properties.copy(Blocks.TUFF).sound(SoundType.TUFF).strength(3, 6).requiresCorrectToolForDrops()));
+            () -> new FossilBlock(Properties.ofLegacyCopy(Blocks.TUFF).sound(SoundType.TUFF).strength(3, 6).requiresCorrectToolForDrops()));
 
     public static final RegistrySupplier<Block> TARRED_DIRT = registerBlock("tarred_dirt",
-            () -> new Block(Properties.copy(Blocks.DIRT)));
+            () -> new Block(Properties.ofLegacyCopy(Blocks.DIRT)));
     public static final RegistrySupplier<Block> PERMAFROST_BLOCK = registerBlock("permafrost_block",
             () -> new PermafrostBlock(Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(BASEDRUM).strength(2f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<Block> VOLCANIC_ASH = registerBlock("volcanic_ash",
@@ -178,19 +179,19 @@ public class ModBlocks {
     public static final RegistrySupplier<Block> VOLCANIC_BRICKS = registerBlock("volcanic_bricks",
             () -> new Block(Properties.of().mapColor(MapColor.COLOR_BLACK).instrument(BASEDRUM).strength(1.5f).requiresCorrectToolForDrops()));
     public static final RegistrySupplier<SlabBlock> VOLCANIC_BRICK_SLAB = registerBlock("volcanic_brick_slab",
-            () -> new SlabBlock(Properties.copy(VOLCANIC_BRICKS.get())));
+            () -> new SlabBlock(Properties.ofLegacyCopy(VOLCANIC_BRICKS.get())));
     public static final RegistrySupplier<StairBlock> VOLCANIC_BRICK_STAIRS = registerBlock("volcanic_brick_stairs",
-            () -> new StairBlock(VOLCANIC_BRICKS.get().defaultBlockState(), Properties.copy(VOLCANIC_BRICKS.get())));
+            () -> new StairBlock(VOLCANIC_BRICKS.get().defaultBlockState(), Properties.ofLegacyCopy(VOLCANIC_BRICKS.get())));
     public static final RegistrySupplier<WallBlock> VOLCANIC_BRICK_WALL = registerBlock("volcanic_brick_wall",
-            () -> new WallBlock(Properties.copy(VOLCANIC_BRICKS.get())));
+            () -> new WallBlock(Properties.ofLegacyCopy(VOLCANIC_BRICKS.get())));
     public static final RegistrySupplier<Block> VOLCANIC_TILES = registerBlock("volcanic_tiles",
-            () -> new Block(Properties.copy(VOLCANIC_BRICKS.get())));
+            () -> new Block(Properties.ofLegacyCopy(VOLCANIC_BRICKS.get())));
     public static final RegistrySupplier<SlabBlock> VOLCANIC_TILE_SLAB = registerBlock("volcanic_tile_slab",
-            () -> new SlabBlock(Properties.copy(VOLCANIC_TILES.get())));
+            () -> new SlabBlock(Properties.ofLegacyCopy(VOLCANIC_TILES.get())));
     public static final RegistrySupplier<StairBlock> VOLCANIC_TILE_STAIRS = registerBlock("volcanic_tile_stairs",
-            () -> new StairBlock(VOLCANIC_TILES.get().defaultBlockState(), Properties.copy(VOLCANIC_TILES.get())));
+            () -> new StairBlock(VOLCANIC_TILES.get().defaultBlockState(), Properties.ofLegacyCopy(VOLCANIC_TILES.get())));
     public static final RegistrySupplier<WallBlock> VOLCANIC_TILE_WALL = registerBlock("volcanic_tile_wall",
-            () -> new WallBlock(Properties.copy(VOLCANIC_TILES.get())));
+            () -> new WallBlock(Properties.ofLegacyCopy(VOLCANIC_TILES.get())));
     public static final RegistrySupplier<Block> CALAMITES_PLANKS = planks(ModWoodTypes.CALAMITES);
     public static final RegistrySupplier<StairBlock> CALAMITES_STAIRS = stairs("calamites", CALAMITES_PLANKS);
     public static final RegistrySupplier<SlabBlock> CALAMITES_SLAB = slab(ModWoodTypes.CALAMITES);
@@ -204,9 +205,9 @@ public class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> CALAMITES_WOOD = wood(ModWoodTypes.CALAMITES, false);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_CALAMITES_LOG = log(ModWoodTypes.CALAMITES, true);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_CALAMITES_WOOD = wood(ModWoodTypes.CALAMITES, true);
-    public static final RegistrySupplier<LeavesBlock> CALAMITES_LEAVES = registerBlock("calamites_leaves", () -> FossilLeavesBlock.get(Properties.copy(Blocks.OAK_LEAVES)));
+    public static final RegistrySupplier<LeavesBlock> CALAMITES_LEAVES = registerBlock("calamites_leaves", () -> FossilLeavesBlock.get(Properties.ofLegacyCopy(Blocks.OAK_LEAVES)));
     public static final RegistrySupplier<Block> CALAMITES_SAPLING = registerBlock("calamites_sapling",
-            () -> new SaplingBlock(new CalamitesTreeGrower(), Properties.copy(Blocks.OAK_SAPLING)));
+            () -> new SaplingBlock(ModTreeGrowers.CALAMITES, Properties.ofLegacyCopy(Blocks.OAK_SAPLING)));
     public static final RegistrySupplier<Block> CORDAITES_PLANKS = planks(ModWoodTypes.CORDAITES);
     public static final RegistrySupplier<StairBlock> CORDAITES_STAIRS = stairs("cordaites", CORDAITES_PLANKS);
     public static final RegistrySupplier<SlabBlock> CORDAITES_SLAB = slab(ModWoodTypes.CORDAITES);
@@ -220,9 +221,9 @@ public class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> CORDAITES_WOOD = wood(ModWoodTypes.CORDAITES, false);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_CORDAITES_LOG = log(ModWoodTypes.CORDAITES, true);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_CORDAITES_WOOD = wood(ModWoodTypes.CORDAITES, true);
-    public static final RegistrySupplier<LeavesBlock> CORDAITES_LEAVES = registerBlock("cordaites_leaves", () -> FossilLeavesBlock.get(Properties.copy(Blocks.OAK_LEAVES)));
+    public static final RegistrySupplier<LeavesBlock> CORDAITES_LEAVES = registerBlock("cordaites_leaves", () -> FossilLeavesBlock.get(Properties.ofLegacyCopy(Blocks.OAK_LEAVES)));
     public static final RegistrySupplier<SaplingBlock> CORDAITES_SAPLING = registerBlock("cordaites_sapling",
-            () -> new SaplingBlock(new CordaitesTreeGrower(), Properties.copy(Blocks.OAK_SAPLING)));
+            () -> new SaplingBlock(ModTreeGrowers.CORDAITES, Properties.ofLegacyCopy(Blocks.OAK_SAPLING)));
 
     public static final RegistrySupplier<Block> MUTANT_TREE_PLANKS = planks(ModWoodTypes.MUTANT_TREE);
     public static final RegistrySupplier<StairBlock> MUTANT_TREE_STAIRS = stairs("mutant_tree", MUTANT_TREE_PLANKS);
@@ -237,9 +238,9 @@ public class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> MUTANT_TREE_WOOD = wood(ModWoodTypes.MUTANT_TREE, false);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_MUTANT_TREE_LOG = log(ModWoodTypes.MUTANT_TREE, true);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_MUTANT_TREE_WOOD = wood(ModWoodTypes.MUTANT_TREE, true);
-    public static final RegistrySupplier<LeavesBlock> MUTANT_TREE_LEAVES = registerBlock("mutant_tree_leaves", () -> FossilLeavesBlock.get(Properties.copy(Blocks.OAK_LEAVES)));
+    public static final RegistrySupplier<LeavesBlock> MUTANT_TREE_LEAVES = registerBlock("mutant_tree_leaves", () -> FossilLeavesBlock.get(Properties.ofLegacyCopy(Blocks.OAK_LEAVES)));
     public static final RegistrySupplier<Block> MUTANT_TREE_SAPLING = registerBlock("mutant_tree_sapling",
-            () -> new SaplingBlock(new MutantTreeGrower(), Properties.copy(Blocks.OAK_SAPLING)));
+            () -> new SaplingBlock(ModTreeGrowers.MUTANT_TREE, Properties.ofLegacyCopy(Blocks.OAK_SAPLING)));
     public static final RegistrySupplier<Block> MUTANT_TREE_TUMOR = blockWithDebugItem("mutant_tree_tumor",
             () -> new MutantTreeTumor(Properties.of().ignitedByLava().pushReaction(PushReaction.DESTROY)
                     .noOcclusion().dynamicShape().sound(SoundType.GRASS)));
@@ -262,9 +263,9 @@ public class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_PALM_LOG = log(ModWoodTypes.PALM, true);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_PALM_WOOD = wood(ModWoodTypes.PALM, true);
     public static final RegistrySupplier<LeavesBlock> PALM_LEAVES = registerBlock("palm_leaves",
-            () -> FossilLeavesBlock.get(Properties.copy(Blocks.OAK_LEAVES)));
+            () -> FossilLeavesBlock.get(Properties.ofLegacyCopy(Blocks.OAK_LEAVES)));
     public static final RegistrySupplier<Block> PALM_SAPLING = registerBlock("palm_sapling",
-            () -> new SaplingBlock(new PalmTreeGrower(), Properties.copy(Blocks.OAK_SAPLING)));
+            () -> new SaplingBlock(ModTreeGrowers.PALM, Properties.ofLegacyCopy(Blocks.OAK_SAPLING)));
 
     public static final RegistrySupplier<Block> SIGILLARIA_PLANKS = planks(ModWoodTypes.SIGILLARIA);
     public static final RegistrySupplier<StairBlock> SIGILLARIA_STAIRS = stairs("sigillaria", SIGILLARIA_PLANKS);
@@ -279,9 +280,9 @@ public class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> SIGILLARIA_WOOD = wood(ModWoodTypes.SIGILLARIA, false);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_SIGILLARIA_LOG = log(ModWoodTypes.SIGILLARIA, true);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_SIGILLARIA_WOOD = wood(ModWoodTypes.SIGILLARIA, true);
-    public static final RegistrySupplier<LeavesBlock> SIGILLARIA_LEAVES = registerBlock("sigillaria_leaves", () -> FossilLeavesBlock.get(Properties.copy(Blocks.OAK_LEAVES)));
+    public static final RegistrySupplier<LeavesBlock> SIGILLARIA_LEAVES = registerBlock("sigillaria_leaves", () -> FossilLeavesBlock.get(Properties.ofLegacyCopy(Blocks.OAK_LEAVES)));
     public static final RegistrySupplier<Block> SIGILLARIA_SAPLING = registerBlock("sigillaria_sapling",
-            () -> new SaplingBlock(new SigillariaTreeGrower(), Properties.copy(Blocks.OAK_SAPLING)));
+            () -> new SaplingBlock(ModTreeGrowers.SIGILLARIA, Properties.ofLegacyCopy(Blocks.OAK_SAPLING)));
 
     public static final RegistrySupplier<Block> TEMPSKYA_PLANKS = planks(ModWoodTypes.TEMPSKYA);
     public static final RegistrySupplier<StairBlock> TEMPSKYA_STAIRS = stairs("tempskya", TEMPSKYA_PLANKS);
@@ -297,7 +298,7 @@ public class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_TEMPSKYA_LOG = log(ModWoodTypes.TEMPSKYA, true);
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_TEMPSKYA_WOOD = wood(ModWoodTypes.TEMPSKYA, true);
     public static final RegistrySupplier<Block> TEMPSKYA_SAPLING = registerBlock("tempskya_sapling",
-            () -> new SaplingBlock(new TempskyaTreeGrower(), Properties.copy(Blocks.OAK_SAPLING)));
+            () -> new SaplingBlock(ModTreeGrowers.TEMPSKYA, Properties.ofLegacyCopy(Blocks.OAK_SAPLING)));
     public static final RegistrySupplier<Block> TEMPSKYA_TOP = registerBlock("tempskya_top",
             () -> new TempskyaTopBlock(Properties.of().mapColor(MapColor.PLANT).ignitedByLava().pushReaction(PushReaction.DESTROY).noOcclusion().sound(SoundType.GRASS)));
     public static final RegistrySupplier<Block> TEMPSKYA_LEAF = registerBlock("tempskya_leaf",
@@ -353,7 +354,7 @@ public class ModBlocks {
     }
 
     private static RegistrySupplier<StairBlock> stairs(String name, RegistrySupplier<Block> base) {
-        return registerBlock(name + "_stairs", () -> new StairBlock(base.get().defaultBlockState(), BlockBehaviour.Properties.copy(base.get())));
+        return registerBlock(name + "_stairs", () -> new StairBlock(base.get().defaultBlockState(), BlockBehaviour.Properties.ofLegacyCopy(base.get())));
     }
 
     private static RegistrySupplier<SlabBlock> slab(ModWoodTypes.WoodInfo woodInfo) {
@@ -365,31 +366,31 @@ public class ModBlocks {
     }
 
     private static RegistrySupplier<FenceGateBlock> fenceGate(ModWoodTypes.WoodInfo woodInfo) {
-        return registerBlock(woodInfo.name() + "_fence_gate", () -> new FenceGateBlock(woodProp(woodInfo), woodInfo.woodType()));
+        return registerBlock(woodInfo.name() + "_fence_gate", () -> new FenceGateBlock(woodInfo.woodType(), woodProp(woodInfo)));
     }
 
     private static RegistrySupplier<DoorBlock> door(ModWoodTypes.WoodInfo woodInfo) {
-        return registerBlock(woodInfo.name() + "_door", () -> new DoorBlock(woodProp(woodInfo).strength(3).noOcclusion(), woodInfo.setType()));
+        return registerBlock(woodInfo.name() + "_door", () -> new DoorBlock(woodInfo.setType(), woodProp(woodInfo).strength(3).noOcclusion()));
     }
 
     private static RegistrySupplier<TrapDoorBlock> trapDoor(ModWoodTypes.WoodInfo woodInfo) {
-        return registerBlock(woodInfo.name() + "_trapdoor", () -> new TrapDoorBlock(woodProp(woodInfo)
-                .strength(3).noOcclusion().isValidSpawn(ModBlocks::never), woodInfo.setType()));
+        return registerBlock(woodInfo.name() + "_trapdoor", () -> new TrapDoorBlock(woodInfo.setType(), woodProp(woodInfo)
+                .strength(3).noOcclusion().isValidSpawn(ModBlocks::never)));
     }
 
     private static RegistrySupplier<ButtonBlock> woodenButton(ModWoodTypes.WoodInfo woodInfo) {
-        return registerBlock(woodInfo.name() + "_button", () -> new ButtonBlock(Properties.of().pushReaction(PushReaction.DESTROY)
-                .strength(0.5f).noCollission(), woodInfo.setType(), 30, true));
+        return registerBlock(woodInfo.name() + "_button", () -> new ButtonBlock(woodInfo.setType(), 30, Properties.of().pushReaction(PushReaction.DESTROY)
+                .strength(0.5f).noCollission()));
     }
 
     private static RegistrySupplier<ButtonBlock> stoneButton(ModWoodTypes.WoodInfo woodInfo) {
-        return registerBlock(woodInfo.name() + "_button", () -> new ButtonBlock(Properties.of().pushReaction(PushReaction.DESTROY)
-                .strength(0.5f).noCollission(), woodInfo.setType(), 30, true));
+        return registerBlock(woodInfo.name() + "_button", () -> new ButtonBlock(woodInfo.setType(), 30, Properties.of().pushReaction(PushReaction.DESTROY)
+                .strength(0.5f).noCollission()));
     }
 
     private static RegistrySupplier<PressurePlateBlock> pressurePlate(ModWoodTypes.WoodInfo woodInfo) {
-        return registerBlock(woodInfo.name() + "_pressure_plate", () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING,
-                woodProp(woodInfo).strength(0.5f).noCollission(), woodInfo.setType()));
+        return registerBlock(woodInfo.name() + "_pressure_plate", () -> new PressurePlateBlock(woodInfo.setType(),
+                woodProp(woodInfo).strength(0.5f).noCollission())); //PORT(1.21.1): sensitivity (EVERYTHING) is part of the BlockSetType
     }
 
     private static RegistrySupplier<RotatedPillarBlock> log(ModWoodTypes.WoodInfo woodInfo, boolean stripped) {

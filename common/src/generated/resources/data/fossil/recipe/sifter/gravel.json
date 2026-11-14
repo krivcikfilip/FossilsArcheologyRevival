@@ -1,0 +1,69 @@
+{
+  "type": "fossil:sifter",
+  "input": {
+    "item": "minecraft:gravel"
+  },
+  "outputs": [
+    {
+      "id": "fossil:amber_chunk_dominican",
+      "weight": 1.0
+    },
+    {
+      "id": "minecraft:beetroot_seeds",
+      "weight": 3.0
+    },
+    {
+      "id": "minecraft:bone_meal",
+      "weight": 20.0
+    },
+    {
+      "id": "minecraft:carrot",
+      "weight": 10.0
+    },
+    {
+      "id": "minecraft:clay_ball",
+      "weight": 15.0
+    },
+    {
+      "id": "minecraft:cobblestone",
+      "weight": 5.0
+    },
+    {
+      "id": "minecraft:flint",
+      "weight": 5.0
+    },
+    {
+      "id": "fossil:fossil_bio",
+      "weight": 2.0
+    },
+    {
+      "id": "fossil:fossil_plant",
+      "weight": 2.0
+    },
+    {
+      "id": "minecraft:gold_nugget",
+      "weight": 4.0
+    },
+    {
+      "id": "minecraft:iron_nugget",
+      "weight": 4.0
+    },
+    {
+      "id": "minecraft:melon_seeds",
+      "weight": 2.0
+    },
+    {
+      "id": "minecraft:potato",
+      "weight": 15.0
+    },
+    {
+      "id": "fossil:pottery_shard",
+      "weight": 5.0
+    },
+    {
+      "id": "minecraft:pumpkin_seeds",
+      "weight": 2.0
+    }
+  ],
+  "total": 100.0
+}

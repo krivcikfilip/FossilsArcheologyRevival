@@ -1,0 +1,13 @@
+{
+  "type": "fossil:analyzer",
+  "input": {
+    "item": "minecraft:glow_ink_sac"
+  },
+  "outputs": [
+    {
+      "id": "fossil:glow_squid_dna",
+      "weight": 40.0
+    }
+  ],
+  "total": 100.0
+}

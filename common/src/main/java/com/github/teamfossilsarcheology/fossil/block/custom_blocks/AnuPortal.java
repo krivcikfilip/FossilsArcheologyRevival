@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import net.minecraft.world.level.LevelReader;
 import com.github.teamfossilsarcheology.fossil.world.dimension.ModDimensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,14 +23,15 @@ public class AnuPortal extends Block {
 
     @Override
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!entity.isPassenger() && !entity.isVehicle() && entity.canChangeDimensions()) {
+        if (!entity.isPassenger() && !entity.isVehicle() && entity.canUsePortal(false)) { //PORT(1.21.1): canChangeDimensions() -> canUsePortal(boolean)
             if (entity.isOnPortalCooldown()) {
                 entity.setPortalCooldown();
                 return;
             }
-            if (!entity.level().isClientSide && !pos.equals(entity.portalEntrancePos)) {
+            //PORT(1.21.1): Entity#portalEntrancePos was removed with the 1.21 portal rework (it was only used by vanilla nether portals)
+            /*if (!entity.level().isClientSide && !pos.equals(entity.portalEntrancePos)) {
                 entity.portalEntrancePos = pos.immutable();
-            }
+            }*/
             Level entityLevel = entity.level();
             MinecraftServer server = entityLevel.getServer();
             if (server != null) {
@@ -64,7 +66,7 @@ public class AnuPortal extends Block {
     }
 
     @Override
-    public @NotNull ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public @NotNull ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         return ItemStack.EMPTY;
     }
 }

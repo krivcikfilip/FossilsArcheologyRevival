@@ -1,20 +1,25 @@
 package com.github.teamfossilsarcheology.fossil.network;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.entity.animation.AnimationCategory;
 import com.github.teamfossilsarcheology.fossil.entity.animation.AnimationLogic;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricAnimatable;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 
-import java.util.function.Supplier;
 
 /**
  * Sync currently active animation from server to clients
  */
-public class S2CSyncActiveAnimationMessage {
+public class S2CSyncActiveAnimationMessage implements CustomPacketPayload {
+    public static final Type<S2CSyncActiveAnimationMessage> TYPE = new Type<>(FossilMod.location("s2c_sync_active_animation"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, S2CSyncActiveAnimationMessage> STREAM_CODEC = StreamCodec.ofMember(S2CSyncActiveAnimationMessage::write, S2CSyncActiveAnimationMessage::new);
+
     private final int entityId;
     private final String controller;
     private final String animationName;
@@ -54,13 +59,13 @@ public class S2CSyncActiveAnimationMessage {
         buf.writeBoolean(loop);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        if (contextSupplier.get().getEnvironment() == Env.SERVER) return;
-        contextSupplier.get().queue(() -> {
-            if (contextSupplier.get().getPlayer() == null) {//Can happen on world load
+    private void apply(NetworkManager.PacketContext context) {
+        if (context.getEnvironment() == Env.SERVER) return;
+        context.queue(() -> {
+            if (context.getPlayer() == null) {//Can happen on world load
                 return;
             }
-            Entity entity = contextSupplier.get().getPlayer().level().getEntity(entityId);
+            Entity entity = context.getPlayer().level().getEntity(entityId);
             if (entity instanceof PrehistoricAnimatable<?> prehistoric) {
                 if (prehistoric.getAllAnimations().containsKey(animationName)) {
                     double endTick = entity.level().getGameTime() + prehistoric.getAnimation(animationName).animation.length();
@@ -72,7 +77,12 @@ public class S2CSyncActiveAnimationMessage {
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(S2CSyncActiveAnimationMessage.class, S2CSyncActiveAnimationMessage::write, S2CSyncActiveAnimationMessage::new, S2CSyncActiveAnimationMessage::apply);
+    @Override
+    public Type<S2CSyncActiveAnimationMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerS2C(TYPE, STREAM_CODEC, S2CSyncActiveAnimationMessage::apply);
     }
 }

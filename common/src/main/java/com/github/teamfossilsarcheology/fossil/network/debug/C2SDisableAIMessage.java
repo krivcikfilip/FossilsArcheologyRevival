@@ -1,15 +1,23 @@
 package com.github.teamfossilsarcheology.fossil.network.debug;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.network.PayloadChannel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricDebug;
 import com.github.teamfossilsarcheology.fossil.util.Version;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 
-import java.util.function.Supplier;
 
-public class C2SDisableAIMessage {
+public class C2SDisableAIMessage implements PayloadChannel.BidirectionalPayload {
+    //PORT(1.21.1): sent in both directions -> two payload ids (NeoForge forbids registering one id for both directions)
+    public static final Type<C2SDisableAIMessage> TYPE_S2C = new Type<>(FossilMod.location("s2c_disable_ai"));
+    public static final Type<C2SDisableAIMessage> TYPE_C2S = new Type<>(FossilMod.location("c2s_disable_ai"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SDisableAIMessage> STREAM_CODEC_S2C = StreamCodec.ofMember(C2SDisableAIMessage::write, buf -> new C2SDisableAIMessage(buf).withDirection(true));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SDisableAIMessage> STREAM_CODEC_C2S = StreamCodec.ofMember(C2SDisableAIMessage::write, buf -> new C2SDisableAIMessage(buf).withDirection(false));
+    private boolean clientbound;
     private final int id;
     private final boolean disableAI;
     private final byte type;
@@ -30,16 +38,37 @@ public class C2SDisableAIMessage {
         buf.writeByte(type);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        contextSupplier.get().queue(() -> {
-            Entity entity = contextSupplier.get().getPlayer().level().getEntity(id);
+    private void apply(NetworkManager.PacketContext context) {
+        context.queue(() -> {
+            Entity entity = context.getPlayer().level().getEntity(id);
             if (entity instanceof PrehistoricDebug prehistoric && Version.debugEnabled()) {
                 prehistoric.disableCustomAI(type, disableAI);
             }
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(C2SDisableAIMessage.class, C2SDisableAIMessage::write, C2SDisableAIMessage::new, C2SDisableAIMessage::apply);
+    private C2SDisableAIMessage withDirection(boolean clientbound) {
+        C2SDisableAIMessage message = new C2SDisableAIMessage(id, disableAI, type);
+        message.clientbound = clientbound;
+        return message;
+    }
+
+    @Override
+    public PayloadChannel.BidirectionalPayload toClientbound() {
+        return withDirection(true);
+    }
+
+    @Override
+    public PayloadChannel.BidirectionalPayload toServerbound() {
+        return withDirection(false);
+    }
+
+    @Override
+    public Type<C2SDisableAIMessage> type() {
+        return clientbound ? TYPE_S2C : TYPE_C2S;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerBidirectional(TYPE_S2C, STREAM_CODEC_S2C, TYPE_C2S, STREAM_CODEC_C2S, C2SDisableAIMessage::apply);
     }
 }

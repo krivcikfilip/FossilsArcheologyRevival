@@ -5,6 +5,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -71,12 +72,14 @@ public class ModItemTags {
     public static final TagKey<Item> EMBRYO_DNA = TagKey.create(key, FossilMod.location("embryo_dna"));
     
     //Fabric
-    public static final TagKey<Item> C_FOODS = TagKey.create(key, new ResourceLocation("c", "foods"));
-    public static final TagKey<Item> C_GLASS_BLOCKS = TagKey.create(key, new ResourceLocation("c", "glass_blocks"));
-    public static final TagKey<Item> C_SWORDS = TagKey.create(key, new ResourceLocation("c", "swords"));
-    public static final TagKey<Item> C_PICKAXES = TagKey.create(key, new ResourceLocation("c", "pickaxes"));
-    public static final TagKey<Item> C_AXES = TagKey.create(key, new ResourceLocation("c", "axes"));
-    public static final TagKey<Item> C_SHOVELS = TagKey.create(key, new ResourceLocation("c", "shovels"));
-    public static final TagKey<Item> C_HOES = TagKey.create(key, new ResourceLocation("c", "hoes"));
-    public static final TagKey<Item> C_WATER_BUCKETS = TagKey.create(key, new ResourceLocation("c", "water_buckets"));
+    public static final TagKey<Item> C_FOODS = TagKey.create(key, ResourceLocation.fromNamespaceAndPath("c", "foods"));
+    public static final TagKey<Item> C_GLASS_BLOCKS = TagKey.create(key, ResourceLocation.fromNamespaceAndPath("c", "glass_blocks"));
+    //PORT(1.21.1): the c:swords/... tool tags don't exist in the 1.21 conventions, tools use the vanilla tags (field names kept)
+    public static final TagKey<Item> C_SWORDS = ItemTags.SWORDS;
+    public static final TagKey<Item> C_PICKAXES = ItemTags.PICKAXES;
+    public static final TagKey<Item> C_AXES = ItemTags.AXES;
+    public static final TagKey<Item> C_SHOVELS = ItemTags.SHOVELS;
+    public static final TagKey<Item> C_HOES = ItemTags.HOES;
+    //PORT(1.21.1): c:water_buckets -> c:buckets/entity_water (NeoForge Tags.Items.BUCKETS_ENTITY_WATER)
+    public static final TagKey<Item> C_WATER_BUCKETS = TagKey.create(key, ResourceLocation.fromNamespaceAndPath("c", "buckets/entity_water"));
 }

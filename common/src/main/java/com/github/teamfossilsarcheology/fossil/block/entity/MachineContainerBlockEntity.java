@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.entity;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -27,9 +28,9 @@ public abstract class MachineContainerBlockEntity extends BaseContainerBlockEnti
     public abstract ContainerData getDataAccess();
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        ContainerHelper.loadAllItems(tag, getItems());
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        ContainerHelper.loadAllItems(tag, getItems(), registries);
         this.litTime = tag.getShort("LitTime");
         this.litDuration = tag.getShort("LitDuration");
         this.cookingProgress = tag.getShort("CookingProgress");
@@ -37,20 +38,33 @@ public abstract class MachineContainerBlockEntity extends BaseContainerBlockEnti
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putShort("LitTime", (short) litTime);
         tag.putShort("LitDuration", (short) litDuration);
         tag.putShort("CookingProgress", (short) cookingProgress);
         tag.putShort("CookingTotalTime", (short) cookingTotalTime);
-        ContainerHelper.saveAllItems(tag, getItems());
+        ContainerHelper.saveAllItems(tag, getItems(), registries);
     }
 
     protected abstract boolean canProcess();
 
     protected abstract void createItem();
 
+    @Override
     protected abstract @NotNull NonNullList<ItemStack> getItems();
+
+    /**
+     * PORT(1.21.1): BaseContainerBlockEntity#setItems is abstract since 1.20.5 (used by the container component of
+     * dropped/picked block items). The item lists of our machines are fixed size, so the content is copied.
+     */
+    @Override
+    protected void setItems(@NotNull NonNullList<ItemStack> items) {
+        NonNullList<ItemStack> own = getItems();
+        for (int i = 0; i < own.size(); i++) {
+            own.set(i, i < items.size() ? items.get(i) : ItemStack.EMPTY);
+        }
+    }
 
     @Override
     public int getContainerSize() {

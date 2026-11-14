@@ -43,7 +43,7 @@ public class TarFluid {
             int k = level.getEntities(ModEntities.TAR_SLIME.get(), new AABB(pos, pos.offset(1, 1, 1)).inflate(spawnRange), Entity::isAlive).size();
             if (k < 6) {
                 TarSlime slime = ModEntities.TAR_SLIME.get().create(level);
-                slime.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null, null);
+                slime.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null);
                 slime.moveTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0, 0);
                 level.addFreshEntity(slime);
             }

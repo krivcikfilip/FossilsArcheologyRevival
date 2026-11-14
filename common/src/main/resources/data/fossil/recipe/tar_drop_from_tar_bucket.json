@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "fossil:tar_bucket"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "id": "fossil:tar_drop"
+  }
+}

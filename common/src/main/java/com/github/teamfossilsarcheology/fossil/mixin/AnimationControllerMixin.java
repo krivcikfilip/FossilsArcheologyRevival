@@ -9,14 +9,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
-import software.bernie.geckolib.core.animatable.model.CoreGeoModel;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationProcessor;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.keyframe.BoneAnimationQueue;
-import software.bernie.geckolib.core.state.BoneSnapshot;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationProcessor;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.keyframe.BoneAnimationQueue;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.model.GeoModel;
 
 import java.util.Map;
 
@@ -40,8 +40,10 @@ public class AnimationControllerMixin<T extends GeoAnimatable> {
     @Shadow
     protected AnimationProcessor.QueuedAnimation currentAnimation;
 
-    @Inject(method = "process", remap = false, at = @At(value = "INVOKE", target = "Lsoftware/bernie/geckolib/core/molang/MolangParser;setValue(Ljava/lang/String;Ljava/util/function/DoubleSupplier;)V"))
-    public void tickAdditiveAnimations(CoreGeoModel<T> model, AnimationState<T> state, Map<String, CoreGeoBone> bones,
+    //PORT(1.21.1): GeckoLib 4.x 1.21.1: core.* packages flattened, CoreGeoModel/CoreGeoBone -> GeoModel/GeoBone,
+    //MolangParser.INSTANCE.setValue -> static MathParser.setVariable (same call site: TRANSITIONING branch of process)
+    @Inject(method = "process", remap = false, at = @At(value = "INVOKE", target = "Lsoftware/bernie/geckolib/loading/math/MathParser;setVariable(Ljava/lang/String;Ljava/util/function/DoubleSupplier;)V"))
+    public void tickAdditiveAnimations(GeoModel<T> model, AnimationState<T> state, Map<String, GeoBone> bones,
                                        Map<String, BoneSnapshot> snapshots, double seekTime, boolean crashWhenCantFindBone, CallbackInfo ci,
                                        @Local(name = "adjustedTick") double adjustedTick) {
         if (state.getAnimatable() instanceof PrehistoricAnimatable<?>) {

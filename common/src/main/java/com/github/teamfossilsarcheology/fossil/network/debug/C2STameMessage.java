@@ -1,16 +1,22 @@
 package com.github.teamfossilsarcheology.fossil.network.debug;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.network.PayloadChannel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.util.Version;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
-import java.util.function.Supplier;
 
-public class C2STameMessage {
+public class C2STameMessage implements CustomPacketPayload {
+    public static final Type<C2STameMessage> TYPE = new Type<>(FossilMod.location("c2s_tame"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2STameMessage> STREAM_CODEC = StreamCodec.ofMember(C2STameMessage::write, C2STameMessage::new);
+
     private final int id;
 
     private C2STameMessage(FriendlyByteBuf buf) {
@@ -25,20 +31,25 @@ public class C2STameMessage {
         buf.writeInt(id);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        contextSupplier.get().queue(() -> {
+    private void apply(NetworkManager.PacketContext context) {
+        context.queue(() -> {
             if (Version.debugEnabled()) {
-                Entity entity = contextSupplier.get().getPlayer().level().getEntity(id);
+                Entity entity = context.getPlayer().level().getEntity(id);
                 if (entity instanceof TamableAnimal animal) {
-                    animal.tame(contextSupplier.get().getPlayer());
+                    animal.tame(context.getPlayer());
                 } else if (entity instanceof AbstractHorse horse) {
-                    horse.tameWithName(contextSupplier.get().getPlayer());
+                    horse.tameWithName(context.getPlayer());
                 }
             }
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(C2STameMessage.class, C2STameMessage::write, C2STameMessage::new, C2STameMessage::apply);
+    @Override
+    public Type<C2STameMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerC2S(TYPE, STREAM_CODEC, C2STameMessage::apply);
     }
 }

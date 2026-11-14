@@ -34,10 +34,13 @@ public class ModVillagers {
     public static void register() {
         POI_TYPES.register();
         PROFESSIONS.register();
-        LifecycleEvent.SETUP.register(() -> {
+        //PORT(1.21.1): NeoForge registers the block states of modded PoiTypes itself (NeoForgeRegistryCallbacks.PoiTypeCallbacks,
+        //PoiTypes.TYPE_BY_STATE is that map). Calling PoiTypes.registerBlockStates again throws "defined in more than one PoI type".
+        //Only needed on Fabric, which is no longer built.
+        /*LifecycleEvent.SETUP.register(() -> {
             registerBlockStates(ARCHEOLOGIST_POI);
             registerBlockStates(PALEONTOLOGIST_POI);
-        });
+        });*/
     }
 
     private static void registerBlockStates(RegistrySupplier<PoiType> supplier) {

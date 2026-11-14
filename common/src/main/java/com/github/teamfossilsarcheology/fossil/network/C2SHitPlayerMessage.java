@@ -1,19 +1,24 @@
 package com.github.teamfossilsarcheology.fossil.network;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.Prehistoric;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.function.Supplier;
 
 /**
  * Cause a player hit on the server side. Will only trigger for the player that sent the message
  */
-public class C2SHitPlayerMessage {
+public class C2SHitPlayerMessage implements CustomPacketPayload {
+    public static final Type<C2SHitPlayerMessage> TYPE = new Type<>(FossilMod.location("c2s_hit_player"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SHitPlayerMessage> STREAM_CODEC = StreamCodec.ofMember(C2SHitPlayerMessage::write, C2SHitPlayerMessage::new);
+
     private final int entityId;
     private final int targetId;
 
@@ -32,10 +37,10 @@ public class C2SHitPlayerMessage {
         buf.writeInt(targetId);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        if (contextSupplier.get().getEnvironment() == Env.CLIENT) return;
-        contextSupplier.get().queue(() -> {
-            Player player = contextSupplier.get().getPlayer();
+    private void apply(NetworkManager.PacketContext context) {
+        if (context.getEnvironment() == Env.CLIENT) return;
+        context.queue(() -> {
+            Player player = context.getPlayer();
             Entity entity = player.level().getEntity(entityId);
             if (entity instanceof Prehistoric prehistoric && player.getId() == targetId) {
                 prehistoric.attackTarget(player);
@@ -43,7 +48,12 @@ public class C2SHitPlayerMessage {
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(C2SHitPlayerMessage.class, C2SHitPlayerMessage::write, C2SHitPlayerMessage::new, C2SHitPlayerMessage::apply);
+    @Override
+    public Type<C2SHitPlayerMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerC2S(TYPE, STREAM_CODEC, C2SHitPlayerMessage::apply);
     }
 }

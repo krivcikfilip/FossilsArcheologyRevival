@@ -1,7 +1,10 @@
 package com.github.teamfossilsarcheology.fossil.network;
 
+import com.github.teamfossilsarcheology.fossil.FossilMod;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricFlying;
-import dev.architectury.networking.NetworkChannel;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,9 +12,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.function.Supplier;
 
-public class C2SRiderForceFlyingMessage {
+public class C2SRiderForceFlyingMessage implements CustomPacketPayload {
+    public static final Type<C2SRiderForceFlyingMessage> TYPE = new Type<>(FossilMod.location("c2s_rider_force_flying"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SRiderForceFlyingMessage> STREAM_CODEC = StreamCodec.ofMember(C2SRiderForceFlyingMessage::write, C2SRiderForceFlyingMessage::new);
+
     private static final Component FLYING_DISABLED = Component.translatable("entity.fossil.flying.disabled");
     private final int entityId;
     private final boolean flying;
@@ -31,10 +36,10 @@ public class C2SRiderForceFlyingMessage {
         buf.writeBoolean(flying);
     }
 
-    private void apply(Supplier<NetworkManager.PacketContext> contextSupplier) {
-        if (contextSupplier.get().getEnvironment() == Env.CLIENT) return;
-        contextSupplier.get().queue(() -> {
-            Player player = contextSupplier.get().getPlayer();
+    private void apply(NetworkManager.PacketContext context) {
+        if (context.getEnvironment() == Env.CLIENT) return;
+        context.queue(() -> {
+            Player player = context.getPlayer();
             Entity entity = player.level().getEntity(entityId);
             if (player.getServer() != null && !player.getServer().isFlightAllowed()) {
                 player.displayClientMessage(FLYING_DISABLED, false);
@@ -56,7 +61,12 @@ public class C2SRiderForceFlyingMessage {
         });
     }
 
-    public static void register(NetworkChannel channel) {
-        channel.register(C2SRiderForceFlyingMessage.class, C2SRiderForceFlyingMessage::write, C2SRiderForceFlyingMessage::new, C2SRiderForceFlyingMessage::apply);
+    @Override
+    public Type<C2SRiderForceFlyingMessage> type() {
+        return TYPE;
+    }
+
+    public static void register(PayloadChannel channel) {
+        channel.registerC2S(TYPE, STREAM_CODEC, C2SRiderForceFlyingMessage::apply);
     }
 }

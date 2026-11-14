@@ -11,7 +11,8 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -127,25 +128,26 @@ public class ModRecipes {
         ANALYZER_RECIPES.put(recipe.item.asItem(), recipe.build());
     }
 
+    //PORT(1.21.1): Container -> RecipeInput, RecipeManager returns RecipeHolders. These helpers still return the recipe itself.
     @Nullable
-    public static SifterRecipe getSifterRecipeForItem(Container container, Level level) {
-        return level.getRecipeManager().getRecipeFor(SIFTER_TYPE.get(), container, level).orElse(null);
+    public static SifterRecipe getSifterRecipeForItem(RecipeInput container, Level level) {
+        return level.getRecipeManager().getRecipeFor(SIFTER_TYPE.get(), container, level).map(RecipeHolder::value).orElse(null);
     }
 
     @Nullable
-    public static AnalyzerRecipe getAnalyzerRecipeForItem(Container container, Level level) {
+    public static AnalyzerRecipe getAnalyzerRecipeForItem(RecipeInput container, Level level) {
         return ANALYZER_RECIPES.computeIfAbsent(container.getItem(0).getItem(), item ->
-                level.getRecipeManager().getRecipeFor(ANALYZER_TYPE.get(), container, level).orElse(null));
+                level.getRecipeManager().getRecipeFor(ANALYZER_TYPE.get(), container, level).map(RecipeHolder::value).orElse(null));
     }
 
     @Nullable
     public static WorktableRecipe getWorktableRecipeForItem(WithFuelRecipe.ContainerWithAnyFuel container, Level level) {
-        return level.getRecipeManager().getRecipeFor(WORKTABLE_TYPE.get(), container, level).orElse(null);
+        return level.getRecipeManager().getRecipeFor(WORKTABLE_TYPE.get(), container, level).map(RecipeHolder::value).orElse(null);
     }
 
     @Nullable
     public static CultureVatRecipe getCultureVatRecipeForItem(WithFuelRecipe.ContainerWithAnyFuel container, Level level) {
-        return level.getRecipeManager().getRecipeFor(CULTURE_VAT_TYPE.get(), container, level).orElse(null);
+        return level.getRecipeManager().getRecipeFor(CULTURE_VAT_TYPE.get(), container, level).map(RecipeHolder::value).orElse(null);
     }
 
     public static boolean isWorktableFuel(ItemLike itemLike) {

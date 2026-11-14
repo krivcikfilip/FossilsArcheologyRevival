@@ -1,8 +1,0 @@
-{
-  "type": "minecraft:stonecutting",
-  "count": 1,
-  "ingredient": {
-    "item": "fossil:volcanic_bricks"
-  },
-  "result": "fossil:volcanic_tile_wall"
-}

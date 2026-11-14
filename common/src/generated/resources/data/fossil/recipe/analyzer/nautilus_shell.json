@@ -1,0 +1,12 @@
+{
+  "type": "fossil:analyzer",
+  "input": {
+    "item": "minecraft:nautilus_shell"
+  },
+  "outputs": [
+    {
+      "id": "fossil:nautilus_dna",
+      "weight": 100.0
+    }
+  ]
+}

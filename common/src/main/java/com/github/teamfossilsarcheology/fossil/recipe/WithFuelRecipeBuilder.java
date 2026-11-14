@@ -1,19 +1,20 @@
 package com.github.teamfossilsarcheology.fossil.recipe;
 
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-
+/**
+ * PORT(1.21.1): FinishedRecipe/Consumer<FinishedRecipe> -> RecipeOutput. The recipe object is built directly and
+ * serialized by the recipe serializer codec (JSON shape: see {@link WithFuelRecipe}).
+ */
 public abstract class WithFuelRecipeBuilder implements RecipeBuilder {
     protected final String modId;
     protected final ItemLike itemInput;
@@ -30,7 +31,7 @@ public abstract class WithFuelRecipeBuilder implements RecipeBuilder {
     }
 
     @Override
-    public @NotNull RecipeBuilder unlockedBy(@NotNull String criterionName, @NotNull CriterionTriggerInstance criterionTrigger) {
+    public @NotNull RecipeBuilder unlockedBy(@NotNull String criterionName, @NotNull Criterion<?> criterion) {
         return this;
     }
 
@@ -46,61 +47,30 @@ public abstract class WithFuelRecipeBuilder implements RecipeBuilder {
     }
 
     @Override
-    public void save(@NotNull Consumer<FinishedRecipe> consumer) {
-        save(consumer, getDefaultRecipeId());
+    public void save(@NotNull RecipeOutput recipeOutput) {
+        save(recipeOutput, getDefaultRecipeId());
     }
 
     @Override
-    public void save(@NotNull Consumer<FinishedRecipe> consumer, @NotNull String recipeId) {
+    public void save(@NotNull RecipeOutput recipeOutput, @NotNull String recipeId) {
         ResourceLocation resourceLocation = getDefaultRecipeId();
-        ResourceLocation resourceLocation2 = new ResourceLocation(recipeId);
+        ResourceLocation resourceLocation2 = ResourceLocation.parse(recipeId);
         if (resourceLocation2.equals(resourceLocation)) {
             throw new IllegalStateException("Recipe " + recipeId + " should remove its 'save' argument as it is equal to default one");
         } else {
-            save(consumer, resourceLocation2);
+            save(recipeOutput, resourceLocation2);
         }
     }
+
+    @Override
+    public void save(@NotNull RecipeOutput recipeOutput, @NotNull ResourceLocation recipeId) {
+        recipeOutput.accept(recipeId, createRecipe(Ingredient.of(itemInput), Ingredient.of(itemFuel), new ItemStack(itemOutput), duration), null);
+    }
+
+    /**
+     * The fuel duration is not set by the builders (serializer default, as in 1.20.1)
+     */
+    protected abstract WithFuelRecipe createRecipe(Ingredient input, Ingredient fuel, ItemStack output, int duration);
 
     protected abstract ResourceLocation getDefaultRecipeId();
-
-    public abstract static class Result implements FinishedRecipe {
-        private final ResourceLocation recipeLocation;
-        private final Ingredient input;
-        private final Ingredient fuel;
-        private final ItemLike output;
-        private final int duration;
-
-        protected Result(ResourceLocation recipeLocation, Ingredient input, Ingredient fuel, ItemLike output, int duration) {
-            this.recipeLocation = recipeLocation;
-            this.input = input;
-            this.fuel = fuel;
-            this.output = output;
-            this.duration = duration;
-        }
-
-        @Override
-        public void serializeRecipeData(JsonObject json) {
-            json.add("input", input.toJson());
-            json.add("fuel", fuel.toJson());
-            json.addProperty("result", BuiltInRegistries.ITEM.getKey(output.asItem()).toString());
-            json.addProperty("duration", duration);
-        }
-
-        @Override
-        public @NotNull ResourceLocation getId() {
-            return recipeLocation;
-        }
-
-        @Nullable
-        @Override
-        public JsonObject serializeAdvancement() {
-            return null;
-        }
-
-        @Nullable
-        @Override
-        public ResourceLocation getAdvancementId() {
-            return null;
-        }
-    }
 }

@@ -1,6 +1,8 @@
 package com.github.teamfossilsarcheology.fossil.item;
 
+import com.github.teamfossilsarcheology.fossil.enchantment.ModEnchantments;
 import com.github.teamfossilsarcheology.fossil.entity.Javelin;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -10,7 +12,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +33,8 @@ public class JavelinItem extends TieredItem {
         if (!(shooter instanceof Player player)) {
             return;
         }
-        boolean infiniteAmmo = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, stack) > 0;
-        int i = this.getUseDuration(stack) - timeCharged;
+        boolean infiniteAmmo = player.getAbilities().instabuild || ModEnchantments.getItemEnchantmentLevel(level.registryAccess(), Enchantments.INFINITY, stack) > 0;
+        int i = this.getUseDuration(stack, shooter) - timeCharged;
         float speed = BowItem.getPowerForTime(i);
         if (speed < 0.1) {
             return;
@@ -45,17 +46,18 @@ public class JavelinItem extends TieredItem {
             if (speed == 1) {
                 javelin.setCritArrow(true);
             }
-            int powerLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, stack);
+            int powerLevel = ModEnchantments.getItemEnchantmentLevel(level.registryAccess(), Enchantments.POWER, stack);
             if (powerLevel > 0) {
                 javelin.setBaseDamage(javelin.getBaseDamage() + powerLevel * 0.5 + 0.5);
             }
-            int punchLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, stack);
+            int punchLevel = ModEnchantments.getItemEnchantmentLevel(level.registryAccess(), Enchantments.PUNCH, stack);
             if (punchLevel > 0) {
+                //PORT(1.21.1): AbstractArrow#setKnockback was removed in 1.21. Javelin must provide setKnockback(int) (entity-b)
                 javelin.setKnockback(punchLevel);
             }
-            int flameLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, stack);
+            int flameLevel = ModEnchantments.getItemEnchantmentLevel(level.registryAccess(), Enchantments.FLAME, stack);
             if (flameLevel > 0) {
-                javelin.setSecondsOnFire(100);
+                javelin.igniteForSeconds(100);
             }
             if (infiniteAmmo) {
                 javelin.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
@@ -71,7 +73,7 @@ public class JavelinItem extends TieredItem {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72000;
     }
 
@@ -93,11 +95,29 @@ public class JavelinItem extends TieredItem {
     }
 
     public static class JavelinProperties extends Item.Properties {
+        private boolean durabilityLocked;
 
+        /**
+         * PORT(1.21.1): Item.Properties#durability also sets the DAMAGE component and a max stack size of 1, and
+         * Item.Properties#buildAndValidateComponents forbids a default DAMAGE component on stackable items.
+         * We only set MAX_DAMAGE + MAX_STACK_SIZE, the DAMAGE component gets added by ItemStack#setDamageValue/hurtAndBreak.
+         * TieredItem's constructor calls durability(tier.getUses()), which would override the javelin durability
+         * (1.20.1 used defaultDurability, which did not), so further durability calls are ignored.
+         * PORT-TODO(1.21.1): verify in game that damaged javelin stacks (DAMAGE + max stack size 16) save/load and sync fine
+         */
         public JavelinProperties stacksToWithDurability(int maxStackSize, int durability) {
-            durability(durability);
-            this.maxStackSize = maxStackSize;
+            component(DataComponents.MAX_DAMAGE, durability);
+            component(DataComponents.MAX_STACK_SIZE, maxStackSize);
+            durabilityLocked = true;
             return this;
+        }
+
+        @Override
+        public Item.Properties durability(int maxDamage) {
+            if (durabilityLocked) {
+                return this;
+            }
+            return super.durability(maxDamage);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.block.custom_blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.github.teamfossilsarcheology.fossil.tags.ModBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -25,6 +26,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FourTallFlowerBlock extends BushBlock implements BonemealableBlock {
+    @Override
+    protected @NotNull MapCodec<? extends BushBlock> codec() {
+        //PORT(1.21.1): codec required since 1.20.3. The constructor arguments are not serializable, so this codec
+        //always returns this block instance (only used for block type serialization)
+        return MapCodec.unit(this);
+    }
+
     public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 3);
     private final VoxelShape shape;
 
@@ -87,7 +95,7 @@ public class FourTallFlowerBlock extends BushBlock implements BonemealableBlock 
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public @NotNull BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide) {
             if (player.getAbilities().instabuild) {
                 if (state.getValue(LAYER) == 0) {
@@ -103,7 +111,7 @@ public class FourTallFlowerBlock extends BushBlock implements BonemealableBlock 
                 dropResources(state, level, pos, null, player, player.getMainHandItem());
             }
         }
-        super.playerWillDestroy(level, pos, state, player);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
@@ -117,7 +125,7 @@ public class FourTallFlowerBlock extends BushBlock implements BonemealableBlock 
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
         return true;
     }
 
