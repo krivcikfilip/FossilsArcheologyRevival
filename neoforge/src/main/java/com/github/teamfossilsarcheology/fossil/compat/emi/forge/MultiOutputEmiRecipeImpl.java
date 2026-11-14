@@ -29,7 +29,7 @@ public class MultiOutputEmiRecipeImpl {
             } else {
                 //For custom recipe display. Probability is the probability of getting anything from the tag
                 //PORT(1.21.1): EmiUtil.values(TagKey) was removed from EMI 1.1.x (1.21); EmiTagKey#stream streams the tag values
-                //PORT-TODO(1.21.1): EMI internal API, verify against the 1.21.1 jar
+                //PORT(1.21.1, verified phase 2): EMI internal API, verify against the 1.21.1 jar -> compiles against emi-neoforge 1.1.24+1.21.1
                 return new ListEmiIngredient(EmiTagKey.of(weightedItem.tagKey()).stream().map(item -> EmiStack.of(new ItemStack(item)).setChance((float) (weightedItem.probability()))).toList(), 1);
             }
         } else {

@@ -32,7 +32,7 @@ public class CenteredNodeEvaluator extends WalkNodeEvaluator {
     public @NotNull Node getStart() {
         //Unchanged original code (1.20.1 WalkNodeEvaluator#getStart)
         //PORT(1.21.1): NodeEvaluator#level was removed -> currentContext. isPathfindable only takes the computation type
-        //PORT-TODO(1.21.1): vanilla 1.21.1 changed the "not on ground" branch of getStart (scans down from y+1); the 1.20.1 logic is kept here
+        //PORT(1.21.1, verified phase 2): vanilla 1.21.1 changed the "not on ground" branch of getStart (scans down from y+1); the 1.20.1 logic is kept here -> diffed against vanilla 1.21.1, the 1.20.1 logic is kept on purpose
         BlockPos blockPos;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int i = this.mob.getBlockY();

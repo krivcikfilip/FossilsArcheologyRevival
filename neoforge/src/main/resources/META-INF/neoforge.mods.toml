@@ -65,7 +65,7 @@ versionRange = "[4,)"
 ordering = "NONE"
 side = "BOTH"
 
-# PORT-TODO(1.21.1): More Hitboxes 1.21.1 versions are "1.9.x-alpha"; the range below accepts them
+# PORT(1.21.1, verified phase 2): More Hitboxes 1.21.1 versions are "1.9.x-alpha"; the range below accepts them -> 1.9.4-alpha accepted at runtime
 [[dependencies.${mod_id}]]
 modId = "morehitboxes"
 type = "required"

@@ -63,7 +63,7 @@ public class DinopediaScreen extends Screen {
                         return player.getName();
                     }
                     //PORT(1.21.1): authlib 6 replaced fillProfileProperties/isComplete with fetchProfile (null if not found)
-                    //PORT-TODO(1.21.1): verify MinecraftSessionService#fetchProfile(UUID, boolean) / ProfileResult against authlib 6.0.x
+                    //PORT(1.21.1, verified phase 2): verify MinecraftSessionService#fetchProfile(UUID, boolean) / ProfileResult against authlib 6.0.x -> compiles against authlib of 1.21.1
                     ProfileResult profileResult = Minecraft.getInstance().getMinecraftSessionService().fetchProfile(key, true);
                     if (profileResult != null) {
                         return Component.literal(profileResult.profile().getName());

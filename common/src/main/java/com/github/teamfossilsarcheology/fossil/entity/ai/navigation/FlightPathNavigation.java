@@ -38,11 +38,13 @@ public class FlightPathNavigation extends FlyingPathNavigation {
          * PORT(1.21.1): was getBlockPathTypes(BlockGetter, int, int, int, EnumSet, BlockPathTypes, BlockPos) which also returned the type
          * of the center block. 1.21 checks the center type in getPathTypeOfMob itself, evaluateBlockPathType was inlined into
          * getPathTypeWithinMobBB (see {@link NavUtil#evaluatePathType}).
-         * PORT-TODO(1.21.1): 1.20.1 FlyNodeEvaluator#getBlockPathType(..., Mob) called super.getBlockPathTypes (so this override was not
-         * used by it). Verify that 1.21.1 FlyNodeEvaluator#getPathTypeOfMob calls this method and that flying pathing still works
+         * PORT(1.21.1, verified phase 2): 1.20.1 FlyNodeEvaluator#getBlockPathType(..., Mob) called WalkNodeEvaluator#getBlockPathTypes
+         * with invokespecial (checked in the 1.20.1 bytecode), so the 1.20.1 override was never used. In 1.21.1 FlyNodeEvaluator inherits
+         * WalkNodeEvaluator#getPathTypeOfMob, which calls this.getPathTypeWithinMobBB virtually, so an override would now change flying
+         * pathing. To keep the 1.20.1 behaviour it no longer overrides (renamed, unused). Rename back to getPathTypeWithinMobBB (+ @Override)
+         * to enable the centered check for flyers.
          */
-        @Override
-        public @NotNull Set<PathType> getPathTypeWithinMobBB(PathfindingContext context, int x, int y, int z) {
+        public @NotNull Set<PathType> getCenteredPathTypeWithinMobBB(PathfindingContext context, int x, int y, int z) {
             EnumSet<PathType> nodeTypeEnum = EnumSet.noneOf(PathType.class);
             float width = Math.max(0, entityWidth - 2);
             int widthEachSide = Mth.ceil(width / 2.0f) + 1;

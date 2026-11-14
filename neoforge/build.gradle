@@ -48,7 +48,7 @@ dependencies {
 
     modImplementation "software.bernie.geckolib:geckolib-neoforge-$minecraft_version:$gecko_lib_version"
     modImplementation "com.github.glitchfiend:TerraBlender-neoforge:$minecraft_version-$terra_blender_version"
-    // PORT-TODO(1.21.1): artifact name assumed from cloudsmith package list (morehitboxes-neoforge-1.21.1 1.9.4-alpha)
+    // PORT(1.21.1, verified phase 2): artifact name assumed from cloudsmith package list (morehitboxes-neoforge-1.21.1 1.9.4-alpha) -> resolves, loads at runtime
     modImplementation "com.github.darkpred.morehitboxes:morehitboxes-neoforge-$minecraft_version:$more_hitboxes_version"
 
     // PORT(1.21.1): NeoForge bundles MixinExtras (jar-in-jar) at runtime, only the compile API is needed here.
@@ -60,7 +60,7 @@ dependencies {
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version"
     modCompileOnly "mezz.jei:jei-$minecraft_version-neoforge-api:$jei_version"
     //modRuntimeOnly "mezz.jei:jei-$minecraft_version-neoforge:$jei_version"
-    // PORT-TODO(1.21.1): EMI coordinates for 1.21.1 assumed (dev.emi:emi-neoforge:<ver>+1.21.1). MultiOutputEmiRecipeImpl uses
+    // PORT(1.21.1, verified phase 2): EMI coordinates for 1.21.1 assumed (dev.emi:emi-neoforge:<ver>+1.21.1). MultiOutputEmiRecipeImpl uses -> resolves and compiles
     // EMI internals (runtime.EmiTagKey, registry.EmiTags) so the full jar is needed at compile time.
     modCompileOnly "dev.emi:emi-neoforge:$emi_version+$minecraft_version:api"
     modCompileOnly "dev.emi:emi-neoforge:$emi_version+$minecraft_version"

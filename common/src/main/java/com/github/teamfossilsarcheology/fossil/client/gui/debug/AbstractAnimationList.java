@@ -47,7 +47,7 @@ public class AbstractAnimationList extends DebugSelectionList<AbstractAnimationL
     /**
      * PORT(1.21.1): getEntryAtPosition is final in vanilla; this override needs the {@code extendable} entry in fossil.accesswidener
      * (kept by core).
-     * PORT-TODO(1.21.1): verify the AW 'extendable' entry is converted to an AT by Loom on NeoForge (otherwise this fails to load)
+     * PORT(1.21.1, verified phase 2): verify the AW 'extendable' entry is converted to an AT by Loom on NeoForge (otherwise this fails to load) -> remapJar writes public-f to META-INF/accesstransformer.cfg
      */
     @Override
     protected @Nullable AnimationEntry getEntryAtPosition(double mouseX, double mouseY) {

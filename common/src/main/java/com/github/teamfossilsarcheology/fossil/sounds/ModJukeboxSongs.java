@@ -36,7 +36,7 @@ public class ModJukeboxSongs {
 
     private static void register(BootstrapContext<JukeboxSong> context, ResourceKey<JukeboxSong> key, RegistrySupplier<SoundEvent> sound, String item, int lengthInSeconds, int comparatorOutput) {
         //Keeps the old lang key of the record description
-        //PORT-TODO(1.21.1): verify the RegistrySupplier works as Holder<SoundEvent> when the song is encoded by datagen
+        //PORT(1.21.1, verified phase 2): verify the RegistrySupplier works as Holder<SoundEvent> when the song is encoded by datagen -> datagen output identical to the hand-written JSON
         context.register(key, new JukeboxSong(sound, Component.translatable("item." + FossilMod.MOD_ID + "." + item + ".desc"), lengthInSeconds, comparatorOutput));
     }
 }

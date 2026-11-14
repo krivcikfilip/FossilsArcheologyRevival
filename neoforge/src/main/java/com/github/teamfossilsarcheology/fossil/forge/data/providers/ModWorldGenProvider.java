@@ -22,7 +22,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-//PORT-TODO(1.21.1): every bootstrap(...) above must take net.minecraft.data.worldgen.BootstrapContext (renamed from BootstapContext
+//PORT(1.21.1, verified phase 2): every bootstrap(...) above must take net.minecraft.data.worldgen.BootstrapContext (renamed from BootstapContext -> datagen runs
 // in 1.20.5); world/entity owners still had the old name when this was written
 public class ModWorldGenProvider extends DatapackBuiltinEntriesProvider {
     public static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()

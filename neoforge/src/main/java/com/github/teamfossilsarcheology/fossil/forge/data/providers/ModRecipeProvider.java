@@ -51,7 +51,7 @@ import static com.github.teamfossilsarcheology.fossil.block.ModBlocks.*;
 import static com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.VanillaEntityInfo.*;
 import static com.github.teamfossilsarcheology.fossil.item.ModItems.*;
 
-//PORT-TODO(1.21.1): AnalyzerRecipeBuilder/SifterRecipeBuilder/WorktableRecipeBuilder/CultureVatRecipeBuilder (core) must offer save(RecipeOutput)
+//PORT(1.21.1, verified phase 2): AnalyzerRecipeBuilder/SifterRecipeBuilder/WorktableRecipeBuilder/CultureVatRecipeBuilder (core) must offer save(RecipeOutput) -> datagen runs
 public class ModRecipeProvider extends RecipeProvider {
     public static final BlockFamily ANCIENT_WOOD_PLANKS = new BlockFamily.Builder(ModBlocks.ANCIENT_WOOD_PLANKS.get()).slab(ANCIENT_WOOD_SLAB.get()).stairs(ANCIENT_WOOD_STAIRS.get()).recipeGroupPrefix("wooden").recipeUnlockedBy("has_planks").getFamily();
     public static final BlockFamily CALAMITES_PLANKS = new BlockFamily.Builder(ModBlocks.CALAMITES_PLANKS.get()).button(CALAMITES_BUTTON.get()).fence(CALAMITES_FENCE.get()).fenceGate(CALAMITES_FENCE_GATE.get()).pressurePlate(CALAMITES_PRESSURE_PLATE.get()).slab(CALAMITES_SLAB.get()).stairs(CALAMITES_STAIRS.get()).door(CALAMITES_DOOR.get()).trapdoor(CALAMITES_TRAPDOOR.get()).recipeGroupPrefix("wooden").recipeUnlockedBy("has_planks").getFamily();

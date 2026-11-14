@@ -33,7 +33,7 @@ public abstract class SyncedEntityDataMixin implements SyncedEntityDataHelper {
 
     @Override
     public void fossilsArcheologyRevival$markDirty(EntityDataAccessor<Integer> dataAccessor) {
-        itemsById[dataAccessor.id()].setDirty(true); //PORT-TODO(1.21.1): EntityDataAccessor is a record since 1.20.5 (getId() -> id()), verify
+        itemsById[dataAccessor.id()].setDirty(true); //PORT(1.21.1, verified phase 2): EntityDataAccessor is a record since 1.20.5 (getId() -> id()), verify -> compiles
         isDirty = true;
     }
 }

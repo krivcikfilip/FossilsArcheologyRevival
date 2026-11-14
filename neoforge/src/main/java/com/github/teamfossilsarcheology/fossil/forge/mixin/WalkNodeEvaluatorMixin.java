@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-//PORT-TODO(1.21.1): isBurningBlock(BlockState) and findAcceptedNode/canReachWithoutCollision(Node) still exist in 1.21.1
+//PORT(1.21.1, verified phase 2): isBurningBlock(BlockState) and findAcceptedNode/canReachWithoutCollision(Node) still exist in 1.21.1 -> findAcceptedNode/canReachWithoutCollision exist; isBurningBlock is in NodeEvaluatorMixin
 // (isBurningBlock is referenced by the NeoForge WalkNodeEvaluator patch); the ordinal of the first BlockState#is(TagKey) call is unverified
 @Mixin(WalkNodeEvaluator.class)
 public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {

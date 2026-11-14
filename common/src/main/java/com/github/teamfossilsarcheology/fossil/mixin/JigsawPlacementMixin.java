@@ -76,7 +76,7 @@ public abstract class JigsawPlacementMixin {
     private void tryPlacingCustomStructures(PoolElementStructurePiece structurePiece, MutableObject<VoxelShape> mutableObject, int depth, boolean bl, LevelHeightAccessor levelHeightAccessor, RandomState randomState,
                                             PoolAliasLookup poolAliasLookup, LiquidSettings liquidSettings, CallbackInfo ci) {
         //PORT(1.21.1): copy updated for pool aliases, liquid settings and placement priorities (vanilla 1.21.1 Placer#tryPlacingChildren)
-        //PORT-TODO(1.21.1): diff against the vanilla 1.21.1 tryPlacingChildren once sources are available (field names pools/maxDepth assumed)
+        //PORT(1.21.1, verified phase 2): diff against the vanilla 1.21.1 tryPlacingChildren once sources are available (field names pools/maxDepth assumed) -> Placer fields match vanilla 1.21.1 sources
         //This is a copy of the base method that allows us to place some of our structures
         String name = structurePiece.getElement().toString();
         boolean isTop = name.contains("house_taiga_top") || name.contains("house_plains_top") || name.contains("tent_option");

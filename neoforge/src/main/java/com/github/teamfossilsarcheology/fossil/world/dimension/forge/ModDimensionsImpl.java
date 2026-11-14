@@ -10,7 +10,7 @@ import net.minecraft.world.level.portal.DimensionTransition;
  * {@link Entity#changeDimension(DimensionTransition)}; the transition already carries the target level, position, speed and
  * rotation, and {@link DimensionTransition#DO_NOTHING} skips the portal sound like the old ModTeleporter did.
  * <p>
- * PORT-TODO(1.21.1): requires the common @ExpectPlatform signature
+ * PORT(1.21.1, verified phase 2): requires the common @ExpectPlatform signature -> compiles
  * {@code changeDimension(Entity, ServerLevel, DimensionTransition)} (world owner); since this is now plain vanilla code
  * the @ExpectPlatform can also be dropped and this class deleted.
  */

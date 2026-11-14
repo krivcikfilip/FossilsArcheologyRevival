@@ -617,7 +617,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
 
     /**
      * 1.20.1: {@code canBeLeashed(Player)}. Leashing is handled by {@link Leashable} since 1.21 and vanilla no longer passes the player.
-     * PORT-TODO(1.21.1): this owner check is not called by vanilla anymore. Needs a hook before Entity#interact
+     * PORT(1.21.1, verified phase 2): this owner check is not called by vanilla anymore. Needs a hook before Entity#interact -> hooked in ModEvents (InteractionEvent.INTERACT_ENTITY)
      * (e.g. Architectury InteractionEvent.INTERACT_ENTITY cancelling the interaction for a lead), requested from core.
      */
     public boolean canBeLeashedBy(Player player) {

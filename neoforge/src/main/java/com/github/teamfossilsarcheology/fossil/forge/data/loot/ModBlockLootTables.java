@@ -63,7 +63,7 @@ public class ModBlockLootTables extends BlockLootSubProvider {
     }
 
     //PORT(1.21.1): enchantments are data driven, look them up from the registries given to the sub provider.
-    //PORT-TODO(1.21.1): ARCHEOLOGY/PALEONTOLOGY are our own datapack enchantments; DataGenerators therefore passes the lookup of
+    //PORT(1.21.1, verified phase 2): ARCHEOLOGY/PALEONTOLOGY are our own datapack enchantments; DataGenerators therefore passes the lookup of -> datagen runs, loot tables load
     // ModWorldGenProvider (which contains them) instead of the vanilla one.
     private Holder<Enchantment> enchantment(ResourceKey<Enchantment> key) {
         return registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);

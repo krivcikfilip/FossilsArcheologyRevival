@@ -34,7 +34,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 @PrefixGameTestTemplate(value = false)
 @GameTestHolder(FossilMod.MOD_ID)
-//PORT-TODO(1.21.1): depends on core recipe API (getFuel/getInput/getDuration/getWeightedOutputs, ModRecipes.getCultureVatRecipeForItem,
+//PORT(1.21.1, verified phase 2): depends on core recipe API (getFuel/getInput/getDuration/getWeightedOutputs, ModRecipes.getCultureVatRecipeForItem, -> compiles, game tests run
 // WithFuelRecipe.ContainerWithAnyFuel -> RecipeInput). getResultItem(null) now takes a HolderLookup.Provider.
 public class RecipeTests {
     private static final BlockPos MACHINE_POS = new BlockPos(0, 1, 0);

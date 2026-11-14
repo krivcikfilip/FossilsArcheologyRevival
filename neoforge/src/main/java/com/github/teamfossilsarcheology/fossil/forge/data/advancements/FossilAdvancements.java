@@ -80,14 +80,14 @@ public class FossilAdvancements implements AdvancementProvider.AdvancementGenera
 
         AdvancementHolder dna = tag(TRICERATOPS.dnaItem, ModItemTags.DNA, analyzer, consumer);
         AdvancementHolder cultureVat = simple(dna, consumer, CULTURE_VAT);
-        //PORT-TODO(1.21.1): verify PlayerHurtEntityTrigger.TriggerInstance#playerHurtEntity(Optional<EntityPredicate>) in 1.21.1 vanilla
+        //PORT(1.21.1, verified phase 2): verify PlayerHurtEntityTrigger.TriggerInstance#playerHurtEntity(Optional<EntityPredicate>) in 1.21.1 vanilla -> datagen runs
         AdvancementHolder failuresaurus = other(cultureVat, FAILURESAURUS_FLESH, "failuresaurus",
                 PlayerHurtEntityTrigger.TriggerInstance.playerHurtEntity(Optional.of(EntityPredicate.Builder.entity().of(ModEntities.FAILURESAURUS.get()).build())), consumer);
         AdvancementHolder embryo = tag(MAMMOTH.embryoItem, ModItemTags.EMBRYOS, cultureVat, consumer);
         AdvancementHolder dinoEgg = tag(TRICERATOPS.eggItem, ModItemTags.ALL_EGGS, cultureVat, consumer, "dino_eggs");
         AdvancementHolder dinopedia = simple(dinoEgg, consumer, DINOPEDIA);
 
-        //PORT-TODO(1.21.1): IncubateEggTrigger/ImplantEmbryoTrigger/OpenSarcophagusTrigger/ScarabTameTrigger factories (core) must return Criterion<?>
+        //PORT(1.21.1, verified phase 2): IncubateEggTrigger/ImplantEmbryoTrigger/OpenSarcophagusTrigger/ScarabTameTrigger factories (core) must return Criterion<?> -> datagen runs
         Advancement.Builder builder = Advancement.Builder.advancement().display(TYRANNOSAURUS.eggItem, title("all_eggs"),
                         description("all_eggs"), null, AdvancementType.CHALLENGE, true, true, false)
                 .parent(dinoEgg).rewards(AdvancementRewards.Builder.experience(1000));

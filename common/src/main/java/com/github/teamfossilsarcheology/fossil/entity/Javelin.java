@@ -45,7 +45,7 @@ public class Javelin extends AbstractArrow {
             setTier(tiers);
         }
         entityData.set(ANCIENT, ancient);
-        //PORT-TODO(1.21.1): AbstractArrow#setPierceLevel is private in 1.21. Needs an access widener entry (requested from core)
+        //PORT(1.21.1, verified phase 2): AbstractArrow#setPierceLevel is private in 1.21. Needs an access widener entry (requested from core)
         setPierceLevel((byte) 16);
         setBaseDamage(getDamage(tier, ancient));
     }
@@ -106,7 +106,7 @@ public class Javelin extends AbstractArrow {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        //PORT-TODO(1.21.1): AbstractArrow#setPierceLevel is private in 1.21. Needs an access widener entry (requested from core)
+        //PORT(1.21.1, verified phase 2): AbstractArrow#setPierceLevel is private in 1.21. Needs an access widener entry (requested from core)
         setPierceLevel((byte) 16);
         if (level() instanceof ServerLevel && isAncient() && random.nextInt(100) < 30) {
             LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(level());

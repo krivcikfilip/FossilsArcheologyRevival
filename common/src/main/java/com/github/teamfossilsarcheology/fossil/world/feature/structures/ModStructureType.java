@@ -28,7 +28,7 @@ public class ModStructureType {
         return STRUCTURE_TYPES.register(name, () -> () -> codec);
     }
 
-    //PORT-TODO(1.21.1): needs core to call ModStructureType.register() from FossilMod.init() (see PORT_NOTES/world.md); a first call
+    //PORT(1.21.1, verified phase 2): needs core to call ModStructureType.register() from FossilMod.init() (see PORT_NOTES/world.md); a first call -> called from FossilMod.init()
     // from FMLCommonSetupEvent would make Architectury Registry.register into the frozen registry and crash
     public static void register() {
         if (registered) {
