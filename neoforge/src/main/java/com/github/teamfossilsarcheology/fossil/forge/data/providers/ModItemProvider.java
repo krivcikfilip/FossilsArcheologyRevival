@@ -233,8 +233,11 @@ public class ModItemProvider extends ItemModelProvider {
         builder(resourceLocation, item);
     }
 
-    public void spawnEggItem(Item item) {
-        getBuilder(key(item).getPath()).parent(new ModelFile.UncheckedModelFile("item/template_spawn_egg"));
+    // PORT(1.21.1-review): NeoForge 21.1 ItemModelProvider declares "ItemModelBuilder spawnEggItem(Item)"; a void method with the
+    // same signature does not compile. Same output, now an override returning the builder.
+    @Override
+    public ItemModelBuilder spawnEggItem(Item item) {
+        return getBuilder(key(item).getPath()).parent(new ModelFile.UncheckedModelFile("item/template_spawn_egg"));
     }
 
     public void embyroItem(ResourceLocation item) {

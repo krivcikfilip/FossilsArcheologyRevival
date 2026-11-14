@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +67,8 @@ public class CultureVatBlock extends CustomEntityBlock {
     }
 
     public void onFailedCultivation(Level level, BlockPos pos) {
-        List<Player> nearby = level.getEntitiesOfClass(Player.class, new AABB(pos.offset(-50, -50, -50), pos.offset(50, 50, 50)));
+        // PORT(1.21.1-review): AABB(BlockPos, BlockPos) was removed (1.20.5); same corners via Vec3.atLowerCornerOf
+        List<Player> nearby = level.getEntitiesOfClass(Player.class, new AABB(Vec3.atLowerCornerOf(pos.offset(-50, -50, -50)), Vec3.atLowerCornerOf(pos.offset(50, 50, 50))));
         for (Player player : nearby) {
             player.displayClientMessage(Component.translatable("culture_vat.outBreak"), false);
         }

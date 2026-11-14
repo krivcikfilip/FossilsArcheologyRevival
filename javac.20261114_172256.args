@@ -1,6 +1,0 @@
--proc:none
--Xmaxerrs
-100000
--d
-/tmp/jout
-@/tmp/files.txt

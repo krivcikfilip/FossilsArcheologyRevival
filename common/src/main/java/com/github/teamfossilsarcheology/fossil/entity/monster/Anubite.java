@@ -111,7 +111,7 @@ public class Anubite extends PathfinderMob {
     public boolean hurt(DamageSource source, float amount) {
         if (isInvulnerableTo(source) && !source.is(DamageTypeTags.IS_EXPLOSION)) {
             return false;
-        } else if (source.isIndirect()) {
+        } else if (!source.isDirect()) { // PORT(1.21.1-review): DamageSource#isIndirect() was replaced by isDirect()
             for (int i = 0; i < 64; i++) {
                 if (teleportRandomly()) {
                     return true;

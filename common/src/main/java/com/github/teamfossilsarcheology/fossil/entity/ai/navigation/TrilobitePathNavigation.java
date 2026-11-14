@@ -26,6 +26,6 @@ public class TrilobitePathNavigation extends PathNavigation {
 
     @Override
     protected boolean canUpdatePath() {
-        return isInLiquid();
+        return mob.isInLiquid(); // PORT(1.21.1-review): PathNavigation#isInLiquid() was removed, Entity#isInLiquid() is the same check
     }
 }

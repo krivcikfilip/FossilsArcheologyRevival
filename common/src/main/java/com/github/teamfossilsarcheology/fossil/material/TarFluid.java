@@ -40,7 +40,8 @@ public class TarFluid {
         if (level.getDifficulty() != Difficulty.PEACEFUL && FossilConfig.isEnabled(FossilConfig.SPAWN_TAR_SLIMES) &&
                 level.random.nextInt(isSource ? tarSlimeSpawnRate : tarSlimeSpawnRate * 15) == 0) {
             double spawnRange = 16;
-            int k = level.getEntities(ModEntities.TAR_SLIME.get(), new AABB(pos, pos.offset(1, 1, 1)).inflate(spawnRange), Entity::isAlive).size();
+            // PORT(1.21.1-review): AABB(BlockPos, BlockPos) was removed (1.20.5); new AABB(pos) is the same unit box
+            int k = level.getEntities(ModEntities.TAR_SLIME.get(), new AABB(pos).inflate(spawnRange), Entity::isAlive).size();
             if (k < 6) {
                 TarSlime slime = ModEntities.TAR_SLIME.get().create(level);
                 slime.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null);

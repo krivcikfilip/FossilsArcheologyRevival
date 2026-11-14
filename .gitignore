@@ -26,3 +26,5 @@ run
 forge*changelog.txt
 
 .architectury-transformer
+# javac argument files left by tooling
+javac.*.args

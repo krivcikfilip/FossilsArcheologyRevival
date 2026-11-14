@@ -18,12 +18,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(WalkNodeEvaluator.class)
 public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
 
+    // PORT(1.21.1-review): isBurningBlock(BlockState) moved to NodeEvaluator (static) in 1.20.5; WalkNodeEvaluator no longer declares it,
+    // so this injector (defaultRequire = 1) would fail when the class loads. Moved unchanged to NodeEvaluatorMixin.
+    /*
     @Inject(method = "isBurningBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/tags/TagKey;)Z", ordinal = 0), cancellable = true)
     private static void addTarAsDangerousPath(BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if (ModBlocks.TAR.isPresent() && state.is(ModBlocks.TAR.get())) {
             cir.setReturnValue(true);
         }
     }
+    */
 
     @WrapOperation(method = "findAcceptedNode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/pathfinder/WalkNodeEvaluator;canReachWithoutCollision(Lnet/minecraft/world/level/pathfinder/Node;)Z"))
     public boolean preventMobFromGettingStuck(WalkNodeEvaluator instance, Node node, Operation<Boolean> original) {
