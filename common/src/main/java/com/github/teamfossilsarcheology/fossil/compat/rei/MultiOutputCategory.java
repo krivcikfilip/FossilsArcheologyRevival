@@ -1,11 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.compat.rei;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -19,8 +14,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
@@ -134,9 +129,10 @@ public abstract class MultiOutputCategory implements DisplayCategory<MultiOutput
         }
 
         @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+            //PORT(1.21.1): GuiEventListener#mouseScrolled has separate x/y amounts since 1.20.2
             if (containsMouse(mouseX, mouseY)) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -delta, true);
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
                 return true;
             }
             return false;
@@ -189,7 +185,7 @@ public abstract class MultiOutputCategory implements DisplayCategory<MultiOutput
                 }
             }
             try (CloseableScissors ignored = scissor(guiGraphics, scrolling.getBounds())) {
-                renderFixedScrollbar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+                renderFixedScrollbar(guiGraphics, 0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             }
         }
 
@@ -200,7 +196,8 @@ public abstract class MultiOutputCategory implements DisplayCategory<MultiOutput
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0.0, 0.0, 100 + 200.0F);
             String string = FORMAT.format(stack);
-            MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            //PORT(1.21.1): Tesselator#getBuilder is gone (1.21), use the GuiGraphics buffer source
+            MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
             float xOffset = Math.min(11, fr.width(string) / 2f);
             fr.drawInBatch(string, (xPosition + 8 - xOffset), (yPosition + 16 + 1), 16777215, true,
                     guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
@@ -211,7 +208,7 @@ public abstract class MultiOutputCategory implements DisplayCategory<MultiOutput
         /**
          * The z pos in {@link ScrollingContainer#renderScrollBar} is too low
          */
-        private void renderFixedScrollbar(int background, float alpha, float scrollBarAlphaOffset) {
+        private void renderFixedScrollbar(GuiGraphics guiGraphics, int background, float alpha, float scrollBarAlphaOffset) {
             Rectangle bounds = scrolling.getBounds();
             int maxScroll = scrolling.getMaxScroll() == 0 ? 1 : scrolling.getMaxScroll();
             int height = bounds.height * bounds.height / scrolling.getMaxScrollHeight();
@@ -224,28 +221,17 @@ public abstract class MultiOutputCategory implements DisplayCategory<MultiOutput
             boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.ofMouse());
             float bottomC = (hovered ? 0.67F : 0.5F) * scrollBarAlphaOffset;
             float topC = (hovered ? 0.87F : 0.67F) * scrollBarAlphaOffset;
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder buffer = tesselator.getBuilder();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            float a = (background >> 24 & 255) / 255.0F;
-            float r = (background >> 16 & 255) / 255.0F;
-            float g = (background >> 8 & 255) / 255.0F;
-            float b = (background & 255) / 255.0F;
-            buffer.vertex(scrollbarPositionMinX, bounds.getMaxY(), 10.0).color(r, g, b, a).endVertex();
-            buffer.vertex(scrollbarPositionMaxX, bounds.getMaxY(), 10.0).color(r, g, b, a).endVertex();
-            buffer.vertex(scrollbarPositionMaxX, bounds.y, 10.0).color(r, g, b, a).endVertex();
-            buffer.vertex(scrollbarPositionMinX, bounds.y, 10.0).color(r, g, b, a).endVertex();
-            buffer.vertex(scrollbarPositionMinX, (minY + height), 10.0).color(bottomC, bottomC, bottomC, alpha).endVertex();
-            buffer.vertex(scrollbarPositionMaxX, (minY + height), 10.0).color(bottomC, bottomC, bottomC, alpha).endVertex();
-            buffer.vertex(scrollbarPositionMaxX, minY, 10.0).color(bottomC, bottomC, bottomC, alpha).endVertex();
-            buffer.vertex(scrollbarPositionMinX, minY, 10.0).color(bottomC, bottomC, bottomC, alpha).endVertex();
-            buffer.vertex(scrollbarPositionMinX, (minY + height - 1), 10.0).color(topC, topC, topC, alpha).endVertex();
-            buffer.vertex((scrollbarPositionMaxX - 1), (minY + height - 1), 10.0).color(topC, topC, topC, alpha).endVertex();
-            buffer.vertex((scrollbarPositionMaxX - 1), minY, 10.0).color(topC, topC, topC, alpha).endVertex();
-            buffer.vertex(scrollbarPositionMinX, minY, 10.0).color(topC, topC, topC, alpha).endVertex();
-            tesselator.end();
-            RenderSystem.disableBlend();
+            //PORT(1.21.1): the Tesselator/BufferBuilder API changed in 1.21 (no getBuilder/endVertex). Same three quads at z=10 as before,
+            //drawn with GuiGraphics#fill like cloth-config 15 does in ScrollingContainer#renderScrollBar
+            //PORT-TODO(1.21.1): in-game check that the scrollbar still renders above the output slots (z=10 via the pose instead of raw vertices)
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 10);
+            guiGraphics.fill(scrollbarPositionMinX, bounds.y, scrollbarPositionMaxX, bounds.getMaxY(), background);
+            guiGraphics.fill(scrollbarPositionMinX, minY, scrollbarPositionMaxX, minY + height,
+                    FastColor.ARGB32.color(Math.round(alpha * 255.0F), Math.round(bottomC * 255.0F), Math.round(bottomC * 255.0F), Math.round(bottomC * 255.0F)));
+            guiGraphics.fill(scrollbarPositionMinX, minY, scrollbarPositionMaxX - 1, minY + height - 1,
+                    FastColor.ARGB32.color(Math.round(alpha * 255.0F), Math.round(topC * 255.0F), Math.round(topC * 255.0F), Math.round(topC * 255.0F)));
+            guiGraphics.pose().popPose();
         }
 
         @Override

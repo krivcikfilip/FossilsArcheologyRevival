@@ -3,6 +3,7 @@ package com.github.teamfossilsarcheology.fossil.entity.prehistoric.base;
 import com.github.teamfossilsarcheology.fossil.FossilMod;
 import com.github.teamfossilsarcheology.fossil.entity.animation.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,15 +22,15 @@ import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
@@ -56,19 +57,19 @@ public abstract class PrehistoricFish extends AbstractFish implements Prehistori
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
-    public static boolean canSpawn(EntityType<? extends PrehistoricFish> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource rand) {
+    public static boolean canSpawn(EntityType<? extends PrehistoricFish> entityType, ServerLevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource rand) {
         return pos.getY() < level.getSeaLevel() && level.getFluidState(pos.below()).is(FluidTags.WATER) && level.getBlockState(pos.above()).is(Blocks.WATER);
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(BABY, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(BABY, false);
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("disableGoalAI", false);
         tag.putBoolean("disableMoveAI", false);
         tag.putBoolean("disableLookAI", false);
-        entityData.define(DEBUG, tag);
+        builder.define(DEBUG, tag);
     }
 
     @NotNull
@@ -96,9 +97,11 @@ public abstract class PrehistoricFish extends AbstractFish implements Prehistori
     @Override
     public void saveToBucketTag(ItemStack bucket) {
         super.saveToBucketTag(bucket);
-        CompoundTag tag = bucket.getOrCreateTag();
-        tag.putInt("AbsoluteEggCooldown", absoluteEggCooldown);
-        tag.putInt("Age", age);
+        //PORT(1.21.1): item NBT -> vanilla BUCKET_ENTITY_DATA component (same keys as 1.20.1)
+        CustomData.update(DataComponents.BUCKET_ENTITY_DATA, bucket, tag -> {
+            tag.putInt("AbsoluteEggCooldown", absoluteEggCooldown);
+            tag.putInt("Age", age);
+        });
     }
 
     @Override
@@ -120,6 +123,21 @@ public abstract class PrehistoricFish extends AbstractFish implements Prehistori
     @Override
     public boolean isBaby() {
         return entityData.get(BABY);
+    }
+
+    /**
+     * PORT(1.21.1): 1.20.1 LivingEntity#getScale returned 0.5 for babies (used for the hitbox and by our renderer).
+     * 1.21.1 split that into getScale (SCALE attribute) and getAgeScale (baby factor). Keeps the 1.20.1 meaning of getScale.
+     */
+    @Override
+    public float getScale() {
+        return isBaby() ? 0.5f : 1;
+    }
+
+    @Override
+    public float getAgeScale() {
+        //PORT(1.21.1): the baby factor is already part of getScale, see above
+        return 1;
     }
 
     public int getAge() {
@@ -198,13 +216,13 @@ public abstract class PrehistoricFish extends AbstractFish implements Prehistori
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
         if (spawnData instanceof Prehistoric.PrehistoricGroupData prehistoricGroupData) {
             setAge(prehistoricGroupData.ageInDays() * 24000);
         } else {
             setAge(0);
         }
-        return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
+        return super.finalizeSpawn(level, difficulty, reason, spawnData);
     }
 
     @Override

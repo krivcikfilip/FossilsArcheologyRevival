@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.*;
 import net.minecraft.world.phys.AABB;
@@ -15,6 +14,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 
+/**
+ * PORT(1.21.1): 1.20.5 pathfinding changes: BlockPathTypes -> PathType, NodeEvaluator#level -> currentContext (PathfindingContext),
+ * getCachedBlockType(Mob, x, y, z) -> getCachedPathType(x, y, z), getBlockPathType(BlockGetter, x, y, z) -> getPathType(PathfindingContext, x, y, z),
+ * getBlockPathTypeRaw -> getPathTypeFromState, getBlockPathTypeStatic -> getPathTypeStatic, getGoal -> getTarget
+ * PORT-TODO(1.21.1): written against 1.21.1 signatures from mappings.dev (no vanilla source available). Verify amphibious pathing in game,
+ * especially that WalkNodeEvaluator#getCachedPathType -> getPathTypeOfMob -> getPathTypeWithinMobBB still calls our getPathType override
+ */
 public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
 
     @Override
@@ -24,14 +30,14 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
         }
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int i = mob.getBlockY();
-        BlockState blockState = level.getBlockState(mutableBlockPos.set(mob.getX(), i, mob.getZ()));
+        BlockState blockState = currentContext.getBlockState(mutableBlockPos.set(mob.getX(), i, mob.getZ()));
         if (!mob.canStandOnFluid(blockState.getFluidState())) {
             if (this.mob.onGround()) {
                 i = Mth.floor(mob.getY() + 0.5);
             } else {
                 BlockPos blockPos = mob.blockPosition();
 
-                while ((level.getBlockState(blockPos).isAir() || level.getBlockState(blockPos).isPathfindable(level, blockPos, PathComputationType.LAND))
+                while ((currentContext.getBlockState(blockPos).isAir() || currentContext.getBlockState(blockPos).isPathfindable(PathComputationType.LAND))
                         && blockPos.getY() > mob.level().getMinBuildHeight()) {
                     blockPos = blockPos.below();
                 }
@@ -40,13 +46,13 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
             }
         } else {
             while (mob.canStandOnFluid(blockState.getFluidState())) {
-                blockState = level.getBlockState(mutableBlockPos.set(mob.getX(), ++i, mob.getZ()));
+                blockState = currentContext.getBlockState(mutableBlockPos.set(mob.getX(), ++i, mob.getZ()));
             }
             i--;
         }
 
         BlockPos blockPos = mob.blockPosition();
-        BlockPathTypes blockPathTypes = getCachedBlockType(mob, blockPos.getX(), i, blockPos.getZ());
+        PathType blockPathTypes = getCachedPathType(blockPos.getX(), i, blockPos.getZ());
         if (mob.getPathfindingMalus(blockPathTypes) < 0.0F) {
             AABB aABB = mob.getBoundingBox();
             if (canStartAt(mutableBlockPos.set(aABB.minX, i, aABB.minZ))
@@ -55,7 +61,7 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
                     || canStartAt(mutableBlockPos.set(aABB.maxX, i, aABB.maxZ))) {
                 Node node = getNode(mutableBlockPos);
                 BlockPos nodePos = node.asBlockPos();
-                node.type = getCachedBlockType(mob, nodePos.getX(), nodePos.getY(), nodePos.getZ());
+                node.type = getCachedPathType(nodePos.getX(), nodePos.getY(), nodePos.getZ());
                 node.costMalus = mob.getPathfindingMalus(node.type);
                 return node;
             }
@@ -63,13 +69,13 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
 
         Node node2 = getNode(blockPos.getX(), i, blockPos.getZ());
         BlockPos node2Pos = node2.asBlockPos();
-        node2.type = getCachedBlockType(mob, node2Pos.getX(), node2Pos.getY(), node2Pos.getZ());
+        node2.type = getCachedPathType(node2Pos.getX(), node2Pos.getY(), node2Pos.getZ());
         node2.costMalus = mob.getPathfindingMalus(node2.type);
         return node2;
     }
 
     @Override
-    public @NotNull Target getGoal(double x, double y, double z) {
+    public @NotNull Target getTarget(double x, double y, double z) {
         return new Target(super.getNode(Mth.floor(x), Mth.floor(y + 0.5), Mth.floor(z)));
     }
 
@@ -81,12 +87,12 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
         }
         float f;
         Node node = null;
-        BlockPathTypes blockPathTypes = getCachedBlockType(mob, x, y, z);
-        if ((blockPathTypes == BlockPathTypes.WATER || blockPathTypes == BlockPathTypes.WATER_BORDER) && (f = PathingDebug.getPathfindingMalus(blockPathTypes)) >= 0.0f) {
+        PathType blockPathTypes = getCachedPathType(x, y, z);
+        if ((blockPathTypes == PathType.WATER || blockPathTypes == PathType.WATER_BORDER) && (f = PathingDebug.getPathfindingMalus(blockPathTypes)) >= 0.0f) {
             node = super.getNode(x, y, z);
             node.type = blockPathTypes;
             node.costMalus = Math.max(node.costMalus, f);
-            if (level.getFluidState(new BlockPos(x, y, z)).isEmpty()) {
+            if (currentContext.level().getFluidState(new BlockPos(x, y, z)).isEmpty()) {
                 node.costMalus += 8.0f;
             }
         }
@@ -98,9 +104,9 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
         int x = node.x;
         int y = node.y;
         int z = node.z;
-        BlockPathTypes type = getCachedBlockType(mob, x, y, z);
+        PathType type = getCachedPathType(x, y, z);
         int i;
-        if (type == BlockPathTypes.WATER || type == BlockPathTypes.WATER_BORDER) {
+        if (type == PathType.WATER || type == PathType.WATER_BORDER) {
             //SwimNodeEvaluator code
             i = 0;
             EnumMap<Direction, Node> map = Maps.newEnumMap(Direction.class);
@@ -119,15 +125,15 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
         } else {
             //AmphibiousNodeEvaluator code
             i = super.getNeighbors(nodes, node);
-            BlockPathTypes typeAbove = getCachedBlockType(mob, x, y + 1, z);
-            int j = mob.getPathfindingMalus(type) > 0 && typeAbove != BlockPathTypes.STICKY_HONEY ? Mth.floor(Math.max(1, mob.maxUpStep())) : 0;
+            PathType typeAbove = getCachedPathType(x, y + 1, z);
+            int j = mob.getPathfindingMalus(type) > 0 && typeAbove != PathType.STICKY_HONEY ? Mth.floor(Math.max(1, mob.maxUpStep())) : 0;
             double floorLevel = getFloorLevel(new BlockPos(x, y, z));
             Node nodeAbove = findAcceptedNode(x, y + 1, z, Math.max(0, j - 1), floorLevel, Direction.UP, type);
             Node nodeBelow = findAcceptedNode(x, y - 1, z, j, floorLevel, Direction.DOWN, type);
             if (isNeighborValid(nodeAbove, node)) {
                 nodes[i++] = nodeAbove;
             }
-            if (isNeighborValid(nodeBelow, node) && type != BlockPathTypes.TRAPDOOR) {
+            if (isNeighborValid(nodeBelow, node) && type != PathType.TRAPDOOR) {
                 nodes[i++] = nodeBelow;
             }
         }
@@ -135,7 +141,7 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
     }
 
     protected boolean isNodeValid(@Nullable Node node) {
-        return node != null && !node.closed && getBlockPathType(level, node.x, node.y, node.z) != BlockPathTypes.BLOCKED;
+        return node != null && !node.closed && getPathType(currentContext, node.x, node.y, node.z) != PathType.BLOCKED;
     }
 
     protected boolean isDiagonalNodeValid(@Nullable Node diagonal, @Nullable Node node1, @Nullable Node node2) {
@@ -155,20 +161,20 @@ public class PrehistoricAmphibiousNodeEvaluator extends WalkNodeEvaluator {
     }
 
     @Override
-    public @NotNull BlockPathTypes getBlockPathType(BlockGetter level, int x, int y, int z) {
+    public @NotNull PathType getPathType(PathfindingContext context, int x, int y, int z) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        BlockPathTypes type = getBlockPathTypeRaw(level, mutableBlockPos.set(x, y, z));
-        if (type == BlockPathTypes.WATER) {
+        PathType type = getPathTypeFromState(context.level(), mutableBlockPos.set(x, y, z));
+        if (type == PathType.WATER) {
             for (Direction direction : Direction.Plane.HORIZONTAL) {
-                BlockPathTypes neighbourType = getBlockPathTypeRaw(level, mutableBlockPos.set(x, y, z).move(direction));
-                if (neighbourType != BlockPathTypes.BLOCKED) continue;
-                return BlockPathTypes.WATER_BORDER;
+                PathType neighbourType = getPathTypeFromState(context.level(), mutableBlockPos.set(x, y, z).move(direction));
+                if (neighbourType != PathType.BLOCKED) continue;
+                return PathType.WATER_BORDER;
             }
-            return BlockPathTypes.WATER;
+            return PathType.WATER;
         }
         if (!isAmphibious()) {
-            return BlockPathTypes.BLOCKED;
+            return PathType.BLOCKED;
         }
-        return getBlockPathTypeStatic(level, mutableBlockPos);
+        return getPathTypeStatic(context, mutableBlockPos.set(x, y, z));
     }
 }

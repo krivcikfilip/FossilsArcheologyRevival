@@ -23,8 +23,8 @@ public class ToyScratchingPost extends ToyBase {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(WOOD_TYPE, WoodType.OAK.name());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(WOOD_TYPE, WoodType.OAK.name());
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.github.teamfossilsarcheology.fossil.world.feature.placement.ModPlaced
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -31,7 +31,7 @@ public class ModBiomes {
         return ResourceKey.create(Registries.BIOME, FossilMod.location(name));
     }
 
-    public static void bootstrap(BootstapContext<Biome> context) {
+    public static void bootstrap(BootstrapContext<Biome> context) {
         context.register(ANU_LAIR_KEY, anuLair(context.lookup(Registries.PLACED_FEATURE), context.lookup(Registries.CONFIGURED_CARVER)));
         context.register(TREASURE_ROOM_KEY, treasureRoom(context.lookup(Registries.PLACED_FEATURE), context.lookup(Registries.CONFIGURED_CARVER)));
         context.register(VOLCANO_KEY, volcano(context.lookup(Registries.PLACED_FEATURE), context.lookup(Registries.CONFIGURED_CARVER)));

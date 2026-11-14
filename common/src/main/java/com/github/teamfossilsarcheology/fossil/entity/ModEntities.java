@@ -78,7 +78,12 @@ public class ModEntities {
     public static final RegistrySupplier<EntityType<Protoceratops>> PROTOCERATOPS = registerDino("protoceratops", Protoceratops::new, 1.5f, 1.25f);
     public static final RegistrySupplier<EntityType<Psittacosaurus>> PSITTACOSAURUS = registerDino("psittacosaurus", Psittacosaurus::new, 1.5f, 1.25f);
     public static final RegistrySupplier<EntityType<Pteranodon>> PTERANODON = registerDino("pteranodon", Pteranodon::new, 0.7f, 1f);
-    public static final RegistrySupplier<EntityType<Quagga>> QUAGGA = registerDino("quagga", Quagga::new, 1.3964844f, 1.6f);
+    //PORT(1.21.1): eye height (AbstractHorse#getStandingEyeHeight = 0.95 * height) and the riding offset (Quagga#getPassengersRidingOffset)
+    //moved to the builder in 1.20.5. 1.20.1: passenger at 0.75 * 1.6 - 0.25 (chested horse) + 0.25 (quagga) = 1.2 above the feet with a player
+    //offset of -0.35. 1.21.1 player vehicle attachment is 0.6 -> passenger attachment 1.45
+    //PORT-TODO(1.21.1): verify the quagga seat height and eye height in game (values derived from 1.20.1 code, not tested)
+    public static final RegistrySupplier<EntityType<Quagga>> QUAGGA = ENTITIES.register("quagga", () -> EntityType.Builder.of(Quagga::new, MobCategory.CREATURE)
+            .sized(1.3964844f, 1.6f).eyeHeight(1.52f).passengerAttachments(1.45f).clientTrackingRange(8).build("quagga"));
     public static final RegistrySupplier<EntityType<Quetzalcoatlus>> QUETZALCOATLUS = registerDino("quetzalcoatlus", Quetzalcoatlus::new, 1f, 2f);
     public static final RegistrySupplier<EntityType<Sarcosuchus>> SARCOSUCHUS = registerDino("sarcosuchus", Sarcosuchus::new, 2, 1);
     public static final RegistrySupplier<EntityType<Smilodon>> SMILODON = registerDino("smilodon", Smilodon::new, 1.2f, 1.4f);
@@ -102,8 +107,11 @@ public class ModEntities {
 
     public static final RegistrySupplier<EntityType<Failuresaurus>> FAILURESAURUS = ENTITIES.register("failuresaurus",
             () -> EntityType.Builder.of(Failuresaurus::new, MobCategory.MONSTER).sized(0.9f, 1).build("failuresaurus"));
+    //PORT(1.21.1): Slime#getDefaultDimensions scales by getSize() only (1.20.1 used 0.255 * getSize()), so the base size is 2.04 * 0.255
+    //like vanilla's slime (0.52). Eye height was 0.625 * height in 1.20.1 (Slime#getStandingEyeHeight)
+    //PORT-TODO(1.21.1): verify tar slime hitbox sizes in game (Slime#getDefaultDimensions = type dimensions * getSize())
     public static final RegistrySupplier<EntityType<TarSlime>> TAR_SLIME = ENTITIES.register("tar_slime",
-            () -> EntityType.Builder.of(TarSlime::new, MobCategory.MONSTER).sized(2.04f, 2.04f).build("tar_slime"));
+            () -> EntityType.Builder.of(TarSlime::new, MobCategory.MONSTER).sized(0.52f, 0.52f).eyeHeight(0.325f).build("tar_slime"));
     public static final RegistrySupplier<EntityType<Anubite>> ANUBITE = ENTITIES.register("anubite",
             () -> EntityType.Builder.of(Anubite::new, MobCategory.MONSTER).sized(1, 2.3f).fireImmune().build("anubite"));
     public static final RegistrySupplier<EntityType<AnuBoss>> ANU_BOSS = ENTITIES.register("anu_boss",
@@ -112,8 +120,9 @@ public class ModEntities {
     public static final RegistrySupplier<EntityType<AnuDead>> ANU_DEAD = ENTITIES.register("anu_dead",
             () -> EntityType.Builder.of(AnuDead::new, MobCategory.MONSTER).sized(1.8f, 0.8f).fireImmune().build("anu_dead"));
     public static final RegistrySupplier<EntityType<AnuTotem>> ANU_TOTEM = registerMisc("anu_totem", AnuTotem::new, 0.9f, 1.8f, 5, 20);
+    //PORT(1.21.1): PiglinBrute#getStandingEyeHeight (1.74) moved to the builder
     public static final RegistrySupplier<EntityType<SentryPiglin>> SENTRY_PIGLIN = ENTITIES.register("sentry_piglin",
-            () -> EntityType.Builder.of(SentryPiglin::new, MobCategory.MONSTER).sized(0.8f, 2).fireImmune().build("sentry_piglin"));
+            () -> EntityType.Builder.of(SentryPiglin::new, MobCategory.MONSTER).sized(0.8f, 2).eyeHeight(1.74f).fireImmune().build("sentry_piglin"));
 
     public static final RegistrySupplier<EntityType<StoneTablet>> STONE_TABLET = registerMisc("stone_tablet", StoneTablet::new, 0.5f, 0.5f, 10, Integer.MAX_VALUE);
 

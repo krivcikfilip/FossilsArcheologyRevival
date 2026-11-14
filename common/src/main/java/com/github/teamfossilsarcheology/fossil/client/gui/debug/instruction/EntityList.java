@@ -21,18 +21,29 @@ public class EntityList extends ContainerObjectSelectionList<EntityList.EntityEn
     private final Consumer<Entity> consumer;
 
     public EntityList(int x0, int width, int height, List<LivingEntity> entities, Minecraft minecraft, Consumer<Entity> function) {
-        super(minecraft, 200, height, 60, height, 25);
+        //PORT(1.21.1): (minecraft, width, height, y, itemHeight); the list height is y1 - y0 of 1.20.1
+        super(minecraft, 200, height - 60, 60, 25);
         entities.forEach(entity -> addEntry(new EntityEntry(entity)));
-        setRenderBackground(false);
-        setRenderTopAndBottom(false);
-        this.x0 = x0;
-        this.x1 = x0 + width;
+        //PORT(1.21.1): x0/x1 fields -> widget position and width
+        setX(x0);
+        setWidth(width);
         this.consumer = function;
     }
 
+    //PORT(1.21.1): replaces setRenderBackground(false)
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    protected void renderListBackground(GuiGraphics guiGraphics) {
+    }
+
+    //PORT(1.21.1): replaces setRenderTopAndBottom(false)
+    @Override
+    protected void renderListSeparators(GuiGraphics guiGraphics) {
+    }
+
+    //PORT(1.21.1): AbstractWidget#render is final
+    @Override
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
         if (!isMouseOver(mouseX, mouseY)) {
             InstructionTab.entityListHighlight = null;
         }
@@ -40,7 +51,7 @@ public class EntityList extends ContainerObjectSelectionList<EntityList.EntityEn
 
     @Override
     protected int getScrollbarPosition() {
-        return x0 + width - 6;
+        return getX() + width - 6;
     }
 
     protected class EntityEntry extends ContainerObjectSelectionList.Entry<EntityEntry> {

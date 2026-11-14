@@ -41,8 +41,8 @@ public class ToyBall extends ToyBase {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(COLOR_ID, DyeColor.WHITE.getId());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(COLOR_ID, DyeColor.WHITE.getId());
     }
 
     @Override
@@ -207,7 +207,7 @@ public class ToyBall extends ToyBase {
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yRot, float xRot, int lerpSteps, boolean teleport) {
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int lerpSteps) {
         this.lerpX = x;
         this.lerpY = y;
         this.lerpZ = z;

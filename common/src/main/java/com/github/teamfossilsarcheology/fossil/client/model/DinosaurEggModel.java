@@ -53,7 +53,7 @@ public class DinosaurEggModel extends EntityModel<DinosaurEgg> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float r, float g, float b, float alpha) {
-        model.render(poseStack, buffer, packedLight, packedOverlay, r, g, b, alpha);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        model.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 }

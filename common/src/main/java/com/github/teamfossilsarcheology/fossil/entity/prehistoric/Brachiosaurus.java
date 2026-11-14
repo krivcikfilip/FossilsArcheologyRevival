@@ -29,11 +29,12 @@ public class Brachiosaurus extends Prehistoric {
     }
 
     @Override
-    public @NotNull EntityDimensions getDimensions(Pose poseIn) {
+    protected @NotNull EntityDimensions getDefaultDimensions(Pose poseIn) {
+        //PORT(1.21.1): was getDimensions(Pose), which is final in LivingEntity now
         if (poseIn == Pose.SLEEPING) {
-            return super.getDimensions(poseIn).scale(1.2f, 0.5f);
+            return super.getDefaultDimensions(poseIn).scale(1.2f, 0.5f);
         }
-        return super.getDimensions(poseIn);
+        return super.getDefaultDimensions(poseIn);
     }
 
     @Override

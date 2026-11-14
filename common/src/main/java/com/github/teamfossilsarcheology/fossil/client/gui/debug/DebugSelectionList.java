@@ -17,8 +17,12 @@ public class DebugSelectionList<E extends ContainerObjectSelectionList.Entry<E>>
     protected final int rowWidth;
     private GuiEventListener focused;
 
+    /**
+     * PORT(1.21.1): AbstractSelectionList is a widget now: (minecraft, width, height, y, itemHeight) where height is the list
+     * height (1.20.1: y0..y1). The old screen height parameter is no longer needed but kept for the callers.
+     */
     public DebugSelectionList(Minecraft minecraft, int rowWidth, int width, int height, int y0, int y1, int itemHeight) {
-        super(minecraft, width, height, y0, y1, itemHeight);
+        super(minecraft, width, y1 - y0, y0, itemHeight);
         this.rowWidth = rowWidth;
     }
 
@@ -58,9 +62,13 @@ public class DebugSelectionList<E extends ContainerObjectSelectionList.Entry<E>>
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
+    /**
+     * PORT(1.21.1): renderList -> renderListItems/renderWidget. The extra widgets (controller buttons etc.) are placed outside
+     * the list area, so they are rendered after the list (outside of its scissor area) instead of inside renderListItems.
+     */
     @Override
-    protected void renderList(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderList(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
         renderables.forEach(renderable -> renderable.render(guiGraphics, mouseX, mouseY, partialTick));
     }
 

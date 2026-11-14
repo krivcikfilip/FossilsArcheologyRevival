@@ -1,25 +1,33 @@
 package com.github.teamfossilsarcheology.fossil.compat.geckolib;
 
-import com.github.teamfossilsarcheology.fossil.mixin.AnimatableManagerAccessor;
 import com.github.teamfossilsarcheology.fossil.mixin.AnimationControllerAccessor;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
-import software.bernie.geckolib.core.animatable.model.CoreGeoModel;
-import software.bernie.geckolib.core.animation.*;
-import software.bernie.geckolib.core.keyframe.AnimationPoint;
-import software.bernie.geckolib.core.keyframe.BoneAnimationQueue;
-import software.bernie.geckolib.core.state.BoneSnapshot;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationProcessor;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.EasingType;
+import software.bernie.geckolib.animation.keyframe.AnimationPoint;
+import software.bernie.geckolib.animation.keyframe.BoneAnimationQueue;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.model.GeoModel;
 
 import java.util.Map;
 
+/**
+ * PORT(1.21.1): GeckoLib 4.9.3 (1.21.1): core.* packages flattened, CoreGeoModel/CoreGeoBone -> GeoModel/GeoBone.
+ * Logic compared against refs/geckolib (tag 4.9.3) AnimationProcessor#tickAnimation: the per-controller part is unchanged apart from
+ * GeckoLib now reading the bone from BoneAnimationQueue#bone() (we iterate the bones ourselves, so not needed here).
+ */
 public class AnimationProcessorOverride {
 
     /**
      * Replaces parts of  {@link AnimationProcessor#tickAnimation}
      * with the goal of making animations additive across controllers
      */
-    public static <T extends GeoAnimatable> void tickAdditiveAnimations(T animatable, CoreGeoModel<T> model, double animTime, AnimationState<T> state, boolean reloadAnimations,
-                                                                        Map<String, CoreGeoBone> bones, boolean crashWhenCantFindBone,
+    public static <T extends GeoAnimatable> void tickAdditiveAnimations(T animatable, GeoModel<T> model, double animTime, AnimationState<T> state, boolean reloadAnimations,
+                                                                        Map<String, GeoBone> bones, boolean crashWhenCantFindBone,
                                                                         AnimatableManager<T> manager, Map<String, BoneSnapshot> boneSnapshots) {
         for (AnimationController<T> controller : manager.getAnimationControllers().values()) {
             if (reloadAnimations) {
@@ -27,7 +35,8 @@ public class AnimationProcessorOverride {
                 controller.getBoneAnimationQueues().clear();
             }
 
-            ((AnimationControllerAccessor<?>) controller).setIsJustStarting(((AnimatableManagerAccessor) manager).isFirstTick());
+            //PORT(1.21.1): AnimatableManagerAccessor#isFirstTick was renamed by core; GeckoLib 4.9.3 has a public AnimatableManager#isFirstTick()
+            ((AnimationControllerAccessor<?>) controller).setIsJustStarting(manager.isFirstTick());
 
             state.withController(controller);
             // Process animations and add new values to the point queues
@@ -35,7 +44,7 @@ public class AnimationProcessorOverride {
         }
 
         //FA: Moved bone iteration to outer loop to have an easier time adding the animations
-        for (CoreGeoBone bone : bones.values()) {
+        for (GeoBone bone : bones.values()) {
             //FA: These are only true for the first animation. When false the previous bone value will be added to the new one
             boolean firstRot = true;
             boolean firstPos = true;

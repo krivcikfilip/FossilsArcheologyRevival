@@ -41,7 +41,7 @@ public class ToyScratchingPostModel extends EntityModel<ToyScratchingPost> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack stack, VertexConsumer buffer, int packedLight, int packedOverlay, float r, float g, float b, float alpha) {
-        model.render(stack, buffer, packedLight, packedOverlay, r, g, b, alpha);
+    public void renderToBuffer(PoseStack stack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        model.render(stack, buffer, packedLight, packedOverlay, color);
     }
 }

@@ -21,6 +21,6 @@ public class LaserPointRenderer extends EntityRenderer<LaserPointEntity> {
     @Override
     public ResourceLocation getTextureLocation(LaserPointEntity entity) {
         // doesn't matter, but we need to return some texture
-        return new ResourceLocation("minecraft", "textures/particle/glitter_0.png");
+        return ResourceLocation.withDefaultNamespace("textures/particle/glitter_0.png");
     }
 }

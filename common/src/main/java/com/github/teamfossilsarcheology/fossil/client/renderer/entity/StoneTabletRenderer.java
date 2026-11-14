@@ -18,7 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 public class StoneTabletRenderer extends EntityRenderer<StoneTablet> implements RendererFabricFix {
@@ -63,7 +62,6 @@ public class StoneTabletRenderer extends EntityRenderer<StoneTablet> implements 
     private void renderTablet(PoseStack poseStack, VertexConsumer vertexConsumer, StoneTablet entity, int width, int height, int texU, int texV) {
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();
-        Matrix3f matrix3f = pose.normal();
         float offsetX = -width / 2.0f;
         float offsetY = -height / 2.0f;
         for (int blockX = 0; blockX < width / 16; ++blockX) {
@@ -80,25 +78,26 @@ public class StoneTabletRenderer extends EntityRenderer<StoneTablet> implements 
                 float minTexY = (texV + height - blockZ * 16) / 256f;
                 float maxTexY = (texV + height - (blockZ + 1) * 16) / 256f;
                 //Front
-                vertex(matrix4f, matrix3f, vertexConsumer, maxX, minY, maxTexX, minTexY, 0.4f, 0, 0, -1, light);//z=-0.5f
-                vertex(matrix4f, matrix3f, vertexConsumer, minX, minY, minTexX, minTexY, 0.4f, 0, 0, -1, light);
-                vertex(matrix4f, matrix3f, vertexConsumer, minX, maxY, minTexX, maxTexY, 0.4f, 0, 0, -1, light);
-                vertex(matrix4f, matrix3f, vertexConsumer, maxX, maxY, maxTexX, maxTexY, 0.4f, 0, 0, -1, light);
+                vertex(matrix4f, pose, vertexConsumer, maxX, minY, maxTexX, minTexY, 0.4f, 0, 0, -1, light);//z=-0.5f
+                vertex(matrix4f, pose, vertexConsumer, minX, minY, minTexX, minTexY, 0.4f, 0, 0, -1, light);
+                vertex(matrix4f, pose, vertexConsumer, minX, maxY, minTexX, maxTexY, 0.4f, 0, 0, -1, light);
+                vertex(matrix4f, pose, vertexConsumer, maxX, maxY, maxTexX, maxTexY, 0.4f, 0, 0, -1, light);
 
                 minTexY = (texV + (height + 128) - blockZ * 16) / 256f;
                 maxTexY = (texV + (height + 128) - (blockZ + 1) * 16) / 256f;
-                vertex(matrix4f, matrix3f, vertexConsumer, maxX, maxY, maxTexX, maxTexY, 0.5f, 0, 0, 1, light);//z=0.5f
-                vertex(matrix4f, matrix3f, vertexConsumer, minX, maxY, minTexX, maxTexY, 0.5f, 0, 0, 1, light);
-                vertex(matrix4f, matrix3f, vertexConsumer, minX, minY, minTexX, minTexY, 0.5f, 0, 0, 1, light);
-                vertex(matrix4f, matrix3f, vertexConsumer, maxX, minY, maxTexX, minTexY, 0.5f, 0, 0, 1, light);
+                vertex(matrix4f, pose, vertexConsumer, maxX, maxY, maxTexX, maxTexY, 0.5f, 0, 0, 1, light);//z=0.5f
+                vertex(matrix4f, pose, vertexConsumer, minX, maxY, minTexX, maxTexY, 0.5f, 0, 0, 1, light);
+                vertex(matrix4f, pose, vertexConsumer, minX, minY, minTexX, minTexY, 0.5f, 0, 0, 1, light);
+                vertex(matrix4f, pose, vertexConsumer, maxX, minY, maxTexX, minTexY, 0.5f, 0, 0, 1, light);
             }
         }
     }
 
-    private void vertex(Matrix4f matrix4f, Matrix3f matrix3f, VertexConsumer vertexConsumer, float x, float y, float u, float v, float z, int k,
+    //PORT(1.21.1): 1.21 vertex API, normals transformed with the PoseStack.Pose
+    private void vertex(Matrix4f matrix4f, PoseStack.Pose pose, VertexConsumer vertexConsumer, float x, float y, float u, float v, float z, int k,
                         int l, int m, int n) {
-        vertexConsumer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(n).normal(matrix3f, k, l, m).endVertex();
+        vertexConsumer.addVertex(matrix4f, x, y, z).setColor(255, 255, 255, 255).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(n).setNormal(pose, k, l, m);
     }
 
     @Override

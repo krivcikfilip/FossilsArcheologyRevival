@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.pathfinder.Target;
@@ -239,26 +239,26 @@ public class WaterPathFinder extends PlayerPathFinder {
                         //TODO: Use PathRenderer#renderLines to visualize these rays
                         BlockState block = nodeEvaluator.level.getBlockState(pos.set(x, y, z));
                         sweeped.add(pos.immutable());
-                        if (!block.isPathfindable(nodeEvaluator.level, pos, PathComputationType.WATER)){
+                        if (!block.isPathfindable(PathComputationType.WATER)){
                             System.out.format("%s, %s", block.getBlock(), pos);
                             System.out.println();
                             return false;
                         }
                     }
-                    BlockPathTypes below = nodeEvaluator.getBlockPathType(nodeEvaluator.level, x, y0 - 1, z);
-                    if (below == BlockPathTypes.LAVA || below == BlockPathTypes.OPEN){
+                    PathType below = nodeEvaluator.getBlockPathType(nodeEvaluator.level, x, y0 - 1, z);
+                    if (below == PathType.LAVA || below == PathType.OPEN){
                         System.out.format("below: %s", below);
                         System.out.println();
                         return false;
                     }
-                    BlockPathTypes in = nodeEvaluator.getBlockPathType(nodeEvaluator.level, x, y0, z);
+                    PathType in = nodeEvaluator.getBlockPathType(nodeEvaluator.level, x, y0, z);
                     float malus = PathingDebug.getPathfindingMalus(in);
                     if (malus < 0.0F || malus > 8.0F) {
                         System.out.format("in: %s, %s", in, malus);
                         System.out.println();
                         return false;
                     }
-                    if (in == BlockPathTypes.DAMAGE_FIRE || in == BlockPathTypes.DANGER_FIRE || in == BlockPathTypes.DAMAGE_OTHER)
+                    if (in == PathType.DAMAGE_FIRE || in == PathType.DANGER_FIRE || in == PathType.DAMAGE_OTHER)
                         return false;
                 }
             }

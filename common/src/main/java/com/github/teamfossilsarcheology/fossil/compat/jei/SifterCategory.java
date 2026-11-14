@@ -5,6 +5,7 @@ import com.github.teamfossilsarcheology.fossil.recipe.SifterRecipe;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.NotNull;
 
 public class SifterCategory extends MultiOutputCategory<SifterRecipe> {
@@ -18,7 +19,7 @@ public class SifterCategory extends MultiOutputCategory<SifterRecipe> {
     }
 
     @Override
-    public @NotNull RecipeType<SifterRecipe> getRecipeType() {
+    public @NotNull RecipeType<RecipeHolder<SifterRecipe>> getRecipeType() {
         return FossilJEIPlugin.SIFTER;
     }
 }

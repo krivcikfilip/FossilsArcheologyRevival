@@ -1,6 +1,5 @@
 package com.github.teamfossilsarcheology.fossil.entity.monster;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
@@ -36,11 +35,11 @@ public class SentryPiglin extends PiglinBrute {
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
-        SpawnGroupData spawnGroupData = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+        SpawnGroupData spawnGroupData = super.finalizeSpawn(level, difficulty, reason, spawnData);
         ((GroundPathNavigation) getNavigation()).setCanOpenDoors(true);
         populateDefaultEquipmentSlots(level.getRandom(), difficulty);
-        populateDefaultEquipmentEnchantments(random, difficulty);
+        populateDefaultEquipmentEnchantments(level, random, difficulty);
         return spawnGroupData;
     }
 }

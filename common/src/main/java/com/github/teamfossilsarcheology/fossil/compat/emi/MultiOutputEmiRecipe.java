@@ -1,7 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.compat.emi;
 
 import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
-import com.mojang.blaze3d.vertex.Tesselator;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -19,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,8 +34,10 @@ public abstract class MultiOutputEmiRecipe<T extends MultiOutputAndSlotsRecipe> 
     private final List<EmiStack> output;
     private final List<SlotItem> slots;
 
-    protected MultiOutputEmiRecipe(T recipe) {
-        this.id = recipe.getId();
+    //PORT(1.21.1): RecipeManager returns RecipeHolders; the id comes from RecipeHolder#id() (recipes lost getId())
+    protected MultiOutputEmiRecipe(RecipeHolder<T> holder) {
+        T recipe = holder.value();
+        this.id = holder.id();
         this.input = List.of(EmiIngredient.of(recipe.getInput()));
         this.output = recipe.getWeightedOutputs().values().stream().map(EmiStack::of).toList();
         NavigableMap<Double, Pair<ItemStack, TagKey<Item>>> newMap = new TreeMap<>();
@@ -156,7 +158,8 @@ public abstract class MultiOutputEmiRecipe<T extends MultiOutputAndSlotsRecipe> 
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0.0, 0.0, 100 + 200.0F);
             String string = new DecimalFormat("#.#'%'").format(probability);
-            MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            //PORT(1.21.1): Tesselator#getBuilder is gone (1.21), use the GuiGraphics buffer source
+            MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
             float xOffset = Math.min(11, fr.width(string) / 2f);
             fr.drawInBatch(string, (xPosition + 8 - xOffset), (yPosition + 16 + 1), 4210752, false,
                     guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);

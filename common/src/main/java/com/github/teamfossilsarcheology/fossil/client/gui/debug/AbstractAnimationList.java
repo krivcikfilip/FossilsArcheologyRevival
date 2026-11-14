@@ -27,33 +27,46 @@ public class AbstractAnimationList extends DebugSelectionList<AbstractAnimationL
 
     public AbstractAnimationList(int x0, int height, int itemHeight, int yOffset, Map<String, ? extends AnimationInfo> animations, Minecraft minecraft, Consumer<AnimationObject> function) {
         super(minecraft, 100, 215, height, yOffset, height + 60, itemHeight);
-        this.x0 = x0;
-        this.x1 = x0 + width;
+        //PORT(1.21.1): x0/x1 fields -> widget position (the width stays the same)
+        setX(x0);
         List<String> sortedAnimations = animations.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(Map.Entry::getKey).toList();
         sortedAnimations.forEach(animation -> addEntry(new AnimationEntry(animation)));
-        setRenderBackground(false);
-        setRenderTopAndBottom(false);
         this.consumer = function;
     }
 
+    //PORT(1.21.1): setRenderBackground(false) was removed (1.20.5), the list background is a separate method now
+    @Override
+    protected void renderListBackground(GuiGraphics guiGraphics) {
+    }
+
+    //PORT(1.21.1): setRenderTopAndBottom(false) was removed (1.20.5), the separators are a separate method now
+    @Override
+    protected void renderListSeparators(GuiGraphics guiGraphics) {
+    }
+
+    /**
+     * PORT(1.21.1): getEntryAtPosition is final in vanilla; this override needs the {@code extendable} entry in fossil.accesswidener
+     * (kept by core).
+     * PORT-TODO(1.21.1): verify the AW 'extendable' entry is converted to an AT by Loom on NeoForge (otherwise this fails to load)
+     */
     @Override
     protected @Nullable AnimationEntry getEntryAtPosition(double mouseX, double mouseY) {
         int x1 = getEntryLeftPos() + getRowWidth();
-        int m = Mth.floor(mouseY - (double) y0) - headerHeight + (int) getScrollAmount() - 4;
+        int m = Mth.floor(mouseY - (double) getY()) - headerHeight + (int) getScrollAmount() - 4;
         int n = m / itemHeight;
-        if (mouseX < getScrollbarPosition() && mouseX >= x0 && mouseX <= x1 && n >= 0 && m >= 0 && n < getItemCount()) {
+        if (mouseX < getScrollbarPosition() && mouseX >= getX() && mouseX <= x1 && n >= 0 && m >= 0 && n < getItemCount()) {
             return children().get(n);
         }
         return null;
     }
 
     protected int getEntryLeftPos() {
-        return x0;
+        return getX();
     }
 
     @Override
     protected int getScrollbarPosition() {
-        return x0 + rowWidth + 6;
+        return getX() + rowWidth + 6;
     }
 
     protected class AnimationEntry extends ContainerObjectSelectionList.Entry<AnimationEntry> {

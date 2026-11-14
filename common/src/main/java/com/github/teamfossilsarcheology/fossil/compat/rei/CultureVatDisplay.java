@@ -6,11 +6,12 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class CultureVatDisplay extends WithFuelDisplay {
     public static final CategoryIdentifier<CultureVatDisplay> ID = CategoryIdentifier.of(FossilMod.location("culture_vat"));
 
-    public CultureVatDisplay(CultureVatRecipe recipe) {
+    public CultureVatDisplay(RecipeHolder<CultureVatRecipe> recipe) {
         super(recipe);
     }
 

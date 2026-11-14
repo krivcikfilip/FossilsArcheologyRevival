@@ -9,6 +9,7 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class CultureVatEmiRecipe extends WithFuelEmiRecipe<CultureVatRecipe> {
     private static final EmiTexture EMPTY_PROGRESS = new EmiTexture(TEXTURE, 78, 22, PROGRESS_WIDTH, PROGRESS_HEIGHT);
     private static final EmiTexture FULL_PROGRESS = new EmiTexture(TEXTURE, 176, FUEL_HEIGHT, PROGRESS_WIDTH, PROGRESS_HEIGHT);
 
-    protected CultureVatEmiRecipe(CultureVatRecipe recipe) {
+    protected CultureVatEmiRecipe(RecipeHolder<CultureVatRecipe> recipe) {
         super(recipe);
     }
 

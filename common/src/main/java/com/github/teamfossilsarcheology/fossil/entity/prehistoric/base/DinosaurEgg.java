@@ -23,6 +23,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -82,7 +83,7 @@ public class DinosaurEgg extends LivingEntity implements EntitySpawnExtension {
                 }
             }
             prehistoric.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(entity.blockPosition()),
-                    MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0), null);
+                    MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0));
             prehistoric.grow(0);
         }
         entity.moveTo(x, y, z, level.random.nextFloat() * 360, 0);
@@ -91,10 +92,10 @@ public class DinosaurEgg extends LivingEntity implements EntitySpawnExtension {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(HATCHING_TIME, 0);
-        entityData.define(GOLDEN_EGG, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(HATCHING_TIME, 0);
+        builder.define(GOLDEN_EGG, false);
     }
 
     @Override
@@ -236,8 +237,8 @@ public class DinosaurEgg extends LivingEntity implements EntitySpawnExtension {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkManager.createAddEntityPacket(this);
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+        return NetworkManager.createAddEntityPacket(this, serverEntity);
     }
 
     @Override

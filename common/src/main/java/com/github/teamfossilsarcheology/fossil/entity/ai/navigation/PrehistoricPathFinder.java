@@ -45,7 +45,7 @@ public class PrehistoricPathFinder extends PathFinder {
         closedSet.clear();
         this.nodeEvaluator.prepare(region, mob);
         Node node = nodeEvaluator.getStart();
-        Map<Target, BlockPos> map = targetPositions.stream().collect(Collectors.toMap(blockPos -> nodeEvaluator.getGoal(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Function.identity()));
+        Map<Target, BlockPos> map = targetPositions.stream().collect(Collectors.toMap(blockPos -> nodeEvaluator.getTarget(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Function.identity()));
         PatchedPath path = findPatchedPath(region.getProfiler(), node, map, maxRange, accuracy, searchDepthMultiplier);
         if (DEBUG && path != null) path.setDebug(openSet.getHeap(), closedSet.toArray(Node[]::new), map.keySet());
         this.nodeEvaluator.done();

@@ -28,7 +28,7 @@ public class ModVillages {
     public static final Tuple ARCHEOLOGIST_HOUSE_TAIGA = createStructure("houses/archeo_house_taiga_top", 1);
     public static final Tuple PALEONTOLOGIST_HOUSE_TAIGA = createStructure("houses/paleo_house_taiga", 1);
     private static final ResourceKey<StructureProcessorList> EMPTY_PROCESSOR_LIST_KEY = ResourceKey.create(
-            Registries.PROCESSOR_LIST, new ResourceLocation("minecraft", "empty"));
+            Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace("empty"));
 
     private static Tuple createStructure(String name, int weight) {
         return new Tuple(FossilMod.MOD_ID + ":" + name, weight);
@@ -54,7 +54,7 @@ public class ModVillages {
 
     public record Tuple(String location, int weight) {
         public ResourceLocation resourceLocation() {
-            return new ResourceLocation(location);
+            return ResourceLocation.parse(location);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.entity.prehistoric.base;
 
 import com.github.teamfossilsarcheology.fossil.util.Gender;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,9 +37,9 @@ public abstract class PrehistoricSwimmingBucketable extends PrehistoricSwimming 
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(FROM_BUCKET, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FROM_BUCKET, false);
     }
 
     @Override
@@ -70,16 +72,18 @@ public abstract class PrehistoricSwimmingBucketable extends PrehistoricSwimming 
     @Override
     public void saveToBucketTag(ItemStack bucket) {
         Bucketable.saveDefaultDataToBucketTag(this, bucket);
-        CompoundTag tag = bucket.getOrCreateTag();
-        if (getOwnerUUID() != null) {
-            tag.putUUID("Owner", getOwnerUUID());
-        }
-        moodSystem.saveAdditional(tag);
-        tag.putInt("MatingCooldown", getMatingCooldown());
-        tag.putInt("Hunger", getHunger());
-        tag.putInt("Age", getAge());
-        tag.putBoolean("AgingDisabled", isAgingDisabled());
-        tag.putByte("Gender", (byte) getGender().ordinal());
+        //PORT(1.21.1): item NBT -> vanilla BUCKET_ENTITY_DATA component (same keys as 1.20.1)
+        CustomData.update(DataComponents.BUCKET_ENTITY_DATA, bucket, tag -> {
+            if (getOwnerUUID() != null) {
+                tag.putUUID("Owner", getOwnerUUID());
+            }
+            moodSystem.saveAdditional(tag);
+            tag.putInt("MatingCooldown", getMatingCooldown());
+            tag.putInt("Hunger", getHunger());
+            tag.putInt("Age", getAge());
+            tag.putBoolean("AgingDisabled", isAgingDisabled());
+            tag.putByte("Gender", (byte) getGender().ordinal());
+        });
     }
 
     @Override
@@ -88,9 +92,9 @@ public abstract class PrehistoricSwimmingBucketable extends PrehistoricSwimming 
         if (tag.contains("Owner")) {
             try {
                 setOwnerUUID(tag.getUUID("Owner"));
-                setTame(true);
+                setTame(true, true);
             } catch (IllegalArgumentException e) {
-                setTame(false);
+                setTame(false, true);
             }
         }
         moodSystem.load(tag);

@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -235,8 +236,12 @@ public class MeganeuraAttachSystem extends AISystem {
         setAttachmentFace(Direction.from3DDataValue(tag.getInt("AttachFace")));
         setAttached(tag.getBoolean("Attached"));
         setAttachmentPos(new Vec3(tag.getDouble("AttachX"), tag.getDouble("AttachY"), tag.getDouble("AttachZ")));
-        if (tag.contains("AttachPos")) {
-            targetBlockPos = NbtUtils.readBlockPos(tag.getCompound("AttachPos"));
+        if (tag.contains("AttachPos", Tag.TAG_COMPOUND)) {
+            //PORT(1.21.1): 1.20.1 saved the pos as a compound {X, Y, Z}. NbtUtils writes an int array since 1.20.5
+            CompoundTag posTag = tag.getCompound("AttachPos");
+            targetBlockPos = new BlockPos(posTag.getInt("X"), posTag.getInt("Y"), posTag.getInt("Z"));
+        } else if (tag.contains("AttachPos")) {
+            NbtUtils.readBlockPos(tag, "AttachPos").ifPresent(pos -> targetBlockPos = pos);
         }
     }
 }

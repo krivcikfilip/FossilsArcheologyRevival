@@ -60,10 +60,8 @@ public class Quagga extends AbstractChestedHorse {
         return child;
     }
 
-    @Override
-    public double getPassengersRidingOffset() {
-        return super.getPassengersRidingOffset() + 0.25;
-    }
+    //PORT(1.21.1): getPassengersRidingOffset (+0.25 on top of AbstractChestedHorse's -0.25) was replaced by
+    //EntityType.Builder#passengerAttachments in ModEntities
 
     @Nullable
     @Override

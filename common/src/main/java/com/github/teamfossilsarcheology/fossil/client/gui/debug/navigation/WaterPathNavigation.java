@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -197,11 +197,11 @@ public class WaterPathNavigation extends PlayerPathNavigation {
     private boolean isCollisionAtColumn(int x, int minY, int z, int maxY, int stepY, BlockPos.MutableBlockPos pos) {
         for (int y = minY; y != maxY; y += stepY) {
             BlockState block = level.getBlockState(pos.set(x, y, z));
-            if (!block.isPathfindable(level, pos, PathComputationType.WATER)) {
+            if (!block.isPathfindable(PathComputationType.WATER)) {
                 return true;
             }
         }
-        BlockPathTypes in = nodeEvaluator.getBlockPathType(level, x, minY, z);
+        PathType in = nodeEvaluator.getBlockPathType(level, x, minY, z);
         float malus = PathingDebug.getPathfindingMalus(in);
         return malus < 0.0F || malus >= 8.0F;
     }

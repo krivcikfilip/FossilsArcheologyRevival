@@ -9,6 +9,7 @@ import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 public class FossilEmiPlugin implements EmiPlugin {
@@ -35,17 +36,18 @@ public class FossilEmiPlugin implements EmiPlugin {
         registry.addWorkstation(ANALYZER_CATEGORY, ANALYZER);
         registry.addWorkstation(SIFTER_CATEGORY, SIFTER);
 
+        //PORT(1.21.1): getAllRecipesFor returns RecipeHolders (EMI 1.1.x for 1.21 API unchanged otherwise, verified in EMI 1.21 branch)
         RecipeManager recipeManager = registry.getRecipeManager();
-        for (WorktableRecipe recipe : recipeManager.getAllRecipesFor(ModRecipes.WORKTABLE_TYPE.get())) {
+        for (RecipeHolder<WorktableRecipe> recipe : recipeManager.getAllRecipesFor(ModRecipes.WORKTABLE_TYPE.get())) {
             registry.addRecipe(new WorktableEmiRecipe(recipe));
         }
-        for (CultureVatRecipe recipe : recipeManager.getAllRecipesFor(ModRecipes.CULTURE_VAT_TYPE.get())) {
+        for (RecipeHolder<CultureVatRecipe> recipe : recipeManager.getAllRecipesFor(ModRecipes.CULTURE_VAT_TYPE.get())) {
             registry.addRecipe(new CultureVatEmiRecipe(recipe));
         }
-        for (AnalyzerRecipe recipe : recipeManager.getAllRecipesFor(ModRecipes.ANALYZER_TYPE.get())) {
+        for (RecipeHolder<AnalyzerRecipe> recipe : recipeManager.getAllRecipesFor(ModRecipes.ANALYZER_TYPE.get())) {
             registry.addRecipe(new AnalyzerEmiRecipe(recipe));
         }
-        for (SifterRecipe recipe : recipeManager.getAllRecipesFor(ModRecipes.SIFTER_TYPE.get())) {
+        for (RecipeHolder<SifterRecipe> recipe : recipeManager.getAllRecipesFor(ModRecipes.SIFTER_TYPE.get())) {
             registry.addRecipe(new SifterEmiRecipe(recipe));
         }
 

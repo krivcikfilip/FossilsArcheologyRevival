@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -24,7 +24,7 @@ public class PathingDebug {
     public static boolean addNodeToPathMode;
     public static int pickBlockOffset;
 
-    private static final Map<BlockPathTypes, Float> pathfindingMalus = Maps.newEnumMap(BlockPathTypes.class);
+    private static final Map<PathType, Float> pathfindingMalus = Maps.newEnumMap(PathType.class);
 
     public static void addToPath(BlockPos pos) {
         if (pathNavigation1 != null && pathNavigation1.getPath() != null) {
@@ -127,12 +127,12 @@ public class PathingDebug {
         return BlockPos.containing(eye.add(view.scale(pickBlockOffset+1)));
     }
 
-    public static float getPathfindingMalus(BlockPathTypes nodeType) {
+    public static float getPathfindingMalus(PathType nodeType) {
         Float float_ = pathfindingMalus.get(nodeType);
         return float_ == null ? nodeType.getMalus() : float_;
     }
 
-    public static void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
+    public static void setPathfindingMalus(PathType nodeType, float malus) {
         pathfindingMalus.put(nodeType, malus);
     }
 

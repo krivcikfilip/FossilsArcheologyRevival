@@ -6,11 +6,12 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class WorktableDisplay extends WithFuelDisplay {
     public static final CategoryIdentifier<WorktableDisplay> ID = CategoryIdentifier.of(FossilMod.location("worktable"));
 
-    public WorktableDisplay(WorktableRecipe recipe) {
+    public WorktableDisplay(RecipeHolder<WorktableRecipe> recipe) {
         super(recipe);
     }
 

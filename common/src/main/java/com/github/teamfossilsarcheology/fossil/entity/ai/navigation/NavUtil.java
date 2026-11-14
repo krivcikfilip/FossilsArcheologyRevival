@@ -6,10 +6,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.PathfindingContext;
 import net.minecraft.world.phys.Vec3;
 
 /*
@@ -50,6 +51,8 @@ public class NavUtil {
             stepLength[idx] = stepDelta[idx] < Float.POSITIVE_INFINITY ? stepDelta[idx] * dist : Float.POSITIVE_INFINITY;
         }
         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        //PORT(1.21.1): NodeEvaluator#getBlockPathType(BlockGetter, x, y, z) -> getPathType(PathfindingContext, x, y, z)
+        final PathfindingContext context = new PathfindingContext(mob.level(), mob);
         float previousStepLength = 0;
         do {
             //stepForward: pick axis with the shortest step
@@ -76,7 +79,7 @@ public class NavUtil {
             int maxZ = leadingEdges[2] + stepZ;
             for (int x = minX; x != maxX; x += stepX) {
                 for (int z = minZ; z != maxZ; z += stepZ) {
-                    if (isCollisionAtColumn(x, minY, z, maxY, stepY, type, mob, pos, nodeEvaluator)) {
+                    if (isCollisionAtColumn(x, minY, z, maxY, stepY, type, mob, pos, nodeEvaluator, context)) {
                         return false;
                     }
                 }
@@ -85,13 +88,13 @@ public class NavUtil {
         return true;
     }
 
-    private static boolean isCollisionAtColumn(int x, int minY, int z, int maxY, int stepY, PathComputationType type, Mob mob, BlockPos.MutableBlockPos pos, NodeEvaluator nodeEvaluator) {
+    private static boolean isCollisionAtColumn(int x, int minY, int z, int maxY, int stepY, PathComputationType type, Mob mob, BlockPos.MutableBlockPos pos, NodeEvaluator nodeEvaluator, PathfindingContext context) {
         if (type == PathComputationType.WATER) {
             //This should help when the column is partially outside the water
             boolean anyWater = false;
             for (int y = minY; y != maxY; y += stepY) {
                 BlockState block = mob.level().getBlockState(pos.set(x, y, z));
-                if (block.isPathfindable(mob.level(), pos, type)) {
+                if (block.isPathfindable(type)) {
                     anyWater = true;
                     break;
                 }
@@ -101,32 +104,54 @@ public class NavUtil {
             }
             for (int y = minY; y != maxY; y += stepY) {
                 BlockState block = mob.level().getBlockState(pos.set(x, y, z));
-                if (!block.isPathfindable(mob.level(), pos, PathComputationType.WATER) && !block.isPathfindable(mob.level(), pos, PathComputationType.LAND)) {
+                if (!block.isPathfindable(PathComputationType.WATER) && !block.isPathfindable(PathComputationType.LAND)) {
                     return true;
                 }
             }
         } else {
             for (int y = minY; y != maxY; y += stepY) {
                 BlockState block = mob.level().getBlockState(pos.set(x, y, z));
-                if (!block.isPathfindable(mob.level(), pos, type)) {
+                if (!block.isPathfindable(type)) {
                     return true;
                 }
             }
         }
 
-        BlockPathTypes in = nodeEvaluator.getBlockPathType(mob.level(), x, minY, z);
+        PathType in = nodeEvaluator.getPathType(context, x, minY, z);
         float malus = mob.getPathfindingMalus(in);
         if (malus < 0.0F || malus >= 8.0F) {
             return true;
         }
         if (type == PathComputationType.LAND) {
-            BlockPathTypes below = nodeEvaluator.getBlockPathType(mob.level(), x, minY - 1, z);
-            if (below == BlockPathTypes.WATER || below == BlockPathTypes.LAVA || below == BlockPathTypes.OPEN) {
+            PathType below = nodeEvaluator.getPathType(context, x, minY - 1, z);
+            if (below == PathType.WATER || below == PathType.LAVA || below == PathType.OPEN) {
                 return true;
             }
-            return in == BlockPathTypes.DAMAGE_FIRE || in == BlockPathTypes.DANGER_FIRE || in == BlockPathTypes.DAMAGE_OTHER;
+            return in == PathType.DAMAGE_FIRE || in == PathType.DANGER_FIRE || in == PathType.DAMAGE_OTHER;
         }
         return false;
+    }
+
+    /**
+     * PORT(1.21.1): replacement for the removed 1.20.1 WalkNodeEvaluator#evaluateBlockPathType. Same logic as the door/rail checks in
+     * 1.21.1 WalkNodeEvaluator#getPathTypeWithinMobBB
+     */
+    public static PathType evaluatePathType(NodeEvaluator nodeEvaluator, PathfindingContext context, Mob mob, PathType pathType) {
+        boolean canPassDoors = nodeEvaluator.canPassDoors();
+        if (pathType == PathType.DOOR_WOOD_CLOSED && nodeEvaluator.canOpenDoors() && canPassDoors) {
+            pathType = PathType.WALKABLE_DOOR;
+        }
+        if (pathType == PathType.DOOR_OPEN && !canPassDoors) {
+            pathType = PathType.BLOCKED;
+        }
+        if (pathType == PathType.RAIL) {
+            BlockPos mobPos = mob.blockPosition();
+            if (nodeEvaluator.getPathType(context, mobPos.getX(), mobPos.getY(), mobPos.getZ()) != PathType.RAIL
+                    && nodeEvaluator.getPathType(context, mobPos.getX(), mobPos.getY() - 1, mobPos.getZ()) != PathType.RAIL) {
+                pathType = PathType.UNPASSABLE_RAIL;
+            }
+        }
+        return pathType;
     }
 
     private static float chooseLengthForAxis(Direction.Axis axis, Vec3 vec) {

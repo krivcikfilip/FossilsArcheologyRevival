@@ -39,7 +39,7 @@ public class DinopediaBioLoader extends ResourceLoader<Map<String, Map<String, S
         String selectedLang = Minecraft.getInstance().options.languageCode;
         for (Map.Entry<ResourceLocation, Resource> entry : listResources(resourceManager).entrySet()) {
             String path = entry.getKey().getPath();
-            ResourceLocation locationWithLang = new ResourceLocation(entry.getKey().getNamespace(), path.substring(i, path.length() - suffix.length()));
+            ResourceLocation locationWithLang = ResourceLocation.fromNamespaceAndPath(entry.getKey().getNamespace(), path.substring(i, path.length() - suffix.length()));
             try {
                 String[] dinoInfo = locationWithLang.getPath().split("/");
                 if (selectedLang.equals(dinoInfo[0])) {

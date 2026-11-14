@@ -13,6 +13,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 
 public class ToyBallModel extends EntityModel<ToyBall> {
 
@@ -20,7 +21,8 @@ public class ToyBallModel extends EntityModel<ToyBall> {
 
     private final ModelPart model = createBodyLayer().bakeRoot();
     private float rotationX;
-    private float[] rgb;
+    //PORT(1.21.1): DyeColor#getTextureDiffuseColors (float[]) -> getTextureDiffuseColor (ARGB int)
+    private int rgb;
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
@@ -34,16 +36,17 @@ public class ToyBallModel extends EntityModel<ToyBall> {
     @Override
     public void setupAnim(ToyBall entity, float partialTick, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         rotationX = headPitch;
-        rgb = entity.getColor().getTextureDiffuseColors();
+        rgb = entity.getColor().getTextureDiffuseColor();
     }
 
     @Override
-    public void renderToBuffer(PoseStack stack, VertexConsumer buffer, int packedLight, int packedOverlay, float r, float g, float b, float alpha) {
+    public void renderToBuffer(PoseStack stack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
         stack.pushPose();
         stack.translate(0, 1.25, 0);
         stack.mulPose(Axis.XP.rotationDegrees(rotationX));
         stack.translate(0, -1.25, 0);
-        model.render(stack, buffer, packedLight, packedOverlay, rgb[0], rgb[1], rgb[2], alpha);
+        //Dye color replaces the tint rgb, the tint alpha is kept (as in 1.20.1)
+        model.render(stack, buffer, packedLight, packedOverlay, FastColor.ARGB32.color(FastColor.ARGB32.alpha(color), rgb));
         stack.popPose();
     }
 }

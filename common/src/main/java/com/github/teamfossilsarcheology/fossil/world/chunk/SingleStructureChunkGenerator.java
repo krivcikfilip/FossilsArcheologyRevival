@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public abstract class SingleStructureChunkGenerator extends ChunkGenerator {
     private final ResourceKey<Structure> key;
@@ -88,7 +87,7 @@ public abstract class SingleStructureChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public @NotNull CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState random, StructureManager structureManager, ChunkAccess chunk) {
+    public @NotNull CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState random, StructureManager structureManager, ChunkAccess chunk) {//PORT(1.21.1): Executor param removed (1.21)
         return CompletableFuture.completedFuture(chunk);
     }
 

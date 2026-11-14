@@ -65,7 +65,7 @@ public class ModEvents {
             if (level.dimension() == ModDimensions.ANU_LAIR && level instanceof ServerLevel serverLevel) {
                 if (!isBreakableInAnuLair(state) && !player.isCreative() && serverLevel.getServer().getProfilePermissions(player.getGameProfile()) < serverLevel.getServer().getOperatorUserPermissionLevel()) {
                     //PORT(1.21.1): DimensionDataStorage#get takes a SavedData.Factory (null DataFixTypes is allowed by NeoForge)
-                    AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(new SavedData.Factory<>(AnuBoss.AnuLair::new, (tag, registries) -> new AnuBoss.AnuLair(), null), "anu_lair");
+                    AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(AnuBoss.AnuLair.FACTORY, "anu_lair");
                     if (anuLair == null || !anuLair.isAnuKilled()) {
                         player.displayClientMessage(ANU_BREAK_BLOCK, true);
                         return EventResult.interruptFalse();
@@ -104,6 +104,14 @@ public class ModEvents {
                     }
                 }
             });
+        });
+        InteractionEvent.INTERACT_ENTITY.register((player, entity, hand) -> {
+            //PORT(1.21.1): vanilla Leashable no longer passes the player, so the 1.20.1 owner-only leash check lives here
+            if (entity instanceof Prehistoric prehistoric && player.getItemInHand(hand).is(Items.LEAD)
+                    && !prehistoric.isLeashed() && !prehistoric.canBeLeashedBy(player)) {
+                return EventResult.interruptFalse();
+            }
+            return EventResult.pass();
         });
         InteractionEvent.INTERACT_ENTITY.register((player, entity, hand) -> {
             ItemStack stack = player.getItemInHand(hand);

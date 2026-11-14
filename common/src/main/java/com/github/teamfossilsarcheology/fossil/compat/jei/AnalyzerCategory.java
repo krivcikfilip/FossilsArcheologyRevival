@@ -5,6 +5,7 @@ import com.github.teamfossilsarcheology.fossil.recipe.AnalyzerRecipe;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.NotNull;
 
 public class AnalyzerCategory extends MultiOutputCategory<AnalyzerRecipe> {
@@ -18,7 +19,7 @@ public class AnalyzerCategory extends MultiOutputCategory<AnalyzerRecipe> {
     }
 
     @Override
-    public @NotNull RecipeType<AnalyzerRecipe> getRecipeType() {
+    public @NotNull RecipeType<RecipeHolder<AnalyzerRecipe>> getRecipeType() {
         return FossilJEIPlugin.ANALYZER;
     }
 }

@@ -1,7 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.world.feature.structures;
 
 import com.github.teamfossilsarcheology.fossil.config.FossilConfig;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.NoiseColumn;
@@ -17,7 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 public class HellBoatStructure extends Structure {
-    public static final Codec<HellBoatStructure> CODEC = RecordCodecBuilder.create(
+    //PORT(1.21.1): StructureType#codec is a MapCodec since 1.20.5
+    public static final MapCodec<HellBoatStructure> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(settingsCodec(instance), HeightProvider.CODEC.fieldOf("height").forGetter(hellBoatStructure -> hellBoatStructure.height))
                     .apply(instance, HellBoatStructure::new)
     );
@@ -55,6 +56,6 @@ public class HellBoatStructure extends Structure {
 
     @Override
     public @NotNull StructureType<?> type() {
-        return ModStructureType.HELL_BOAT;
+        return ModStructureType.HELL_BOAT.get();
     }
 }

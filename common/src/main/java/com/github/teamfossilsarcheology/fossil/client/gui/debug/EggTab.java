@@ -38,9 +38,10 @@ public class EggTab extends DebugTab<DinosaurEgg> {
                 entity.setScaleOverride((float) scaleOverride);
             }
 
+            //PORT(1.21.1): AbstractWidget#render is final, the widget specific part is renderWidget
             @Override
-            public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.render(guiGraphics, mouseX, mouseY, partialTick);
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
                 int j = active ? 16777215 : 10526880;
                 String currentEggScale = String.valueOf(data.eggScale());
                 int currentScaleX = (int) (((data.eggScale() - minValue) / (maxValue - minValue)) * (width - minecraft.font.width(currentEggScale)));

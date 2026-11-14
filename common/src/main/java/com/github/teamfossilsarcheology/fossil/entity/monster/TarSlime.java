@@ -59,7 +59,7 @@ public class TarSlime extends Slime {
             setDeltaMovement(getDeltaMovement().multiply(1, 1.3, 1));
         }
         if (isOnFire()) {
-            setSecondsOnFire(10);
+            igniteForSeconds(10);
         }
     }
 
@@ -77,7 +77,7 @@ public class TarSlime extends Slime {
                 float h = (l / 2f - 0.5f) * f;
                 TarSlime slime = ModEntities.TAR_SLIME.get().create(level());
                 if (getSharedFlag(0)) {
-                    slime.setSecondsOnFire(15);
+                    slime.igniteForSeconds(15);
                 }
                 if (isPersistenceRequired()) {
                     slime.setPersistenceRequired();
@@ -90,10 +90,15 @@ public class TarSlime extends Slime {
                 level().addFreshEntity(slime);
             }
         }
+        //PORT(1.21.1): LivingEntity#remove now also triggers on-death mob effects (e.g. oozing) and clears the brain memories
+        if (reason == RemovalReason.KILLED || reason == RemovalReason.DISCARDED) {
+            triggerOnDeathMobEffects(reason);
+        }
         setRemoved(reason);
         if (reason == RemovalReason.KILLED) {
             gameEvent(GameEvent.ENTITY_DIE);
         }
+        getBrain().clearMemories();
     }
 
     @Override

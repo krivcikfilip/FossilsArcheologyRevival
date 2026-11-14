@@ -85,7 +85,7 @@ public class C2SStructureMessage implements CustomPacketPayload {
             /*
             PrehistoricLeaping velociraptor = ModEntities.DEINONYCHUS.get().create(level);
             velociraptor.moveTo(xOffset, 120, 0, 0, 0);
-            velociraptor.finalizeSpawn(level, level.getCurrentDifficultyAt(velociraptor.blockPosition()), MobSpawnType.SPAWN_EGG, null, null);
+            velociraptor.finalizeSpawn(level, level.getCurrentDifficultyAt(velociraptor.blockPosition()), MobSpawnType.SPAWN_EGG, null);
             velociraptor.startAttackRiding(prehistoric);
             velociraptor.startRiding(prehistoric, true);
             level.addFreshEntity(velociraptor);

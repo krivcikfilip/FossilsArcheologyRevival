@@ -14,7 +14,7 @@ import com.github.teamfossilsarcheology.fossil.food.FoodMappingsManager;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.joml.Matrix4fStack;
 
 public class DinopediaScreen extends Screen {
     private static final ResourceLocation DINOPEDIA_BACKGROUND = FossilMod.location("textures/gui/dinopedia.png");
@@ -61,10 +62,11 @@ public class DinopediaScreen extends Screen {
                     if (player != null) {
                         return player.getName();
                     }
-                    GameProfile gameProfile = new GameProfile(key, null);
-                    gameProfile = Minecraft.getInstance().getMinecraftSessionService().fillProfileProperties(gameProfile, true);
-                    if (gameProfile.isComplete()) {
-                        return Component.literal(gameProfile.getName());
+                    //PORT(1.21.1): authlib 6 replaced fillProfileProperties/isComplete with fetchProfile (null if not found)
+                    //PORT-TODO(1.21.1): verify MinecraftSessionService#fetchProfile(UUID, boolean) / ProfileResult against authlib 6.0.x
+                    ProfileResult profileResult = Minecraft.getInstance().getMinecraftSessionService().fetchProfile(key, true);
+                    if (profileResult != null) {
+                        return Component.literal(profileResult.profile().getName());
                     }
                     return Component.literal("Invalid User");
                 }
@@ -99,10 +101,12 @@ public class DinopediaScreen extends Screen {
      * Renders the entity in the dinopedia with a fixed y-rotation and a scale
      */
     public static void renderEntityInDinopedia(int posX, int posY, LivingEntity entity) {
-        PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushPose();
-        poseStack.translate(posX, posY, 1050);
-        poseStack.scale(1, 1, -1);
+        //PORT(1.21.1): RenderSystem#getModelViewStack is a JOML Matrix4fStack since 1.20.5
+        //PORT-TODO(1.21.1): visual check of the entity preview (GUI depth range / lighting unchanged in theory)
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.translate(posX, posY, 1050);
+        modelViewStack.scale(1, 1, -1);
         RenderSystem.applyModelViewMatrix();
         PoseStack poseStack2 = new PoseStack();
         poseStack2.translate(0.0, -10, 1000.0);
@@ -131,7 +135,7 @@ public class DinopediaScreen extends Screen {
         });
         bufferSource.endBatch();
         entityRenderDispatcher.setRenderShadow(true);
-        poseStack.popPose();
+        modelViewStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
     }
@@ -175,10 +179,24 @@ public class DinopediaScreen extends Screen {
         backButton.visible = currentPage > 0;
     }
 
+    /**
+     * PORT(1.21.1): Screen#render renders the background itself since 1.20.2, so the book and the entity are drawn here
+     * (same order as in 1.20.1: background, book + entity, widgets, text). The 1.20.1 in-world background was the dark gradient
+     * that is now {@link #renderTransparentBackground}; the 1.21 blur is not used because it would also cover/occlude the
+     * 3D entity preview.
+     */
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        if (minecraft.level == null) {
+            super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        } else {
+            renderTransparentBackground(guiGraphics);
+        }
+        renderBackgroundLayer(guiGraphics, mouseX, mouseY);
+    }
+
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics);
-        renderBackgroundLayer(guiGraphics, mouseX, mouseY);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderForegroundLayer(guiGraphics, mouseX, mouseY, partialTick);
         if (!toolTipList.isEmpty()) {

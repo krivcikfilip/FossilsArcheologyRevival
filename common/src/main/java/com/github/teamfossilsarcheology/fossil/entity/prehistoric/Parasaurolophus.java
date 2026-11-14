@@ -21,14 +21,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animation.*;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animation.*;
+import software.bernie.geckolib.animation.PlayState;
 
 import java.util.EnumSet;
 import java.util.Optional;
 
-import static software.bernie.geckolib.core.animation.Animation.LoopType.LOOP;
-import static software.bernie.geckolib.core.animation.Animation.LoopType.PLAY_ONCE;
+import static software.bernie.geckolib.animation.Animation.LoopType.LOOP;
+import static software.bernie.geckolib.animation.Animation.LoopType.PLAY_ONCE;
 
 public class Parasaurolophus extends Prehistoric {
     private static final EntityDataAccessor<Boolean> STANDING = SynchedEntityData.defineId(Parasaurolophus.class, EntityDataSerializers.BOOLEAN);
@@ -48,9 +48,9 @@ public class Parasaurolophus extends Prehistoric {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(STANDING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(STANDING, false);
     }
 
     @Override

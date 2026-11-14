@@ -10,7 +10,6 @@ import com.github.teamfossilsarcheology.fossil.sounds.ModSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -35,8 +34,10 @@ public class Megalograptus extends PrehistoricSwimmingBucketable {
     }
 
     @Override
-    public @NotNull MobType getMobType() {
-        return MobType.ARTHROPOD;
+    public boolean isWaterMobType() {
+        //PORT(1.21.1): getMobType() returned MobType.ARTHROPOD. MobType was removed in 1.20.5, vanilla uses the
+        // minecraft:arthropod entity type tag now (requested from data/build)
+        return false;
     }
 
     @Override

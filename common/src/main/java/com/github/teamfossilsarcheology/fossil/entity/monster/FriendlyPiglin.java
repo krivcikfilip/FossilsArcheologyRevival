@@ -1,7 +1,6 @@
 package com.github.teamfossilsarcheology.fossil.entity.monster;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -48,10 +47,10 @@ public class FriendlyPiglin extends TamableAnimal {
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
+                                        @Nullable SpawnGroupData spawnData) {
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(isTame() ? 25 : 20);
         populateDefaultEquipmentSlots(level.getRandom(), difficulty);
-        return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
+        return super.finalizeSpawn(level, difficulty, reason, spawnData);
     }
 
     @Override
@@ -60,7 +59,8 @@ public class FriendlyPiglin extends TamableAnimal {
         goalSelector.addGoal(1, new FloatGoal(this));
         goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
-        goalSelector.addGoal(4, new FollowOwnerGoal(this, 1, 10, 2, false));
+        //PORT(1.21.1): FollowOwnerGoal lost the canFly parameter (was false), teleporting is handled by TamableAnimal now
+        goalSelector.addGoal(4, new FollowOwnerGoal(this, 1, 10, 2));
         goalSelector.addGoal(5, new RandomStrollGoal(this, 1));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8));
         goalSelector.addGoal(6, new RandomLookAroundGoal(this));
@@ -69,10 +69,8 @@ public class FriendlyPiglin extends TamableAnimal {
         targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers());
     }
 
-    @Override
-    public @NotNull MobType getMobType() {
-        return MobType.UNDEAD;
-    }
+    //PORT(1.21.1): getMobType()/MobType.UNDEAD was replaced by the entity type tag minecraft:undead (EntityTypeTags.UNDEAD).
+    //fossil:friendly_piglin must be in data/minecraft/tags/entity_type/undead.json (requested from data/build datagen)
 
     @Override
     public void aiStep() {
@@ -119,7 +117,7 @@ public class FriendlyPiglin extends TamableAnimal {
         if (hurtTarget) {
             float f = level().getCurrentDifficultyAt(blockPosition()).getEffectiveDifficulty();
             if (getItemInHand(isLeftHanded() ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND).isEmpty() && isOnFire() && random.nextFloat() < f * 0.3f) {
-                target.setSecondsOnFire(2 * (int) f);
+                target.igniteForSeconds(2 * (int) f);
             }
             swing(isLeftHanded() ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
         }
@@ -196,6 +194,14 @@ public class FriendlyPiglin extends TamableAnimal {
     @Override
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+    }
+
+    /**
+     * PORT(1.21.1): Animal#isFood is abstract since 1.20.5. 1.20.1 default was wheat
+     */
+    @Override
+    public boolean isFood(ItemStack stack) {
+        return stack.is(Items.WHEAT);
     }
 
     @Nullable

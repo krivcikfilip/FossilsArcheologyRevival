@@ -1,6 +1,7 @@
 package com.github.teamfossilsarcheology.fossil;
 
 import com.github.teamfossilsarcheology.fossil.advancements.ModTriggers;
+import com.github.teamfossilsarcheology.fossil.world.feature.structures.ModStructureType;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.block.entity.ModBlockEntities;
 import com.github.teamfossilsarcheology.fossil.client.particle.ModParticles;
@@ -67,6 +68,7 @@ public class FossilMod {
         ModFeatures.register();
         ModVillages.register();
         ModDimensions.register();
+        ModStructureType.register(); //PORT(1.21.1): must run in init, registries are frozen by common setup on NeoForge
         ModEffects.register();
         ModLootItemFunctionTypes.register();
         ModEvents.init();

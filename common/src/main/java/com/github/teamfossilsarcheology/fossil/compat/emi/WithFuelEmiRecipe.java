@@ -6,6 +6,7 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,11 +18,14 @@ public abstract class WithFuelEmiRecipe<T extends WithFuelRecipe> implements Emi
     protected final EmiStack output;
     protected final T recipe;
 
-    protected WithFuelEmiRecipe(T recipe) {
-        this.id = recipe.getId();
+    //PORT(1.21.1): RecipeManager returns RecipeHolders; the id comes from RecipeHolder#id() (recipes lost getId()),
+    //getResultItem(null) -> getResult()
+    protected WithFuelEmiRecipe(RecipeHolder<T> holder) {
+        T recipe = holder.value();
+        this.id = holder.id();
         this.input = EmiIngredient.of(recipe.getInput());
         this.fuel = EmiIngredient.of(recipe.getFuel());
-        this.output = EmiStack.of(recipe.getResultItem(null));
+        this.output = EmiStack.of(recipe.getResult().copy());
         this.recipe = recipe;
     }
 

@@ -8,8 +8,9 @@ import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.PathfindingContext;
 
 import java.util.EnumSet;
 
@@ -73,8 +74,8 @@ public class DinoFollowOwnerGoal extends Goal {
     @Override
     public void start() {
         timeToRecalcPath = 0;
-        oldWaterCost = dino.getPathfindingMalus(BlockPathTypes.WATER);
-        dino.setPathfindingMalus(BlockPathTypes.WATER, 0);
+        oldWaterCost = dino.getPathfindingMalus(PathType.WATER);
+        dino.setPathfindingMalus(PathType.WATER, 0);
         shouldSprint = dino.distanceToSqr(owner) >= sprintDistanceSqr;
     }
 
@@ -82,7 +83,7 @@ public class DinoFollowOwnerGoal extends Goal {
     public void stop() {
         owner = null;
         dino.getNavigation().stop();
-        dino.setPathfindingMalus(BlockPathTypes.WATER, oldWaterCost);
+        dino.setPathfindingMalus(PathType.WATER, oldWaterCost);
     }
 
     @Override
@@ -129,11 +130,12 @@ public class DinoFollowOwnerGoal extends Goal {
     private boolean canTeleportTo(BlockPos teleportPos) {
         Level level = dino.level();
         NodeEvaluator nodeEvaluator = dino.getNavigation().getNodeEvaluator();
-        BlockPathTypes type = nodeEvaluator.getBlockPathType(level, teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
-        if (type == BlockPathTypes.WATER && dino.getPathfindingMalus(type) == 0) {
+        //PORT(1.21.1): NodeEvaluator#getBlockPathType(BlockGetter, x, y, z) -> getPathType(PathfindingContext, x, y, z)
+        PathType type = nodeEvaluator.getPathType(new PathfindingContext(level, dino), teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
+        if (type == PathType.WATER && dino.getPathfindingMalus(type) == 0) {
             return level.noCollision(dino, dino.getBoundingBox().move(teleportPos.subtract(dino.blockPosition())));
         }
-        if (type != BlockPathTypes.WALKABLE) {
+        if (type != PathType.WALKABLE) {
             return false;
         }
         if (!canFly && level.getBlockState(teleportPos).getBlock() instanceof LeavesBlock) {

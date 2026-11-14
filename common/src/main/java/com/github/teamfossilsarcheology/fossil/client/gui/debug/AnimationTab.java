@@ -17,8 +17,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.animation.AnimationController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +94,7 @@ public class AnimationTab<T extends Mob & PrehistoricAnimatable<?>> extends Debu
         public AnimationList(int x0, Map<String, ? extends AnimationInfo> animations, Map<String, AnimationController<GeoAnimatable>> controllers, Minecraft minecraft, Consumer<AnimationObject> function) {
             super(x0, 250, 21, 120, animations, minecraft, function);
             int buttonX = x0;
-            int buttonY = y0 - 110;
+            int buttonY = getY() - 110;
             if (controllers.isEmpty()) {
                 return;
             }

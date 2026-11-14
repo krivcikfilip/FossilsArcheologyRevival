@@ -57,6 +57,7 @@ public class FossilREIClientPlugin implements REIClientPlugin {
 
     @Override
     public void registerDisplays(DisplayRegistry registry) {
+        //PORT(1.21.1): REI 16 recipe fillers pass RecipeHolder<T> to the display constructors (verified in REI 16.x-1.21 DisplayRegistry)
         registry.registerRecipeFiller(WorktableRecipe.class, ModRecipes.WORKTABLE_TYPE.get(), WorktableDisplay::new);
         registry.registerRecipeFiller(CultureVatRecipe.class, ModRecipes.CULTURE_VAT_TYPE.get(), CultureVatDisplay::new);
         registry.registerRecipeFiller(AnalyzerRecipe.class, ModRecipes.ANALYZER_TYPE.get(), AnalyzerDisplay::new);

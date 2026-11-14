@@ -11,6 +11,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +30,7 @@ public class CultureVatCategory extends WithFuelCategory<CultureVatRecipe> {
     }
 
     @Override
-    public void draw(@NotNull CultureVatRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+    public void draw(@NotNull RecipeHolder<CultureVatRecipe> recipe, @NotNull IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         animatedFuel.draw(guiGraphics, 42, 21);
         animatedProgress.draw(guiGraphics, 38, 6);
     }
@@ -40,7 +41,7 @@ public class CultureVatCategory extends WithFuelCategory<CultureVatRecipe> {
     }
 
     @Override
-    public @NotNull RecipeType<CultureVatRecipe> getRecipeType() {
+    public @NotNull RecipeType<RecipeHolder<CultureVatRecipe>> getRecipeType() {
         return FossilJEIPlugin.CULTURE_VAT;
     }
 }

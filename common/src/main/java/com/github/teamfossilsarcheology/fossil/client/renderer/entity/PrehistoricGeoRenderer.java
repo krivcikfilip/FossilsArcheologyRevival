@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.core.object.Color;
+import software.bernie.geckolib.util.Color;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 import java.util.function.Function;
@@ -31,10 +31,15 @@ public class PrehistoricGeoRenderer<T extends Prehistoric> extends GeoEntityRend
         super(renderManager, new PrehistoricGeoModel<>(model, renderType));
     }
 
+    /**
+     * PORT(1.21.1): GeckoLib 4.9 GeoEntityRenderer#actuallyRender already scales the pose by {@code LivingEntity#getScale()}
+     * ("nativeScale"), which {@link Prehistoric#getScale()} overrides. The 1.20.1 {@code withScale(animatable.getScale())} would
+     * therefore scale the model twice, so the scale is no longer applied here (scaleWidth/scaleHeight stay 1).
+     * PORT-TODO(1.21.1): relies on Prehistoric#getScale overriding LivingEntity#getScale (entity-a); visual size check in game
+     */
     @Override
-    public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        withScale(animatable.getScale());
-        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+    public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 
     @Override
@@ -74,8 +79,12 @@ public class PrehistoricGeoRenderer<T extends Prehistoric> extends GeoEntityRend
         return Util.SWING_ANIM_THRESHOLD;
     }
 
+    /**
+     * PORT(1.21.1): GeckoLib 4.9 calls the overload with {@code nativeScale}; the 5 parameter version is deprecated and no longer
+     * called by GeoEntityRenderer. The Dinnerbone translation happens after the native scale, like after withScale in 1.20.1.
+     */
     @Override
-    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
         poseStack.mulPose(Axis.YP.rotationDegrees(180f - rotationYaw));
         if (animatable.deathTime > 0) {
             float deathRotation = (animatable.deathTime + partialTick - 1f) / 20f * 1.6f;

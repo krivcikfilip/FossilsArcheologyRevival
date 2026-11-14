@@ -6,6 +6,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,7 @@ import java.util.TreeMap;
 public class AnalyzerDisplay extends MultiOutputDisplay {
     public static final CategoryIdentifier<AnalyzerDisplay> ID = CategoryIdentifier.of(FossilMod.location("analyzer"));
 
-    public AnalyzerDisplay(MultiOutputAndSlotsRecipe recipe) {
+    public AnalyzerDisplay(RecipeHolder<? extends MultiOutputAndSlotsRecipe> recipe) {
         super(recipe);
     }
 

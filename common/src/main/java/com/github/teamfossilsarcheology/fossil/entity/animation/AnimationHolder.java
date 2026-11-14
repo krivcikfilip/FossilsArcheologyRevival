@@ -4,7 +4,7 @@ import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.Prehistor
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.PrehistoricFlying;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
-import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationController;
 
 import java.util.*;
 

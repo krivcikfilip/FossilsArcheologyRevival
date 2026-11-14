@@ -7,7 +7,7 @@ import dev.architectury.registry.level.biome.BiomeModifications;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
@@ -30,7 +30,7 @@ public class ModPlacedFeatures {
         return ResourceKey.create(Registries.PLACED_FEATURE, FossilMod.location(name));
     }
 
-    public static void bootstrap(BootstapContext<PlacedFeature> context) {
+    public static void bootstrap(BootstrapContext<PlacedFeature> context) {
         ModOrePlacements.bootstrap(context);
         HolderGetter<ConfiguredFeature<?, ?>> holderGetter = context.lookup(Registries.CONFIGURED_FEATURE);
         Holder<ConfiguredFeature<?, ?>> volcanoAshDisk = holderGetter.getOrThrow(ModConfiguredFeatures.ASH_DISK_KEY);

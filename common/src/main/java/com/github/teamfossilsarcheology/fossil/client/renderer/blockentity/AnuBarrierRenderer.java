@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import java.util.stream.IntStream;
@@ -85,8 +84,9 @@ public class AnuBarrierRenderer implements BlockEntityRenderer<AnuBarrierBlockEn
     }
 
     private void renderRectangle(PoseStack poseStack, VertexConsumer vertexConsumer, int width, float y, int height, int packedLight) {
-        Matrix4f matrix4f = poseStack.last().pose();
-        Matrix3f matrix3f = poseStack.last().normal();
+        //PORT(1.21.1): normals are transformed with the PoseStack.Pose (VertexConsumer#setNormal(Pose, ...))
+        PoseStack.Pose pose = poseStack.last();
+        Matrix4f matrix4f = pose.pose();
         float minX = 8 - (width - width / 2f);
         float maxX = minX + width;
         float maxY = y + height;
@@ -98,24 +98,24 @@ public class AnuBarrierRenderer implements BlockEntityRenderer<AnuBarrierBlockEn
         float minTexY = (TEXTURE_HEIGHT - y) / TEXTURE_HEIGHT;
         float maxTexY = minTexY - height / TEXTURE_HEIGHT;
         //Front
-        vertex(matrix4f, matrix3f, vertexConsumer, maxX, y, maxTexX, minTexY, packedLight, false);
-        vertex(matrix4f, matrix3f, vertexConsumer, minX, y, minTexX, minTexY, packedLight, false);
-        vertex(matrix4f, matrix3f, vertexConsumer, minX, maxY, minTexX, maxTexY, packedLight, false);
-        vertex(matrix4f, matrix3f, vertexConsumer, maxX, maxY, maxTexX, maxTexY, packedLight, false);
+        vertex(matrix4f, pose, vertexConsumer, maxX, y, maxTexX, minTexY, packedLight, false);
+        vertex(matrix4f, pose, vertexConsumer, minX, y, minTexX, minTexY, packedLight, false);
+        vertex(matrix4f, pose, vertexConsumer, minX, maxY, minTexX, maxTexY, packedLight, false);
+        vertex(matrix4f, pose, vertexConsumer, maxX, maxY, maxTexX, maxTexY, packedLight, false);
         //Back
-        vertex(matrix4f, matrix3f, vertexConsumer, maxX, maxY, maxTexX, maxTexY, packedLight, true);
-        vertex(matrix4f, matrix3f, vertexConsumer, minX, maxY, minTexX, maxTexY, packedLight, true);
-        vertex(matrix4f, matrix3f, vertexConsumer, minX, y, minTexX, minTexY, packedLight, true);
-        vertex(matrix4f, matrix3f, vertexConsumer, maxX, y, maxTexX, minTexY, packedLight, true);
+        vertex(matrix4f, pose, vertexConsumer, maxX, maxY, maxTexX, maxTexY, packedLight, true);
+        vertex(matrix4f, pose, vertexConsumer, minX, maxY, minTexX, maxTexY, packedLight, true);
+        vertex(matrix4f, pose, vertexConsumer, minX, y, minTexX, minTexY, packedLight, true);
+        vertex(matrix4f, pose, vertexConsumer, maxX, y, maxTexX, minTexY, packedLight, true);
     }
 
-    private void vertex(Matrix4f matrix4f, Matrix3f matrix3f, VertexConsumer vertexConsumer, float x, float y, float u, float v, int n, boolean back) {
+    private void vertex(Matrix4f matrix4f, PoseStack.Pose pose, VertexConsumer vertexConsumer, float x, float y, float u, float v, int n, boolean back) {
         if (back) {
-            vertexConsumer.vertex(matrix4f, x, y, 8).color(125, 255, 255, 255).uv(u, v)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(n).normal(matrix3f, 0, 0, -1).endVertex();
+            vertexConsumer.addVertex(matrix4f, x, y, 8).setColor(125, 255, 255, 255).setUv(u, v)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(n).setNormal(pose, 0, 0, -1);
         } else {
-            vertexConsumer.vertex(matrix4f, x, y, 8).color(255, 255, 255, 255).uv(u, v)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(n).normal(matrix3f, 0, 0, -1).endVertex();
+            vertexConsumer.addVertex(matrix4f, x, y, 8).setColor(255, 255, 255, 255).setUv(u, v)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(n).setNormal(pose, 0, 0, -1);
         }
     }
 }

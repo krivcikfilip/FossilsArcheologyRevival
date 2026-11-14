@@ -21,6 +21,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -70,9 +71,9 @@ public class Elasmotherium extends Prehistoric implements PrehistoricShearable {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(SHEARED, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(SHEARED, false);
     }
 
     @Override
@@ -121,7 +122,7 @@ public class Elasmotherium extends Prehistoric implements PrehistoricShearable {
             shear(SoundSource.PLAYERS);
             gameEvent(GameEvent.SHEAR, player);
             if (!level().isClientSide) {
-                itemStack.hurtAndBreak(1, player, player2 -> player2.broadcastBreakEvent(hand));
+                itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
             }
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
@@ -141,8 +142,8 @@ public class Elasmotherium extends Prehistoric implements PrehistoricShearable {
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelIn, DifficultyInstance difficultyIn, MobSpawnType reason, @Nullable SpawnGroupData spawnDataIn, @Nullable CompoundTag dataTag) {
-        var data = super.finalizeSpawn(levelIn, difficultyIn, reason, spawnDataIn, dataTag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelIn, DifficultyInstance difficultyIn, MobSpawnType reason, @Nullable SpawnGroupData spawnDataIn) {
+        var data = super.finalizeSpawn(levelIn, difficultyIn, reason, spawnDataIn);
         if (isBaby()) {
             setSheared(true);
         }

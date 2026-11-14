@@ -25,6 +25,7 @@ import java.util.List;
 
 public class AnuDead extends LivingEntity {
     private static final int MAX_LIFESPAN = 5960;
+    private static final int PORTAL_COOLDOWN = 3;
     private static final List<ItemStack> ARMOR = NonNullList.withSize(1, ItemStack.EMPTY);
 
     public AnuDead(EntityType<? extends LivingEntity> entityType, Level level) {
@@ -44,15 +45,17 @@ public class AnuDead extends LivingEntity {
     @Override
     public @NotNull InteractionResult interact(Player player, InteractionHand hand) {
         if (player instanceof ServerPlayer serverPlayer) {
-
-            if (player.portalTime > 0) {
-                player.portalTime = 10;
+            //PORT(1.21.1): Entity#portalTime was removed (portals use PortalProcessor now). The portal cooldown is used instead to
+            //prevent double teleports. 1.20.1 set portalTime to 10, which decayed by 4 per tick outside a portal (= 3 ticks)
+            //PORT-TODO(1.21.1): verify that interacting twice (both hands) does not teleport the player back immediately
+            if (player.isOnPortalCooldown()) {
+                player.setPortalCooldown(PORTAL_COOLDOWN);
             } else if (!player.level().dimension().equals(ModDimensions.TREASURE_ROOM)) {
-                player.portalTime = 10;
+                player.setPortalCooldown(PORTAL_COOLDOWN);
                 ServerLevel treasureLevel = serverPlayer.server.getLevel(ModDimensions.TREASURE_ROOM);
                 serverPlayer.teleportTo(treasureLevel, 6.5, 72.5, 6.5, 0, 0);
             } else {
-                player.portalTime = 10;
+                player.setPortalCooldown(PORTAL_COOLDOWN);
                 serverPlayer.teleportTo(serverPlayer.server.getLevel(Level.OVERWORLD), 0, 60, 0, 0, 0);
             }
             return InteractionResult.sidedSuccess(false);

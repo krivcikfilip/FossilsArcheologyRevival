@@ -81,7 +81,7 @@ public class ForgeFossilMod {
                 FoodMappingsManager.INSTANCE.listen(AlexsMobsCompat::register);
             }
             ModPlacedFeatures.register();
-            ModStructureType.register();
+            //PORT(1.21.1): ModStructureType.register() moved to FossilMod.init()
             ModTriggers.register();
             Regions.register(new ForgeFossilRegion("overworld", RegionType.OVERWORLD, 4));
             SurfaceRuleManager.addSurfaceRules(SurfaceRuleManager.RuleCategory.OVERWORLD, FossilMod.MOD_ID, ModSurfaceRules.VOLCANIC_SURFACE_RULE);

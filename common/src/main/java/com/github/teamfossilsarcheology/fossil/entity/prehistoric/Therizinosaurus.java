@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -65,9 +66,9 @@ public class Therizinosaurus extends Prehistoric implements PrehistoricShearable
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(SHEARED, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(SHEARED, false);
     }
 
     @Override
@@ -116,7 +117,7 @@ public class Therizinosaurus extends Prehistoric implements PrehistoricShearable
             shear(SoundSource.PLAYERS);
             gameEvent(GameEvent.SHEAR, player);
             if (!level().isClientSide) {
-                itemStack.hurtAndBreak(1, player, player2 -> player2.broadcastBreakEvent(hand));
+                itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
             }
             return InteractionResult.sidedSuccess(level().isClientSide);
         }

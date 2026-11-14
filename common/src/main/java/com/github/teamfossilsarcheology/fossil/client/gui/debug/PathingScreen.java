@@ -2,6 +2,7 @@ package com.github.teamfossilsarcheology.fossil.client.gui.debug;
 
 import com.github.teamfossilsarcheology.fossil.client.gui.debug.navigation.PathingDebug;
 import com.github.teamfossilsarcheology.fossil.client.gui.debug.navigation.PlayerPathNavigation;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,6 +25,14 @@ public class PathingScreen extends Screen {
 
     public PathingScreen() {
         super(Component.literal("Pathing Screen"));
+    }
+
+    /**
+     * PORT(1.21.1): Screen#render renders a (blurred) background since 1.20.2. In 1.20.1 this screen had no background so that
+     * the rendered paths stay visible.
+     */
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
     }
 
     @Override

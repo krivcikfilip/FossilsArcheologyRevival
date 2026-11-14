@@ -10,8 +10,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
-import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 
 import java.util.function.Function;
@@ -34,13 +34,13 @@ public class PrehistoricGeoModel<T extends Prehistoric> extends DefaultedEntityG
         }
         if (animatable instanceof PrehistoricSwimming && animatable.isInWater() || (animatable instanceof PrehistoricFlying flying && flying.isFlying())) {
             if (!animatable.isVehicle() && !(animatable instanceof Trilobite)) {
-                CoreGeoBone root = getAnimationProcessor().getBone("pitch_root");
+                GeoBone root = getAnimationProcessor().getBone("pitch_root");
                 if (root != null) {
                     float pitch = Mth.lerp(animationState.getPartialTick(), animatable.xRotO, animatable.getXRot());
                     root.setRotX(-pitch * Mth.DEG_TO_RAD);
                 }
             } else if (animatable instanceof PrehistoricFlying flying) {
-                CoreGeoBone root = getAnimationProcessor().getBone("pitch_root");
+                GeoBone root = getAnimationProcessor().getBone("pitch_root");
                 if (root != null && animatable.getControllingPassenger() instanceof Player) {
                     //TODO: I would prefer using the molang query but its very laggy
                     //GeckoLibCache.getInstance().parser.setValue("rider_rot_x", () -> Mth.lerp(animationEvent.getPartialTick(), flying.prevPitch, flying.currentPitch));

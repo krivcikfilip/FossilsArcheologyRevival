@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 
 public class AnuTotemOverlayRenderer extends RenderLayer<AnuTotem, AnuTotemModel> {
     private static final ResourceLocation TEXTURE = FossilMod.location("textures/entity/anu_totem_layer.png");
@@ -23,6 +24,8 @@ public class AnuTotemOverlayRenderer extends RenderLayer<AnuTotem, AnuTotemModel
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AnuTotem livingEntity, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE));
-        getParentModel().renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, livingEntity.tickCount / 200f);
+        //PORT(1.21.1): tint is a packed ARGB int (alpha was tickCount / 200f)
+        getParentModel().renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY,
+                FastColor.ARGB32.color((int) (livingEntity.tickCount / 200f * 255), 255, 255, 255));
     }
 }

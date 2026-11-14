@@ -8,6 +8,7 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class WorktableEmiRecipe extends WithFuelEmiRecipe<WorktableRecipe> {
     private static final EmiTexture EMPTY_PROGRESS = new EmiTexture(TEXTURE, 75, 19, PROGRESS_WIDTH + 2, PROGRESS_HEIGHT + 2);
     private static final EmiTexture FULL_PROGRESS = new EmiTexture(TEXTURE, 176, FUEL_HEIGHT, PROGRESS_WIDTH, PROGRESS_HEIGHT);
 
-    protected WorktableEmiRecipe(WorktableRecipe recipe) {
+    protected WorktableEmiRecipe(RecipeHolder<WorktableRecipe> recipe) {
         super(recipe);
     }
 

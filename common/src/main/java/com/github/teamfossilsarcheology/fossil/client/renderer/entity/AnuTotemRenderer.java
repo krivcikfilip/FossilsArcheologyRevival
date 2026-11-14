@@ -27,19 +27,19 @@ public class AnuTotemRenderer extends MobRenderer<AnuTotem, AnuTotemModel> imple
     }
 
     private static void vertex01(VertexConsumer vertexConsumer, Matrix4f matrix4f, int alpha) {
-        vertexConsumer.vertex(matrix4f, 0.0f, 0.0f, 0.0f).color(66, 0, 176, alpha).endVertex();
+        vertexConsumer.addVertex(matrix4f, 0.0f, 0.0f, 0.0f).setColor(66, 0, 176, alpha);
     }
 
     private static void vertex2(VertexConsumer vertexConsumer, Matrix4f matrix4f, float y, float g) {
-        vertexConsumer.vertex(matrix4f, -HALF_SQRT_3 * g, y, -0.5f * g).color(255, 0, 0, 0).endVertex();
+        vertexConsumer.addVertex(matrix4f, -HALF_SQRT_3 * g, y, -0.5f * g).setColor(255, 0, 0, 0);
     }
 
     private static void vertex3(VertexConsumer vertexConsumer, Matrix4f matrix4f, float y, float g) {
-        vertexConsumer.vertex(matrix4f, HALF_SQRT_3 * g, y, -0.5f * g).color(255, 0, 0, 0).endVertex();
+        vertexConsumer.addVertex(matrix4f, HALF_SQRT_3 * g, y, -0.5f * g).setColor(255, 0, 0, 0);
     }
 
     private static void vertex4(VertexConsumer vertexConsumer, Matrix4f matrix4f, float y, float g) {
-        vertexConsumer.vertex(matrix4f, 0.0f, y, g).color(255, 0, 0, 0).endVertex();
+        vertexConsumer.addVertex(matrix4f, 0.0f, y, g).setColor(255, 0, 0, 0);
     }
 
     @Override
@@ -52,9 +52,10 @@ public class AnuTotemRenderer extends MobRenderer<AnuTotem, AnuTotemModel> imple
         return getTextureLocation((AnuTotem) entity);
     }
 
+    //PORT(1.21.1): setupRotations gained a scale parameter (1.20.5)
     @Override
-    protected void setupRotations(AnuTotem entityLiving, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTicks) {
-        super.setupRotations(entityLiving, poseStack, ageInTicks, rotationYaw, partialTicks);
+    protected void setupRotations(AnuTotem entityLiving, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTicks, float scale) {
+        super.setupRotations(entityLiving, poseStack, ageInTicks, rotationYaw, partialTicks, scale);
         poseStack.mulPose(Axis.YP.rotationDegrees(ageInTicks * ageInTicks * 0.15f));
     }
 
@@ -65,7 +66,10 @@ public class AnuTotemRenderer extends MobRenderer<AnuTotem, AnuTotemModel> imple
         float i = (entity.tickCount + partialTicks) / 200f;
         float j = Math.min(i > 0.8f ? (i - 0.8f) / 0.2f : 0, 1);
         Random random = new Random(432L);
-        VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.lightning());
+        //PORT(1.21.1): vanilla's dragon death rays (which this copies) moved from lightning() (QUADS) to dragonRays() (TRIANGLES)
+        //in 1.20.5. The 9 vertices per beam are 3 triangles, so dragonRays() is the render type that draws them as intended.
+        //PORT-TODO(1.21.1): visual check of the Anu totem beams (was RenderType.lightning()).
+        VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.dragonRays());
         poseStack.pushPose();
         int passes = 0;
         poseStack.translate(0, 1.5, 0);

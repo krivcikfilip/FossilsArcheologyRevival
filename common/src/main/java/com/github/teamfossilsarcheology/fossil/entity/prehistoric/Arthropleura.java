@@ -20,7 +20,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -60,9 +59,9 @@ public class Arthropleura extends Prehistoric {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(IS_BEE, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(IS_BEE, false);
     }
 
     @Override
@@ -155,10 +154,8 @@ public class Arthropleura extends Prehistoric {
         return PrehistoricEntityInfo.ARTHROPLEURA;
     }
 
-    @Override
-    public @NotNull MobType getMobType() {
-        return MobType.ARTHROPOD;
-    }
+    //PORT(1.21.1): getMobType() returned MobType.ARTHROPOD. MobType was removed in 1.20.5, vanilla uses the
+    // minecraft:arthropod entity type tag now (requested from data/build)
 
     @Override
     public Item getOrderItem() {

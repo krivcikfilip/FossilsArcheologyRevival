@@ -35,7 +35,8 @@ public class PrehistoricPathNavigation extends GroundPathNavigation {
     protected double getGroundY(Vec3 vec) {
         BlockPos blockPos = BlockPos.containing(vec);
         BlockPos entityPos = mob.blockPosition();
-        if (level.getBlockState(blockPos.below()).isPathfindable(level, blockPos, PathComputationType.LAND)) {
+        //PORT(1.21.1): BlockState#isPathfindable only takes the PathComputationType now
+        if (level.getBlockState(blockPos.below()).isPathfindable(PathComputationType.LAND)) {
             if (blockPos.getY() >= mob.getY() + 2) {
                 return vec.y - 1;
             }

@@ -69,8 +69,9 @@ public class PlantModelBakery {
         vertexData[i + 1] = Float.floatToRawIntBits(vector.y());
         vertexData[i + 2] = Float.floatToRawIntBits(vector.z());
         vertexData[i + 3] = -1;
-        vertexData[i + 4] = Float.floatToRawIntBits(sprite.getU(blockFaceUV.getU(vertexIndex)));
-        vertexData[i + 4 + 1] = Float.floatToRawIntBits(sprite.getV(blockFaceUV.getV(vertexIndex)));
+        //PORT(1.21.1): TextureAtlasSprite#getU/getV take 0..1 since 1.20.2 (were 0..16), like vanilla FaceBakery#fillVertex
+        vertexData[i + 4] = Float.floatToRawIntBits(sprite.getU(blockFaceUV.getU(vertexIndex) / 16f));
+        vertexData[i + 4 + 1] = Float.floatToRawIntBits(sprite.getV(blockFaceUV.getV(vertexIndex) / 16f));
     }
 
 

@@ -5,7 +5,7 @@ import com.github.teamfossilsarcheology.fossil.world.feature.ModOreFeatures;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -27,7 +27,7 @@ public class ModOrePlacements {
         return ResourceKey.create(Registries.PLACED_FEATURE, FossilMod.location(name));
     }
 
-    public static void bootstrap(BootstapContext<PlacedFeature> context) {
+    public static void bootstrap(BootstrapContext<PlacedFeature> context) {
         HolderGetter<ConfiguredFeature<?, ?>> features = context.lookup(Registries.CONFIGURED_FEATURE);
         Holder<ConfiguredFeature<?, ?>> amberOre = features.getOrThrow(ModOreFeatures.ORE_AMBER);
         Holder<ConfiguredFeature<?, ?>> buriedAmberOre = features.getOrThrow(ModOreFeatures.ORE_AMBER_BURIED);

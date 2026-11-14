@@ -4,7 +4,7 @@ import com.github.teamfossilsarcheology.fossil.FossilMod;
 import com.github.teamfossilsarcheology.fossil.world.feature.ModFeatures;
 import com.github.teamfossilsarcheology.fossil.world.feature.ModOreFeatures;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -31,7 +31,7 @@ public class ModConfiguredFeatures {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, FossilMod.location(name));
     }
 
-    public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> context) {
+    public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> context) {
         ModOreFeatures.bootstrap(context);
         FeatureUtils.register(context, CALAMITES_TREE_KEY, ModFeatures.CALAMITES_TREE.feature());
         FeatureUtils.register(context, CORDAITES_TREE_KEY, ModFeatures.CORDAITES_TREE.feature());

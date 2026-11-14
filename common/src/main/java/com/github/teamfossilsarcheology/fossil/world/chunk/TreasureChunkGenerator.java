@@ -2,7 +2,7 @@ package com.github.teamfossilsarcheology.fossil.world.chunk;
 
 import com.github.teamfossilsarcheology.fossil.world.biome.ModBiomes;
 import com.github.teamfossilsarcheology.fossil.world.feature.structures.ModStructures;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -17,7 +17,8 @@ import net.minecraft.world.level.levelgen.RandomState;
 import org.jetbrains.annotations.NotNull;
 
 public class TreasureChunkGenerator extends SingleStructureChunkGenerator {
-    public static final Codec<TreasureChunkGenerator> CODEC = RecordCodecBuilder.create(
+    //PORT(1.21.1): chunk generator codecs are MapCodecs since 1.20.5
+    public static final MapCodec<TreasureChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(RegistryOps.retrieveElement(ModBiomes.TREASURE_ROOM_KEY)).apply(instance, instance.stable(TreasureChunkGenerator::new))
     );
 
@@ -26,7 +27,7 @@ public class TreasureChunkGenerator extends SingleStructureChunkGenerator {
     }
 
     @Override
-    protected @NotNull Codec<? extends ChunkGenerator> codec() {
+    protected @NotNull MapCodec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 

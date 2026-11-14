@@ -28,7 +28,7 @@ public class CultureVatScreen extends AbstractContainerScreen<CultureVatMenu> {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics);
+        //PORT(1.21.1): Screen#render already renders the background (1.20.2+); a second call would blur twice and crash in 1.21
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
     }

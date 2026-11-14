@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
@@ -255,8 +255,8 @@ public class PlayerPathNavigation {
         //doStuckDetection(vec3);
     }
 
-    public boolean canCutCorner(BlockPathTypes pathType) {
-        return pathType != BlockPathTypes.DANGER_FIRE && pathType != BlockPathTypes.DANGER_OTHER && pathType != BlockPathTypes.WALKABLE_DOOR;
+    public boolean canCutCorner(PathType pathType) {
+        return pathType != PathType.DANGER_FIRE && pathType != PathType.DANGER_OTHER && pathType != PathType.WALKABLE_DOOR;
     }
 
     private boolean shouldTargetNextNodeInDirection(Vec3 vec) {

@@ -4,7 +4,7 @@ import com.github.teamfossilsarcheology.fossil.FossilMod;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -46,7 +46,7 @@ public class ModDimensions {
     public static void register() {
     }
 
-    public static void bootstrap(BootstapContext<DimensionType> context) {
+    public static void bootstrap(BootstrapContext<DimensionType> context) {
         context.register(ANU_LAIR_TYPE, CUSTOM);
         context.register(TREASURE_ROOM_TYPE, CUSTOM);
     }
@@ -65,11 +65,20 @@ public class ModDimensions {
         int z = (int) spawnPoint.z;
         BlockPos.betweenClosed(x - 2, y + 1, z - 2, x + 2, y + 3, z + 2).forEach(blockPos -> anuLair.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState()));
         BlockPos.betweenClosed(x - 2, y, z - 2, x + 2, y, z + 2).forEach(blockPos -> anuLair.setBlockAndUpdate(blockPos, Blocks.OBSIDIAN.defaultBlockState()));
-        changeDimension(entity, anuLair, new PortalInfo(spawnPoint, entity.getDeltaMovement(), 0, 90));
+        //PORT(1.21.1): PortalInfo(pos, speed, yRot, xRot) + Forge ITeleporter -> vanilla DimensionTransition (1.21).
+        //DO_NOTHING = no portal sound/ticket/portal placement, same as the old ModTeleporter (playTeleportSound=false, placeEntity without portal)
+        //PORT-TODO(1.21.1): verify in game for players and non-player entities (AnuPortal calls this from entityInside; 1.21 vanilla
+        // portals go through the Portal interface/PortalProcessor instead, direct changeDimension is still supported)
+        changeDimension(entity, anuLair, new DimensionTransition(anuLair, spawnPoint, entity.getDeltaMovement(), 0, 90, DimensionTransition.DO_NOTHING));
     }
 
+    /**
+     * PORT(1.21.1): takes a {@link DimensionTransition} (was PortalInfo). The NeoForge impl calls
+     * {@link Entity#changeDimension(DimensionTransition)}. Since this is plain vanilla now, the @ExpectPlatform could be inlined
+     * later (then delete neoforge's ModDimensionsImpl).
+     */
     @ExpectPlatform
-    public static void changeDimension(Entity entity, ServerLevel level, PortalInfo portalInfo) {
+    public static void changeDimension(Entity entity, ServerLevel level, DimensionTransition transition) {
         throw new NotImplementedException();
     }
 }

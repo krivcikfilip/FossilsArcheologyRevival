@@ -11,6 +11,7 @@ import com.github.teamfossilsarcheology.fossil.sounds.ModMusic;
 import com.github.teamfossilsarcheology.fossil.sounds.MusicHandler;
 import com.github.teamfossilsarcheology.fossil.world.dimension.ModDimensions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -44,7 +45,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -75,9 +76,9 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
         super(entityType, level);
         moveControl = new AnuMoveControl(this);
         xpReward = 50;
-        setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 4);
-        setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0);
-        setPathfindingMalus(BlockPathTypes.LAVA, 4);
+        setPathfindingMalus(PathType.DANGER_FIRE, 4);
+        setPathfindingMalus(PathType.DAMAGE_FIRE, 0);
+        setPathfindingMalus(PathType.LAVA, 4);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -89,10 +90,10 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(DATA_PHASE, AnuPhase.MELEE.ordinal());
-        entityData.define(WEAK, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_PHASE, AnuPhase.MELEE.ordinal());
+        builder.define(WEAK, false);
     }
 
     @Override
@@ -112,8 +113,16 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    /**
+     * PORT(1.21.1): canChangeDimensions() was split into canUsePortal(boolean) and canChangeDimensions(Level, Level)
+     */
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canUsePortal(boolean allowPassengers) {
+        return false;
+    }
+
+    @Override
+    public boolean canChangeDimensions(Level oldLevel, Level newLevel) {
         return false;
     }
 
@@ -198,7 +207,7 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
 
     private void removeBarriers() {
         if (!level().isClientSide && level().dimension() == ModDimensions.ANU_LAIR) {
-            AnuLair anuLair = ((ServerLevel) level()).getDataStorage().get(AnuLair::load, "anu_lair");
+            AnuLair anuLair = ((ServerLevel) level()).getDataStorage().get(AnuLair.FACTORY, "anu_lair");
             if (anuLair != null) {
                 for (BlockPos barrierPosition : anuLair.barrierPositions) {
                     if (level().getBlockEntity(barrierPosition) instanceof AnuBarrierBlockEntity blockEntity) {
@@ -234,8 +243,8 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource damageSource, int looting, boolean hitByPlayer) {
-        super.dropCustomDeathLoot(damageSource, looting, hitByPlayer);
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean hitByPlayer) {
+        super.dropCustomDeathLoot(level, damageSource, hitByPlayer);
         ItemEntity itemEntity = spawnAtLocation(ModItems.ANCIENT_KEY.get());
         if (itemEntity != null) {
             itemEntity.setExtendedLifetime();
@@ -268,7 +277,7 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
         double y = target.getBoundingBox().minY - (getY() + (getBbHeight() / 2));
         double z = target.getZ() - getZ();
         playSound(SoundEvents.GHAST_SHOOT, 1, 1);
-        LargeFireball largeFireball = new LargeFireball(level(), this, x, y, z, 2);
+        LargeFireball largeFireball = new LargeFireball(level(), this, new Vec3(x, y, z), 2);
         largeFireball.setPos(getX() + x * 0.1, getY() + (getBbHeight() / 2) + 0.5, getZ() + z * 0.1);
         level().addFreshEntity(largeFireball);
     }
@@ -297,10 +306,10 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
         populateDefaultEquipmentSlots(level.getRandom(), difficulty);
         spawnPosition = position();
-        return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
+        return super.finalizeSpawn(level, difficulty, reason, spawnData);
     }
 
     @Override
@@ -344,8 +353,15 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
     }
 
     public static class AnuLair extends SavedData {
+        /**
+         * PORT(1.21.1): DimensionDataStorage#get takes a SavedData.Factory now (no DataFixTypes)
+         */
+        public static final SavedData.Factory<AnuLair> FACTORY = new SavedData.Factory<>(AnuLair::new, AnuLair::load, null);
         private boolean anuKilled;
         private final Set<BlockPos> barrierPositions = new HashSet<>();
+
+        public AnuLair() {
+        }
 
         public static AnuLair killed() {
             AnuLair anuLair = new AnuLair();
@@ -361,7 +377,7 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
             return anuLair;
         }
 
-        public static AnuLair load(CompoundTag compoundTag) {
+        public static AnuLair load(CompoundTag compoundTag, HolderLookup.Provider registries) {
             AnuLair anuLair = new AnuLair();
             anuLair.anuKilled = compoundTag.getBoolean("AnuKilled");
             ListTag barriers = compoundTag.getList("Barriers", Tag.TAG_COMPOUND);
@@ -374,7 +390,7 @@ public class AnuBoss extends PathfinderMob implements RangedAttackMob {
         }
 
         @Override
-        public @NotNull CompoundTag save(CompoundTag compoundTag) {
+        public @NotNull CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider registries) {
             compoundTag.putBoolean("AnuKilled", anuKilled);
             ListTag barriers = new ListTag();
             for (BlockPos blockPos : barrierPositions) {

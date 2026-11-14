@@ -7,6 +7,7 @@ import com.github.teamfossilsarcheology.fossil.sounds.ModSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -41,10 +42,11 @@ public class Gallimimus extends PrehistoricFlocking {
     @Override
     public void aiStep() {
         super.aiStep();
+        //PORT(1.21.1): step height is the STEP_HEIGHT attribute since 1.20.5 (was setMaxUpStep)
         if (getRidingPlayer() != null) {
-            setMaxUpStep(2);
+            getAttribute(Attributes.STEP_HEIGHT).setBaseValue(2);
         } else {
-            setMaxUpStep(0.6f);
+            getAttribute(Attributes.STEP_HEIGHT).setBaseValue(0.6f);
         }
     }
 

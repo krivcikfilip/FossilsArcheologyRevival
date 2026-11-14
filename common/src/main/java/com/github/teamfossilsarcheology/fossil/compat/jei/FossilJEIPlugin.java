@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,10 +29,12 @@ import java.util.List;
 
 @JeiPlugin
 public class FossilJEIPlugin implements IModPlugin {
-    public static final RecipeType<AnalyzerRecipe> ANALYZER = RecipeType.create(FossilMod.MOD_ID, "analyzer", AnalyzerRecipe.class);
-    public static final RecipeType<CultureVatRecipe> CULTURE_VAT = RecipeType.create(FossilMod.MOD_ID, "culture_vat", CultureVatRecipe.class);
-    public static final RecipeType<SifterRecipe> SIFTER = RecipeType.create(FossilMod.MOD_ID, "sifter", SifterRecipe.class);
-    public static final RecipeType<WorktableRecipe> WORKTABLE = RecipeType.create(FossilMod.MOD_ID, "worktable", WorktableRecipe.class);
+    //PORT(1.21.1): RecipeManager returns RecipeHolders, so the JEI recipe types wrap RecipeHolder<T> (JEI 19 API, verified in JEI 1.21.1 branch).
+    //createRecipeHolderType instead of createFromVanilla to avoid a registry lookup during class init. Uids unchanged.
+    public static final RecipeType<RecipeHolder<AnalyzerRecipe>> ANALYZER = RecipeType.createRecipeHolderType(FossilMod.location("analyzer"));
+    public static final RecipeType<RecipeHolder<CultureVatRecipe>> CULTURE_VAT = RecipeType.createRecipeHolderType(FossilMod.location("culture_vat"));
+    public static final RecipeType<RecipeHolder<SifterRecipe>> SIFTER = RecipeType.createRecipeHolderType(FossilMod.location("sifter"));
+    public static final RecipeType<RecipeHolder<WorktableRecipe>> WORKTABLE = RecipeType.createRecipeHolderType(FossilMod.location("worktable"));
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {

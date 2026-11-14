@@ -8,6 +8,7 @@ import com.github.teamfossilsarcheology.fossil.tags.ModEntityTypeTags;
 import com.github.teamfossilsarcheology.fossil.util.TimePeriod;
 import dev.architectury.core.item.ArchitecturyMobBucketItem;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -178,7 +180,7 @@ public enum PrehistoricEntityInfo implements EntityInfo {
             registerItem("spawn_egg", info, properties -> new CustomSpawnEggItem(info), item -> info.spawnEggItem = item);
 
             if (info.bucketable) {
-                registerItem("bucket_item", info, properties -> new ArchitecturyMobBucketItem(info.entitySupplier, () -> Fluids.WATER, () -> SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1).arch$tab(ModTabs.FA_MOB_ITEM_TAB)),
+                registerItem("bucket_item", info, properties -> new ArchitecturyMobBucketItem(info.entitySupplier, () -> Fluids.WATER, () -> SoundEvents.BUCKET_EMPTY_FISH, new Item.Properties().stacksTo(1).component(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY).arch$tab(ModTabs.FA_MOB_ITEM_TAB)),
                         item -> info.bucketItem = item);
             }
         }

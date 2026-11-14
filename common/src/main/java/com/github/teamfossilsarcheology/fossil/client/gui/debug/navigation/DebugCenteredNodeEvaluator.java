@@ -3,7 +3,7 @@ package com.github.teamfossilsarcheology.fossil.client.gui.debug.navigation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
@@ -19,7 +19,7 @@ public class DebugCenteredNodeEvaluator extends PlayerNodeEvaluator {
     @Override
     public Node getStart() {
         int i = Mth.floor(PathingDebug.pos1.getY() + 0.5);
-        BlockPathTypes blockPathTypes = getCachedBlockType(player, PathingDebug.pos1.getX(), i, PathingDebug.pos1.getZ());
+        PathType blockPathTypes = getCachedBlockType(player, PathingDebug.pos1.getX(), i, PathingDebug.pos1.getZ());
         if (PathingDebug.getPathfindingMalus(blockPathTypes) < 0.0f) {
             AABB aABB = PathingRenderer.getBigHitbox().move(PathingDebug.pos1);
             Vec3 center = aABB.setMinY(i).setMaxY(i).getCenter();
@@ -46,14 +46,14 @@ public class DebugCenteredNodeEvaluator extends PlayerNodeEvaluator {
      * @implNote This implementation checks neighbours around the target instead of shifted to a positive x and z
      */
     @Override
-    public BlockPathTypes getBlockPathTypes(BlockGetter level, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoors,
-                                            boolean canEnterDoors, EnumSet<BlockPathTypes> nodeTypeEnum, BlockPathTypes nodeType, BlockPos pos) {
+    public PathType getBlockPathTypes(BlockGetter level, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoors,
+                                            boolean canEnterDoors, EnumSet<PathType> nodeTypeEnum, PathType nodeType, BlockPos pos) {
         float width = Math.max(0, xSize - 2);
         int widthEachSide = xSize - 1;
         for (int i = -widthEachSide + 1; i < widthEachSide; ++i) {
             for (int j = 0; j < ySize; ++j) {
                 for (int k = -widthEachSide + 1; k < widthEachSide; ++k) {
-                    BlockPathTypes blockPathType = getBlockPathType(level, x + i, y + j, z + k);
+                    PathType blockPathType = getBlockPathType(level, x + i, y + j, z + k);
                     blockPathType = evaluateBlockPathType(level, canOpenDoors, canEnterDoors, pos, blockPathType);
                     nodeTypeEnum.add(blockPathType);
                 }

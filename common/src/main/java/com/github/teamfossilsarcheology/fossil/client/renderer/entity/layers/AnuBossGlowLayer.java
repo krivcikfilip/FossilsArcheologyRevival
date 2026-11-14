@@ -23,6 +23,6 @@ public class AnuBossGlowLayer extends RenderLayer<AnuBoss, AnuBossModel> {
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AnuBoss livingEntity, float limbSwing,
                        float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE));
-        getParentModel().renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.WHITE_OVERLAY_V, 1, 1, 1, 1);
+        getParentModel().renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.WHITE_OVERLAY_V);
     }
 }

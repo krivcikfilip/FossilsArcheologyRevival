@@ -5,7 +5,6 @@ import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.doubles.DoubleComparators;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -21,7 +20,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +31,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class MultiOutputCategory<T extends MultiOutputAndSlotsRecipe> implements IRecipeCategory<T> {
+//PORT(1.21.1): categories work on RecipeHolder<T> (JEI 19 / 1.21.1 recipe manager). The probability cache stays keyed by the recipe itself.
+public abstract class MultiOutputCategory<T extends MultiOutputAndSlotsRecipe> implements IRecipeCategory<RecipeHolder<T>> {
     private static final ResourceLocation TEXTURE = FossilMod.location("textures/gui/multi_output.png");
     private static final DecimalFormat FORMAT = new DecimalFormat("#.#'%'");
     private final IDrawable background;
@@ -77,8 +77,8 @@ public abstract class MultiOutputCategory<T extends MultiOutputAndSlotsRecipe> i
     }
 
     @Override
-    public void draw(@NotNull T recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        List<SlotItem> slotItems = probabilities.getUnchecked(recipe);
+    public void draw(@NotNull RecipeHolder<T> recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+        List<SlotItem> slotItems = probabilities.getUnchecked(recipe.value());
         List<IRecipeSlotView> slots = recipeSlotsView.getSlotViews(RecipeIngredientRole.OUTPUT);
         for (int i = 0; i < slots.size(); i++) {
             Optional<ItemStack> currentStack = slots.get(i).getDisplayedItemStack();
@@ -103,7 +103,8 @@ public abstract class MultiOutputCategory<T extends MultiOutputAndSlotsRecipe> i
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0.0, 0.0, 100 + 200.0F);
         String string = FORMAT.format(percentage);
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        //PORT(1.21.1): Tesselator#getBuilder is gone (1.21), use the GuiGraphics buffer source
+        MultiBufferSource.BufferSource bufferSource = guiGraphics.bufferSource();
         float xOffset = Math.min(11, fr.width(string) / 2f);
         fr.drawInBatch(string, (xPosition + 8 - xOffset), (yPosition + 16 + 1), 16777215, true,
                 guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
@@ -112,12 +113,14 @@ public abstract class MultiOutputCategory<T extends MultiOutputAndSlotsRecipe> i
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder, RecipeHolder<T> holder, IFocusGroup focuses) {
+        T recipe = holder.value();
         int centerX = 150 / 2;
         builder.addSlot(RecipeIngredientRole.INPUT, centerX - 7, 2).addIngredients(recipe.getInput());
         List<SlotItem> outputs = probabilities.getUnchecked(recipe);
         for (SlotItem output : outputs) {
-            builder.addSlot(RecipeIngredientRole.OUTPUT, output.x, output.y + 1).addIngredients(Ingredient.of(output.items.stream().map(weightedItem -> weightedItem.stack)));
+            //PORT(1.21.1): Ingredient.of(Stream) -> addItemStacks. Empty stacks are filtered like Ingredient.of did ("nothing" is drawn in draw())
+            builder.addSlot(RecipeIngredientRole.OUTPUT, output.x, output.y + 1).addItemStacks(output.items.stream().map(weightedItem -> weightedItem.stack).filter(stack -> !stack.isEmpty()).toList());
         }
     }
 

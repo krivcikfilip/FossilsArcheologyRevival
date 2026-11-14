@@ -17,15 +17,19 @@ public class PrehistoricFishGeoRenderer<T extends PrehistoricFish> extends GeoEn
         super(renderManager, new PrehistoricFishGeoModel<>(model));
     }
 
+    /**
+     * PORT(1.21.1): GeckoLib 4.9 GeoEntityRenderer#actuallyRender already scales by {@code LivingEntity#getScale()} ("nativeScale"),
+     * so {@code withScale(animatable.getScale())} is no longer applied here (it would scale twice).
+     */
     @Override
-    public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        withScale(animatable.getScale());
-        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+    public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 
+    //PORT(1.21.1): GeckoLib 4.9 only calls the overload with nativeScale
     @Override
-    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
-        super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick);
+    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
+        super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick, nativeScale);
         if (animatable instanceof Nautilus) {
             poseStack.mulPose(Axis.YP.rotationDegrees(180));
         }

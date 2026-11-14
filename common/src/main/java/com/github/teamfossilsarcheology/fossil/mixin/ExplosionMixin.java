@@ -30,7 +30,7 @@ public class ExplosionMixin {
     public void preventExplosion(CallbackInfo ci) {
         if (level.dimension() == ModDimensions.ANU_LAIR && level instanceof ServerLevel serverLevel) {
             //PORT(1.21.1): DimensionDataStorage#get takes a SavedData.Factory (null DataFixTypes is allowed by NeoForge)
-            AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(new SavedData.Factory<>(AnuBoss.AnuLair::new, (tag, registries) -> new AnuBoss.AnuLair(), null), "anu_lair");
+            AnuBoss.AnuLair anuLair = serverLevel.getDataStorage().get(AnuBoss.AnuLair.FACTORY, "anu_lair");
             if (anuLair == null || !anuLair.isAnuKilled()) {
                 toBlow.clear();
             }

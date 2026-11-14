@@ -18,6 +18,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -36,8 +37,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
@@ -61,9 +62,9 @@ public class PrehistoricSkeleton extends Entity implements GeoEntity, EntitySpaw
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(AGE, 0);
-        entityData.define(INFO_TYPE, TRICERATOPS.name());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(AGE, 0);
+        builder.define(INFO_TYPE, TRICERATOPS.name());
     }
 
     @Override
@@ -167,6 +168,7 @@ public class PrehistoricSkeleton extends Entity implements GeoEntity, EntitySpaw
             refreshTexturePath();
         }
         if (INFO_TYPE.equals(key) && level().isClientSide) {
+            //PORT(1.21.1): More Hitboxes API checked against the DarkPred/morehitboxes 1.21.1 branch (HitboxDataLoader.HITBOX_DATA#getHitboxes, HitboxData record)
             List<HitboxData> hitboxesData = HitboxDataLoader.HITBOX_DATA.getHitboxes(FossilMod.location(info().resourceName));
             if (hitboxesData != null) {
                 float maxFrustumWidthRadius = 0;
@@ -269,8 +271,8 @@ public class PrehistoricSkeleton extends Entity implements GeoEntity, EntitySpaw
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkManager.createAddEntityPacket(this);
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+        return NetworkManager.createAddEntityPacket(this, serverEntity);
     }
 
     @Override

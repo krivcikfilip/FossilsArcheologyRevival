@@ -36,10 +36,10 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimatableManager;
 
 public abstract class PrehistoricSwimming extends Prehistoric implements SwimmingAnimal {
     public static final int MAX_TIME_IN_WATER = 1000;
@@ -55,13 +55,13 @@ public abstract class PrehistoricSwimming extends Prehistoric implements Swimmin
 
     protected PrehistoricSwimming(EntityType<? extends Prehistoric> entityType, Level level, ResourceLocation animationLocation) {
         super(entityType, level, animationLocation);
-        setPathfindingMalus(BlockPathTypes.WATER, 0);
+        setPathfindingMalus(PathType.WATER, 0);
         switchNavigator(false);
     }
 
     protected PrehistoricSwimming(EntityType<? extends Prehistoric> entityType, Level level) {
         super(entityType, level);
-        setPathfindingMalus(BlockPathTypes.WATER, 0);
+        setPathfindingMalus(PathType.WATER, 0);
         switchNavigator(false);
     }
 
@@ -113,9 +113,9 @@ public abstract class PrehistoricSwimming extends Prehistoric implements Swimmin
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(GRABBING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(GRABBING, false);
     }
 
     @Override
@@ -150,8 +150,9 @@ public abstract class PrehistoricSwimming extends Prehistoric implements Swimmin
     }
 
     @Override
-    public @NotNull MobType getMobType() {
-        return MobType.WATER;
+    public boolean isWaterMobType() {
+        //PORT(1.21.1): was getMobType() returning MobType.WATER (removed in 1.20.5, now the minecraft:aquatic entity type tag)
+        return true;
     }
 
     @Override
@@ -179,10 +180,9 @@ public abstract class PrehistoricSwimming extends Prehistoric implements Swimmin
         return swimSpeed;
     }
 
-    @Override
-    public boolean canBreatheUnderwater() {
-        return true;
-    }
+    //PORT(1.21.1): canBreatheUnderwater() returned true. LivingEntity#canBreatheUnderwater is final in 1.21.1 and reads the
+    // minecraft:can_breathe_under_water entity type tag (requested from data/build). Drowning itself is still prevented by
+    // handleAirSupply (resets the air supply while in water).
 
     @Override
     protected @NotNull MovementEmission getMovementEmission() {
@@ -232,6 +232,8 @@ public abstract class PrehistoricSwimming extends Prehistoric implements Swimmin
         }
     }
 
+    //PORT-TODO(1.21.1): NeoForge's LivingEntity#aiStep calls jumpInFluid(FluidType) instead of this method (deprecated there),
+    // so this override only runs on Fabric. Same as on Forge 1.20.1, kept unchanged.
     @Override
     protected void jumpInLiquid(TagKey<Fluid> fluidTag) {
         setDeltaMovement(getDeltaMovement().add(0.0, 0.3, 0.0));
@@ -267,7 +269,7 @@ public abstract class PrehistoricSwimming extends Prehistoric implements Swimmin
         super.positionRider(passenger, callback);
         if (passenger != getRidingPlayer() && isDoingGrabAttack()) {
             getEntityHitboxData().getAnchorData().getAnchorPos("grab_pos").ifPresentOrElse(pos -> {
-                callback.accept(passenger, pos.x, pos.y + passenger.getMyRidingOffset(), pos.z);
+                callback.accept(passenger, pos.x, pos.y + getLegacyRidingOffset(passenger, this), pos.z);
             }, () -> {
                 // holy magic numbers. what is going on here?
                 // I'm guessing the numbers were tweaked until it looked good?

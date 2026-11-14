@@ -24,10 +24,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.animation.PlayState;
 
 import java.util.List;
 
@@ -63,9 +63,9 @@ public class Nautilus extends PrehistoricFish {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(IS_IN_SHELL, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(IS_IN_SHELL, false);
     }
 
     @Override
@@ -131,8 +131,9 @@ public class Nautilus extends PrehistoricFish {
     }
 
     @Override
-    public @NotNull EntityDimensions getDimensions(Pose pose) {
-        return shouldBeBeached() ? SHELL_DIMENSIONS : super.getDimensions(pose);
+    protected @NotNull EntityDimensions getDefaultDimensions(Pose pose) {
+        //PORT(1.21.1): was getDimensions(Pose), which is final in LivingEntity now
+        return shouldBeBeached() ? SHELL_DIMENSIONS : super.getDefaultDimensions(pose);
     }
 
     @Override

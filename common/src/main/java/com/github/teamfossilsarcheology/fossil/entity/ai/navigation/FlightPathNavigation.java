@@ -4,12 +4,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.FlyNodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.PathfindingContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,27 +34,33 @@ public class FlightPathNavigation extends FlyingPathNavigation {
     }
 
     private static class FlightNodeEvaluator extends FlyNodeEvaluator {
+        /**
+         * PORT(1.21.1): was getBlockPathTypes(BlockGetter, int, int, int, EnumSet, BlockPathTypes, BlockPos) which also returned the type
+         * of the center block. 1.21 checks the center type in getPathTypeOfMob itself, evaluateBlockPathType was inlined into
+         * getPathTypeWithinMobBB (see {@link NavUtil#evaluatePathType}).
+         * PORT-TODO(1.21.1): 1.20.1 FlyNodeEvaluator#getBlockPathType(..., Mob) called super.getBlockPathTypes (so this override was not
+         * used by it). Verify that 1.21.1 FlyNodeEvaluator#getPathTypeOfMob calls this method and that flying pathing still works
+         */
         @Override
-        public BlockPathTypes getBlockPathTypes(BlockGetter level, int x, int y, int z, EnumSet<BlockPathTypes> nodeTypeEnum, BlockPathTypes nodeType, BlockPos pos) {
+        public @NotNull Set<PathType> getPathTypeWithinMobBB(PathfindingContext context, int x, int y, int z) {
+            EnumSet<PathType> nodeTypeEnum = EnumSet.noneOf(PathType.class);
             float width = Math.max(0, entityWidth - 2);
             int widthEachSide = Mth.ceil(width / 2.0f) + 1;
             for (int i = 0; i < widthEachSide; ++i) {
                 for (int j = 0; j < entityHeight; ++j) {
                     for (int k = 0; k < widthEachSide; ++k) {
-                        BlockPathTypes blockPathType = this.getBlockPathType(level, x + i, y + j, z + k);
-                        blockPathType = this.evaluateBlockPathType(level, pos, blockPathType);
+                        PathType blockPathType = this.getPathType(context, x + i, y + j, z + k);
+                        blockPathType = NavUtil.evaluatePathType(this, context, mob, blockPathType);
                         nodeTypeEnum.add(blockPathType);
-                        if (i == 0 && j == 0 && k == 0) {
-                            nodeType = blockPathType;
-                        } else if (i != 0 || k != 0) {
-                            blockPathType = this.getBlockPathType(level, x - i, y + j, z - k);
-                            blockPathType = this.evaluateBlockPathType(level, pos, blockPathType);
+                        if (i != 0 || k != 0) {
+                            blockPathType = this.getPathType(context, x - i, y + j, z - k);
+                            blockPathType = NavUtil.evaluatePathType(this, context, mob, blockPathType);
                             nodeTypeEnum.add(blockPathType);
                         }
                     }
                 }
             }
-            return nodeType;
+            return nodeTypeEnum;
         }
     }
 }

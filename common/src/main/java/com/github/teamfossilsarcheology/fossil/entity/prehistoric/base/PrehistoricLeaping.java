@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimatableManager;
 
 import java.util.Objects;
 
@@ -51,15 +51,15 @@ public abstract class PrehistoricLeaping extends Prehistoric {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(LEAPING, false);
-        entityData.define(LEAP_STARTED, false);
-        entityData.define(LEAP_RIDING, false);
-        entityData.define(LEAP_FLYING, false);
-        entityData.define(LEAP_LANDING, false);
-        entityData.define(LEAP_TARGET_ID, -1);
-        entityData.define(LANDING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(LEAPING, false);
+        builder.define(LEAP_STARTED, false);
+        builder.define(LEAP_RIDING, false);
+        builder.define(LEAP_FLYING, false);
+        builder.define(LEAP_LANDING, false);
+        builder.define(LEAP_TARGET_ID, -1);
+        builder.define(LANDING, false);
     }
 
     @Override

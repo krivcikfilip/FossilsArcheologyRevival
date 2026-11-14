@@ -34,7 +34,7 @@ public abstract class ToyBaseRenderer<T extends ToyBase> extends EntityRenderer<
         model.setupAnim(entity, partialTicks, 0, 0, 0, xRotDiff);
         VertexConsumer vertexConsumer = buffer.getBuffer(model.renderType(_getTextureLocation(entity)));
         int m = OverlayTexture.pack(OverlayTexture.u(0), OverlayTexture.v(false));
-        model.renderToBuffer(poseStack, vertexConsumer, packedLight, m, 1, 1, 1, 1);
+        model.renderToBuffer(poseStack, vertexConsumer, packedLight, m);
         poseStack.popPose();
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }

@@ -10,8 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import software.bernie.geckolib.core.animation.Animation;
-import software.bernie.geckolib.core.keyframe.BoneAnimation;
+import software.bernie.geckolib.animation.Animation;
+import software.bernie.geckolib.animation.keyframe.BoneAnimation;
 
 import java.lang.reflect.Type;
 import java.util.Map;

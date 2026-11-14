@@ -7,7 +7,10 @@ import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.Prehistor
 import com.github.teamfossilsarcheology.fossil.entity.prehistoric.base.VanillaEntityInfo;
 import net.minecraft.Util;
 import net.minecraft.core.Position;
-import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
@@ -43,10 +47,31 @@ public class ThrownBirdEgg extends ThrowableItemProjectile {
         this.cultivated = cultivated;
     }
 
-    public static AbstractProjectileDispenseBehavior getProjectile(EntityInfo info, boolean cultivated) {
-        return new AbstractProjectileDispenseBehavior() {
+    /**
+     * PORT(1.21.1): AbstractProjectileDispenseBehavior was removed in 1.20.5 (replaced by ProjectileDispenseBehavior + ProjectileItem).
+     * This is the 1.20.1 AbstractProjectileDispenseBehavior logic (power 1.1, uncertainty 6, sound event 1002).
+     * PORT-TODO(1.21.1): verify dispensing bird eggs in game (BlockSource is a record now: level()/pos()/state())
+     */
+    public static DispenseItemBehavior getProjectile(EntityInfo info, boolean cultivated) {
+        return new DefaultDispenseItemBehavior() {
             @Override
-            protected @NotNull Projectile getProjectile(Level level, Position position, ItemStack stack) {
+            public @NotNull ItemStack execute(BlockSource source, ItemStack stack) {
+                Level level = source.level();
+                Position position = DispenserBlock.getDispensePosition(source);
+                Direction direction = source.state().getValue(DispenserBlock.FACING);
+                Projectile projectile = getProjectile(level, position, stack);
+                projectile.shoot(direction.getStepX(), direction.getStepY() + 0.1f, direction.getStepZ(), 1.1f, 6);
+                level.addFreshEntity(projectile);
+                stack.shrink(1);
+                return stack;
+            }
+
+            @Override
+            protected void playSound(BlockSource source) {
+                source.level().levelEvent(1002, source.pos(), 0);
+            }
+
+            private Projectile getProjectile(Level level, Position position, ItemStack stack) {
                 return Util.make(new ThrownBirdEgg(level, position.x(), position.y(), position.z(), cultivated), thrownEgg -> {
                     thrownEgg.setItem(stack);
                     thrownEgg.setType(info);
@@ -98,7 +123,7 @@ public class ThrownBirdEgg extends ThrowableItemProjectile {
         if (info.mobType() != PrehistoricMobType.VANILLA_BIRD) {
             for (int i = 0; i < amount; ++i) {
                 Prehistoric entity = (Prehistoric) info.entityType().create(level());
-                entity.finalizeSpawn((ServerLevel) level(), level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0), null);
+                entity.finalizeSpawn((ServerLevel) level(), level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0));
                 entity.moveTo(getX(), getY(), getZ(), getYRot(), 0);
                 level().addFreshEntity(entity);
                 if (getOwner() instanceof ServerPlayer player) {
@@ -117,7 +142,7 @@ public class ThrownBirdEgg extends ThrowableItemProjectile {
                 } else {
                     entity = EntityType.CHICKEN.create(level());
                 }
-                entity.finalizeSpawn((ServerLevel) level(), level().getCurrentDifficultyAt(blockPosition()), MobSpawnType.BREEDING, null, null);
+                entity.finalizeSpawn((ServerLevel) level(), level().getCurrentDifficultyAt(blockPosition()), MobSpawnType.BREEDING, null);
                 entity.setAge(-24000);
                 entity.moveTo(getX(), getY(), getZ(), getYRot(), 0);
                 level().addFreshEntity(entity);

@@ -1,6 +1,5 @@
 package com.github.teamfossilsarcheology.fossil.entity.ai.anu;
 
-import com.eliotlash.mclib.utils.MathHelper;
 import com.github.teamfossilsarcheology.fossil.entity.monster.AnuBoss;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -37,7 +36,8 @@ public class AnuMoveControl extends MoveControl {
                 Vec3 next = current.add(newX, newY, newZ);
                 mob.setDeltaMovement(new Vec3(next.x, Double.isNaN(next.y) ? 0 : next.y, next.z));
                 float angle = (float) (Math.atan2(next.z, next.x) * Mth.RAD_TO_DEG) - 90;
-                float rotation = MathHelper.wrapDegrees(angle - mob.getYRot());
+                //PORT(1.21.1): mclib (com.eliotlash MathHelper) is no longer shipped with GeckoLib, Mth#wrapDegrees is equivalent
+                float rotation = Mth.wrapDegrees(angle - mob.getYRot());
                 mob.setYRot(mob.getYRot() + rotation);
             }
         } else {

@@ -11,6 +11,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,9 +25,10 @@ public abstract class WithFuelDisplay implements Display {
     protected final ResourceLocation location;
 
 
-    protected WithFuelDisplay(WithFuelRecipe recipe) {
-        this(EntryIngredients.ofIngredient(recipe.getInput()), EntryIngredients.ofIngredient(recipe.getFuel()),
-                EntryStacks.of(recipe.getResultItem(null)), recipe.getId());
+    //PORT(1.21.1): REI 16 recipe fillers receive RecipeHolders; the id comes from RecipeHolder#id(), getResultItem(null) -> getResult()
+    protected WithFuelDisplay(RecipeHolder<? extends WithFuelRecipe> holder) {
+        this(EntryIngredients.ofIngredient(holder.value().getInput()), EntryIngredients.ofIngredient(holder.value().getFuel()),
+                EntryStacks.of(holder.value().getResult().copy()), holder.id());
     }
 
     protected WithFuelDisplay(EntryIngredient input, EntryIngredient fuel, EntryStack<?> output, ResourceLocation location) {
@@ -72,7 +74,7 @@ public abstract class WithFuelDisplay implements Display {
             EntryIngredient input = EntryIngredient.read(tag.getList("Input", Tag.TAG_COMPOUND));
             EntryIngredient fuel = EntryIngredient.read(tag.getList("Fuel", Tag.TAG_COMPOUND));
             EntryStack<?> output = EntryStack.read(tag.getCompound("Output"));
-            ResourceLocation location = new ResourceLocation(tag.getString("Location"));
+            ResourceLocation location = ResourceLocation.parse(tag.getString("Location"));
             return constructor.construct(input, fuel, output, location);
         }
 

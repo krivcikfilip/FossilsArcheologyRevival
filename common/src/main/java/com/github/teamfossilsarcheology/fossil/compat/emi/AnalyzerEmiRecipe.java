@@ -7,13 +7,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
 public class AnalyzerEmiRecipe extends MultiOutputEmiRecipe<AnalyzerRecipe> {
-    public AnalyzerEmiRecipe(AnalyzerRecipe recipe) {
+    public AnalyzerEmiRecipe(RecipeHolder<AnalyzerRecipe> recipe) {
         super(recipe);
     }
 

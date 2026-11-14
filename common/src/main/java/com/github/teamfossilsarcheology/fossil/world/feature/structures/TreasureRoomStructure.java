@@ -1,7 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.world.feature.structures;
 
 import com.github.teamfossilsarcheology.fossil.FossilMod;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -22,8 +22,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 public class TreasureRoomStructure extends Structure {
-    public static final Codec<TreasureRoomStructure> CODEC = RecordCodecBuilder
-            .create(instance -> instance.group(settingsCodec(instance)).apply(instance, TreasureRoomStructure::new));
+    //PORT(1.21.1): StructureType#codec is a MapCodec since 1.20.5
+    public static final MapCodec<TreasureRoomStructure> CODEC = RecordCodecBuilder
+            .mapCodec(instance -> instance.group(settingsCodec(instance)).apply(instance, TreasureRoomStructure::new));
 
     public TreasureRoomStructure(Structure.StructureSettings settings) {
         super(settings);
@@ -37,7 +38,7 @@ public class TreasureRoomStructure extends Structure {
 
     @Override
     public @NotNull StructureType<?> type() {
-        return ModStructureType.TREASURE_ROOM;
+        return ModStructureType.TREASURE_ROOM.get();
     }
 
     static class TreasureRoomPiece extends TemplateStructurePiece {

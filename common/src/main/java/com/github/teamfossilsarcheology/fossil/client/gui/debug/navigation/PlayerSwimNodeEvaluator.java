@@ -12,7 +12,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.pathfinder.Target;
@@ -23,12 +23,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 
 public class PlayerSwimNodeEvaluator extends PlayerNodeEvaluator {
-    private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<PathType> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
     @Override
     public void prepare(PathNavigationRegion level, Player p) {
         super.prepare(level, p);
         this.pathTypesByPosCache.clear();
-        PathingDebug.setPathfindingMalus(BlockPathTypes.WATER, 0);
+        PathingDebug.setPathfindingMalus(PathType.WATER, 0);
     }
 
     @Override
@@ -75,8 +75,8 @@ public class PlayerSwimNodeEvaluator extends PlayerNodeEvaluator {
     protected Node getNode(int x, int y, int z) {
         float f;
         Node node = null;
-        BlockPathTypes blockPathTypes = this.getCachedBlockType(x, y, z);
-        if (blockPathTypes == BlockPathTypes.WATER && (f = PathingDebug.getPathfindingMalus(blockPathTypes)) >= 0.0f) {
+        PathType blockPathTypes = this.getCachedBlockType(x, y, z);
+        if (blockPathTypes == PathType.WATER && (f = PathingDebug.getPathfindingMalus(blockPathTypes)) >= 0.0f) {
             node = super.getNode(x, y, z);
             node.type = blockPathTypes;
             node.costMalus = Math.max(node.costMalus, f);
@@ -92,35 +92,35 @@ public class PlayerSwimNodeEvaluator extends PlayerNodeEvaluator {
         return new Target(super.getNode(Mth.floor(x), Mth.floor(y), Mth.floor(z)));
     }
 
-    protected BlockPathTypes getCachedBlockType(int x, int y, int z) {
+    protected PathType getCachedBlockType(int x, int y, int z) {
         return this.pathTypesByPosCache.computeIfAbsent(BlockPos.asLong(x, y, z), l -> this.getBlockPathType(this.level, x, y, z));
     }
 
     @Override
-    public BlockPathTypes getBlockPathType(BlockGetter level, int x, int y, int z) {
+    public PathType getBlockPathType(BlockGetter level, int x, int y, int z) {
         return this.getBlockPathType(level, x, y, z, player, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors());
     }
 
     @Override
-    public BlockPathTypes getBlockPathType(BlockGetter blockaccess, int x, int y, int z, Player entityliving, int xSize, int ySize, int zSize, boolean canBreakDoors, boolean canEnterDoors) {
+    public PathType getBlockPathType(BlockGetter blockaccess, int x, int y, int z, Player entityliving, int xSize, int ySize, int zSize, boolean canBreakDoors, boolean canEnterDoors) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int i = x; i < x + xSize; ++i) {
             for (int j = y; j < y + ySize; ++j) {
                 for (int k = z; k < z + zSize; ++k) {
                     FluidState fluidState = blockaccess.getFluidState(mutableBlockPos.set(i, j, k));
                     BlockState blockState = blockaccess.getBlockState(mutableBlockPos.set(i, j, k));
-                    if (fluidState.isEmpty() && blockState.isPathfindable(blockaccess, mutableBlockPos.below(), PathComputationType.WATER) && blockState.isAir()) {
-                        return BlockPathTypes.BREACH;
+                    if (fluidState.isEmpty() && blockState.isPathfindable(PathComputationType.WATER) && blockState.isAir()) {
+                        return PathType.BREACH;
                     }
                     if (fluidState.is(FluidTags.WATER)) continue;
-                    return BlockPathTypes.BLOCKED;
+                    return PathType.BLOCKED;
                 }
             }
         }
         BlockState blockState2 = blockaccess.getBlockState(mutableBlockPos);
-        if (blockState2.isPathfindable(blockaccess, mutableBlockPos, PathComputationType.WATER)) {
-            return BlockPathTypes.WATER;
+        if (blockState2.isPathfindable(PathComputationType.WATER)) {
+            return PathType.WATER;
         }
-        return BlockPathTypes.BLOCKED;
+        return PathType.BLOCKED;
     }
 }

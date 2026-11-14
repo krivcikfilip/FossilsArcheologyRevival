@@ -19,7 +19,7 @@ public class FeederScreen extends AbstractContainerScreen<FeederMenu> {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics);
+        //PORT(1.21.1): Screen#render already renders the background (1.20.2+); a second call would blur twice and crash in 1.21
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;

@@ -39,11 +39,11 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.item.ItemPropertiesRegistry;
+import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LightningBoltRenderer;
@@ -112,6 +112,22 @@ public class ClientInit {
         ParticleProviderRegistry.register(ModParticles.LASER_PARTICLE, LaserParticle.Provider::new);
         KeyMappingRegistry.register(flyUpKey);
         KeyMappingRegistry.register(flyDownKey);
+        registerMenuScreens();
+    }
+
+    /**
+     * PORT(1.21.1): NeoForge registers menu screens in RegisterMenuScreensEvent, which is posted while Minecraft is constructed,
+     * i.e. before FMLClientSetupEvent ({@link #later()}). The 1.20.1 MenuScreens.register calls in {@link #later()} would come too
+     * late, so the factories are registered with Architectury's MenuRegistry (listens to RegisterMenuScreensEvent) as soon as the
+     * menu types are registered.
+     */
+    private static void registerMenuScreens() {
+        //PORT-TODO(1.21.1): verify in game that all 5 machine screens open (relies on RegisterEvent before RegisterMenuScreensEvent)
+        ModMenus.FEEDER.listen(type -> MenuRegistry.registerScreenFactory(type, FeederScreen::new));
+        ModMenus.SIFTER.listen(type -> MenuRegistry.registerScreenFactory(type, SifterScreen::new));
+        ModMenus.CULTURE_VAT.listen(type -> MenuRegistry.registerScreenFactory(type, CultureVatScreen::new));
+        ModMenus.ANALYZER.listen(type -> MenuRegistry.registerScreenFactory(type, AnalyzerScreen::new));
+        ModMenus.WORKTABLE.listen(type -> MenuRegistry.registerScreenFactory(type, WorktableScreen::new));
     }
 
     public static void later() {
@@ -159,7 +175,8 @@ public class ClientInit {
                 }
                 return EventResult.pass();
             });
-            ClientGuiEvent.RENDER_HUD.register((poseStack, v) -> PathingRenderer.renderOverlay(poseStack));
+            //PORT(1.21.1): RENDER_HUD passes (GuiGraphics, DeltaTracker)
+            ClientGuiEvent.RENDER_HUD.register((guiGraphics, deltaTracker) -> PathingRenderer.renderOverlay(guiGraphics));
         }
         if (Version.isAlpha()) {
             ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(localPlayer -> {
@@ -169,17 +186,13 @@ public class ClientInit {
         registerBlockRenderers();
         registerEventHandlers();
         registerItemProperties();
-        MenuScreens.register(ModMenus.FEEDER.get(), FeederScreen::new);
-        MenuScreens.register(ModMenus.SIFTER.get(), SifterScreen::new);
-        MenuScreens.register(ModMenus.CULTURE_VAT.get(), CultureVatScreen::new);
-        MenuScreens.register(ModMenus.ANALYZER.get(), AnalyzerScreen::new);
-        MenuScreens.register(ModMenus.WORKTABLE.get(), WorktableScreen::new);
+        //PORT(1.21.1): menu screens moved to registerMenuScreens() (called from immediate())
         CreativeTabFilters.register();
     }
 
     private static void registerItemProperties() {
         ItemPropertiesRegistry.register(ModItems.LASER_POINTER.get(),
-                new ResourceLocation("using"), (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1 : 0);
+                ResourceLocation.withDefaultNamespace("using"), (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1 : 0);
     }
 
     private static void registerEntityRenderers() {
@@ -304,7 +317,7 @@ public class ClientInit {
             }
             return EventResult.pass();
         });
-        ClientGuiEvent.RENDER_HUD.register((poseStack, v) -> {
+        ClientGuiEvent.RENDER_HUD.register((guiGraphics, deltaTracker) -> {
             Minecraft mc = Minecraft.getInstance();
             OverlayRenderer.renderHelmet(mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
         });

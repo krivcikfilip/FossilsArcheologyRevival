@@ -230,6 +230,14 @@ public class DebugScreen extends Screen {
         }
     }
 
+    /**
+     * PORT(1.21.1): Screen#render renders a (blurred) background since 1.20.2. In 1.20.1 this screen had no background so that
+     * the world (entity, paths) stays visible.
+     */
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    }
+
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);

@@ -41,7 +41,7 @@ import dev.architectury.extensions.network.EntitySpawnExtension;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -58,6 +58,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -94,16 +95,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.time.ZonedDateTime;
@@ -130,6 +131,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     private static final EntityDataAccessor<Byte> GENDER = SynchedEntityData.defineId(Prehistoric.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> CURRENT_ORDER = SynchedEntityData.defineId(Prehistoric.class, EntityDataSerializers.BYTE);
     private static final int GROW_UP_INTERVAL = 120;
+    private static final ResourceLocation VANILLA_SPRINTING_MODIFIER_ID = ResourceLocation.withDefaultNamespace("sprinting");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final List<AISystem> aiSystems = new ArrayList<>();
     public final MoodSystem moodSystem = registerSystem(new MoodSystem(this));
@@ -155,6 +157,10 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     private boolean useLowerFluidJumpThreshold;
     private final Map<VariantRegistry.RegistryObject<?>, VariantCondition.WithVariant<?>> allVariants = new HashMap<>();
     private long synTime = -1;
+    /**
+     * PORT(1.21.1): true between finalizeSpawn and the next load/tick, see {@link #load(CompoundTag)}
+     */
+    private boolean spawnFinalized;
 
     protected Prehistoric(EntityType<? extends Prehistoric> entityType, Level level, ResourceLocation animationLocation) {
         super(entityType, level);
@@ -162,8 +168,9 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         this.moveControl = new SmoothTurningMoveControl(this);
         this.lookControl = new PrehistoricLookControl(this);
         refreshDimensions();
-        if (this.getMobType() == MobType.WATER) {
-            this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
+        //PORT(1.21.1): MobType was removed in 1.20.5, see isWaterMobType()
+        if (this.isWaterMobType()) {
+            this.setPathfindingMalus(PathType.WATER, -1.0F);
             this.getNavigation().getNodeEvaluator().setCanFloat(true);
         }
         setPersistenceRequired();
@@ -208,6 +215,15 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
                 .add(Attributes.FLYING_SPEED, 0.4f);
     }
 
+    /**
+     * PORT(1.21.1): replacement for {@code getMobType() == MobType.WATER} (MobType was removed in 1.20.5).
+     * Vanilla behaviour that depended on MobType (impaling, bane of arthropods, ...) uses the entity type tags
+     * {@code minecraft:aquatic} / {@code minecraft:arthropod} now (requested from data/build).
+     */
+    public boolean isWaterMobType() {
+        return false;
+    }
+
     @Override
     protected void registerGoals() {
         matingGoal = new DinoMatingGoal(this, 1);
@@ -248,30 +264,30 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(EATING, false);
-        entityData.define(MOOD, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(EATING, false);
+        builder.define(MOOD, 0);
         //Quick fix to ensure adults also update AGE_TICK on spawn (which call refreshDimensions)
-        entityData.define(AGE_TICK, data().adultAgeInTicks() - 1);
-        entityData.define(HUNGER, 0);
-        entityData.define(FLEEING, false);
-        entityData.define(SITTING, false);
-        entityData.define(SLEEPING, false);
-        entityData.define(CLIMBING, false);
-        entityData.define(CLIMBING_DIR, Direction.UP);
-        entityData.define(AGING_DISABLED, false);
-        entityData.define(DIMENSION_VER, new CompoundTag());
-        entityData.define(DATA_VARIANT, "");
+        builder.define(AGE_TICK, data().adultAgeInTicks() - 1);
+        builder.define(HUNGER, 0);
+        builder.define(FLEEING, false);
+        builder.define(SITTING, false);
+        builder.define(SLEEPING, false);
+        builder.define(CLIMBING, false);
+        builder.define(CLIMBING_DIR, Direction.UP);
+        builder.define(AGING_DISABLED, false);
+        builder.define(DIMENSION_VER, new CompoundTag());
+        builder.define(DATA_VARIANT, "");
         //TODO: Is this not synced to client?
-        entityData.define(GENDER, random.nextBoolean() ? (byte) 1 : 0);
-        entityData.define(CURRENT_ORDER, (byte) OrderType.WANDER.ordinal());
+        builder.define(GENDER, random.nextBoolean() ? (byte) 1 : 0);
+        builder.define(CURRENT_ORDER, (byte) OrderType.WANDER.ordinal());
 
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("disableGoalAI", false);
         tag.putBoolean("disableMoveAI", false);
         tag.putBoolean("disableLookAI", false);
-        entityData.define(DEBUG, tag);
+        builder.define(DEBUG, tag);
     }
 
     @Override
@@ -287,8 +303,11 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
             } else if (DIMENSION_VER.equals(key)) {
                 CompoundTag tag = entityData.get(DIMENSION_VER);
                 if (tag.contains("Width", Tag.TAG_FLOAT) && tag.contains("Height", Tag.TAG_FLOAT)) {
-                    dimensions = EntityDimensions.fixed(tag.getFloat("Width"), tag.getFloat("Height"));
-                    eyeHeight = getEyeHeight(getPose(), dimensions);
+                    //PORT(1.21.1): eye height is part of EntityDimensions now. Same value as the 1.20.1 getEyeHeight(pose, dimensions)
+                    float height = tag.getFloat("Height");
+                    dimensions = EntityDimensions.fixed(tag.getFloat("Width"), height).withEyeHeight(getLegacyEyeHeight(getPose(), height));
+                    //PORT(1.21.1): Entity#eyeHeight is private in 1.21.1, made accessible in fossil.accesswidener
+                    eyeHeight = dimensions.eyeHeight();
 
                 }
             }
@@ -413,32 +432,55 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
                 clearVariant(VariantRegistry.CONFIG);
             }
         }
+        if (spawnFinalized) {
+            //PORT(1.21.1): finalizeSpawn lost its CompoundTag parameter (1.20.5). In 1.20.1 spawn eggs passed their item tag to
+            // finalizeSpawn. In 1.21.1 EntityType#create calls finalizeSpawn first and then applies the item's ENTITY_DATA component
+            // with Entity#load, so the NBT variant conditions are tested here instead (only right after finalizeSpawn).
+            //PORT-TODO(1.21.1): NbtCondition keys now have to be inside the spawn egg's minecraft:entity_data component
+            // (1.20.1 read the root item tag, which is minecraft:custom_data now and never reaches the entity). Verify in game.
+            spawnFinalized = false;
+            applyNbtVariants(compound);
+        }
+    }
+
+    private void applyNbtVariants(@Nullable CompoundTag dataTag) {
+        if (dataTag != null) {
+            for (VariantCondition.WithVariant<NbtCondition> pair : variantsByCondition(NbtCondition.class)) {
+                if (pair.condition().test(dataTag)) {
+                    setVariant(VariantRegistry.NBT, pair);
+                    break;
+                }
+            }
+        }
     }
 
     @Override
     public void refreshDimensions() {
+        //PORT(1.21.1): LivingEntity#getDimensions(Pose) is final in 1.21.1 and returns a 0.2x0.2 box for Pose.SLEEPING.
+        // Prehistoric dimensions are calculated by getPrehistoricDimensions(Pose) instead (1.20.1 getDimensions override)
         EntityDimensions oldDimensions = dimensions;
         Pose pose = getPose();
-        EntityDimensions newDimensions = getDimensions(pose);
+        EntityDimensions newDimensions = getPrehistoricDimensions(pose);
         dimensions = newDimensions;
-        eyeHeight = getEyeHeight(pose, newDimensions);
+        //PORT(1.21.1): Entity#eyeHeight made accessible in fossil.accesswidener
+        eyeHeight = newDimensions.eyeHeight();
         reapplyPosition();
-        if (!level().isClientSide && !firstTick && !noPhysics && (newDimensions.width > oldDimensions.width || newDimensions.height > oldDimensions.height)) {
-            Vec3 vec3 = position().add(0.0, oldDimensions.height / 2.0, 0.0);
-            double wDiff = Math.max(0.0, newDimensions.width - oldDimensions.width) + 1.0E-6;
-            double hDiff = Math.max(0.0, newDimensions.height - oldDimensions.height) + 1.0E-6;
+        if (!level().isClientSide && !firstTick && !noPhysics && (newDimensions.width() > oldDimensions.width() || newDimensions.height() > oldDimensions.height())) {
+            Vec3 vec3 = position().add(0.0, oldDimensions.height() / 2.0, 0.0);
+            double wDiff = Math.max(0.0, newDimensions.width() - oldDimensions.width()) + 1.0E-6;
+            double hDiff = Math.max(0.0, newDimensions.height() - oldDimensions.height()) + 1.0E-6;
             VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec3, wDiff, hDiff, wDiff));
             //Quite slow for very large mobs and borderline unusable if wDiff and hDiff are also very large (0 -> max)
-            var opt = level().findFreePosition(this, voxelShape, vec3, newDimensions.width, newDimensions.height, newDimensions.width);
+            var opt = level().findFreePosition(this, voxelShape, vec3, newDimensions.width(), newDimensions.height(), newDimensions.width());
             if (opt.isPresent()) {
-                setPos(opt.get().add(0.0, (-newDimensions.height) / 2.0, 0.0));
+                setPos(opt.get().add(0.0, (-newDimensions.height()) / 2.0, 0.0));
             } else {
                 //This should prevent mobs from phasing through blocks while growing up
                 dimensions = oldDimensions;
-                eyeHeight = getEyeHeight(pose, oldDimensions);
+                eyeHeight = getLegacyEyeHeight(pose, oldDimensions.height());
                 CompoundTag tag = new CompoundTag();
-                tag.putFloat("Width", dimensions.width);
-                tag.putFloat("Height", dimensions.height);
+                tag.putFloat("Width", dimensions.width());
+                tag.putFloat("Height", dimensions.height());
                 entityData.set(DIMENSION_VER, tag);
                 reapplyPosition();
             }
@@ -448,9 +490,39 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         }
     }
 
+    /**
+     * Unscaled dimensions for the given pose. Subclasses override this for pose specific sizes (was the 1.20.1
+     * {@code getDimensions(Pose)} override). Vanilla {@link LivingEntity#getDimensions(Pose)} (final in 1.21.1) scales this with
+     * {@link #getScale()} for every pose except {@link Pose#SLEEPING}.
+     */
     @Override
-    public @NotNull EntityDimensions getDimensions(Pose poseIn) {
-        return getType().getDimensions().scale(getScale());
+    protected @NotNull EntityDimensions getDefaultDimensions(Pose poseIn) {
+        return getType().getDimensions();
+    }
+
+    /**
+     * The dimensions this mob actually uses. Same as the 1.20.1 {@code getDimensions(Pose)}:
+     * {@code getType().getDimensions().scale(getScale())} plus pose specific changes, and the 1.20.1 eye height.
+     */
+    public @NotNull EntityDimensions getPrehistoricDimensions(Pose poseIn) {
+        EntityDimensions scaled = getDefaultDimensions(poseIn).scale(getScale());
+        return scaled.withEyeHeight(getLegacyEyeHeight(poseIn, scaled.height()));
+    }
+
+    /**
+     * 1.20.1 LivingEntity#getEyeHeight(Pose, EntityDimensions): 0.2 while sleeping, 85% of the height otherwise
+     */
+    protected static float getLegacyEyeHeight(Pose pose, float height) {
+        return pose == Pose.SLEEPING ? 0.2f : height * 0.85f;
+    }
+
+    /**
+     * 1.20.1 LivingEntity#getScale returned 0.5 for babies, which Prehistoric#getScale replaced.
+     * In 1.21.1 that factor is getAgeScale (used by LivingEntity#getDefaultDimensions and getPassengerRidingPosition).
+     */
+    @Override
+    public float getAgeScale() {
+        return 1;
     }
 
     protected Pose getTargetPose() {
@@ -462,9 +534,11 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelIn, DifficultyInstance difficultyIn, MobSpawnType reason, @Nullable SpawnGroupData spawnDataIn, @Nullable CompoundTag dataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelIn, DifficultyInstance difficultyIn, MobSpawnType reason, @Nullable SpawnGroupData spawnDataIn) {
         //Skip AgeableMob#finalizeSpawn
-        getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+        //PORT(1.21.1): modifiers need a unique id now. Vanilla's id is used; replacing (instead of stacking another random
+        // modifier like 1.20.1 did when finalizeSpawn was called twice) because adding the same id twice throws
+        getAttribute(Attributes.FOLLOW_RANGE).addOrReplacePermanentModifier(new AttributeModifier(RANDOM_SPAWN_BONUS_ID, this.random.nextGaussian() * 0.05, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
         if (spawnDataIn instanceof PrehistoricGroupData prehistoricGroupData) {
             setAgeInDays(prehistoricGroupData.ageInDays());
         } else if (spawnDataIn == null) {
@@ -493,14 +567,8 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
                 break;
             }
         }
-        if (dataTag != null) {
-            for (VariantCondition.WithVariant<NbtCondition> pair : variantsByCondition(NbtCondition.class)) {
-                if (pair.condition().test(dataTag)) {
-                    setVariant(VariantRegistry.NBT, pair);
-                    break;
-                }
-            }
-        }
+        //PORT(1.21.1): the NbtCondition variants (1.20.1: dataTag param) are applied in load(CompoundTag), see there
+        spawnFinalized = true;
         return spawnDataIn;
     }
 
@@ -520,8 +588,8 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
 
     @Override
     public void push(double x, double y, double z) {
-        EntityDimensions dimensions = getDimensions(Pose.STANDING);
-        float max = Math.max(dimensions.width, dimensions.height);
+        EntityDimensions dimensions = getPrehistoricDimensions(Pose.STANDING);
+        float max = Math.max(dimensions.width(), dimensions.height());
         if (max < 3) {
             float mult = Mth.lerp((Math.max(max, 1) - 1) / 2f, 1, 0);
             super.push(x * mult, y, z * mult);
@@ -547,9 +615,13 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         return false;
     }
 
-    @Override
-    public boolean canBeLeashed(Player player) {
-        return super.canBeLeashed(player) && isOwnedBy(player);
+    /**
+     * 1.20.1: {@code canBeLeashed(Player)}. Leashing is handled by {@link Leashable} since 1.21 and vanilla no longer passes the player.
+     * PORT-TODO(1.21.1): this owner check is not called by vanilla anymore. Needs a hook before Entity#interact
+     * (e.g. Architectury InteractionEvent.INTERACT_ENTITY cancelling the interaction for a lead), requested from core.
+     */
+    public boolean canBeLeashedBy(Player player) {
+        return canBeLeashed() && !isLeashed() && isOwnedBy(player);
     }
 
     @Nullable
@@ -557,9 +629,44 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         return getControllingPassenger() instanceof Player player ? player : null;
     }
 
-    @Override
+    /**
+     * PORT(1.21.1): Entity#getPassengersRidingOffset was removed in 1.20.2 (replaced by passenger attachment points).
+     * Kept as our own method (overridden by some mobs) and used by {@link #positionRider} and {@link #getPassengerAttachmentPoint}.
+     */
     public double getPassengersRidingOffset() {
         return getBbHeight() * 0.85;
+    }
+
+    /**
+     * PORT(1.21.1): replacement for the removed Entity#getMyRidingOffset (1.20.2). 1.20.1 values: player -0.35, other entities
+     * their own offset (usually 0), which is the negated vehicle attachment point in 1.21.1.
+     * PORT-TODO(1.21.1): verify rider height in game (the player value is hard coded to keep the 1.20.1 seat position).
+     */
+    public static double getLegacyRidingOffset(Entity passenger, Entity vehicle) {
+        if (passenger instanceof Player) {
+            return -0.35;
+        }
+        return -passenger.getVehicleAttachmentPoint(vehicle).y;
+    }
+
+    /**
+     * PORT(1.21.1): our own replacement for the removed Entity#getMyRidingOffset (overridden by PrehistoricLeaping).
+     * Exposed to vanilla vehicles through {@link #getVehicleAttachmentPoint(Entity)}.
+     */
+    public double getMyRidingOffset() {
+        return 0;
+    }
+
+    @Override
+    public @NotNull Vec3 getVehicleAttachmentPoint(Entity vehicle) {
+        //PORT(1.21.1): 1.20.1 vehicles added passenger.getMyRidingOffset() to the passenger's y; vehicles now subtract this point
+        return new Vec3(0, -getMyRidingOffset(), 0);
+    }
+
+    @Override
+    protected @NotNull Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+        //PORT(1.21.1): keeps vanilla code that uses getPassengerRidingPosition (e.g. dismounting) in line with positionRider
+        return new Vec3(0, getPassengersRidingOffset(), 0);
     }
 
     @Override
@@ -568,14 +675,15 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         if (canBeControlledByRider() && passenger instanceof LivingEntity livingEntity) {
             yBodyRot = livingEntity.yHeadRot;
         }
+        double ridingOffset = getLegacyRidingOffset(passenger, this);
         getEntityHitboxData().getAnchorData().getAnchorPos("rider_pos").ifPresentOrElse(pos -> {
             if (passenger instanceof Player) {
-                callback.accept(passenger, pos.x, pos.y + passenger.getMyRidingOffset() - 0.2, pos.z);
+                callback.accept(passenger, pos.x, pos.y + ridingOffset - 0.2, pos.z);
             } else {
-                callback.accept(passenger, pos.x, pos.y + passenger.getMyRidingOffset(), pos.z);
+                callback.accept(passenger, pos.x, pos.y + ridingOffset, pos.z);
             }
         }, () -> {
-            callback.accept(passenger, getX(), getY() + getPassengersRidingOffset() + passenger.getMyRidingOffset(), getZ());
+            callback.accept(passenger, getX(), getY() + getPassengersRidingOffset() + ridingOffset, getZ());
         });
     }
 
@@ -705,8 +813,9 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     public void setSprinting(boolean sprinting) {
         super.setSprinting(sprinting);
         AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-        if (attributeInstance.getModifier(UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D")) != null) {
-            attributeInstance.removeModifier(UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D"));
+        //PORT(1.21.1): vanilla sprinting modifier (was UUID 662A6B8D-DA3E-4C1C-8813-96EA6097278D), id = LivingEntity#SPRINTING_MODIFIER_ID (private)
+        if (attributeInstance.getModifier(VANILLA_SPRINTING_MODIFIER_ID) != null) {
+            attributeInstance.removeModifier(VANILLA_SPRINTING_MODIFIER_ID);
         }
     }
 
@@ -724,10 +833,11 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         updateSwingTime();
         super.aiStep();
 
+        //PORT(1.21.1): step height is the STEP_HEIGHT attribute since 1.20.5 (was setMaxUpStep)
         if (getRidingPlayer() != null) {
-            setMaxUpStep(1);
+            getAttribute(Attributes.STEP_HEIGHT).setBaseValue(1);
         } else {
-            setMaxUpStep(0.6f);
+            getAttribute(Attributes.STEP_HEIGHT).setBaseValue(0.6f);
         }
 
         if (!level().isClientSide) {
@@ -769,6 +879,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
 
     @Override
     public void tick() {
+        spawnFinalized = false;
         super.tick();
         if (level().isClientSide) {
             //Used for smooth rotation
@@ -850,7 +961,8 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     }
 
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward() {
+        //PORT(1.21.1): was getExperienceReward() (now final, applies enchantment effects to this value)
         float base = 6 * getBbWidth() * (data().diet() == Diet.HERBIVORE ? 1 : 2)
                 * (aiTameType() == Taming.GEM ? 2 : 1)
                 * (aiAttackType() == Attacking.BASIC ? 1 : 1.25f);
@@ -1028,7 +1140,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
             Entity baby = info().entityType().create(level());
             if (baby instanceof Prehistoric prehistoricBaby) {
                 prehistoricBaby.finalizeSpawn((ServerLevelAccessor) level(), level().getCurrentDifficultyAt(blockPosition()),
-                        MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0), null);
+                        MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0));
                 prehistoricBaby.grow(0);
                 return prehistoricBaby;
             }
@@ -1059,7 +1171,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
                 ((DinosaurEgg) hatchling).setPrehistoricEntityInfo(info());
 
                 if (getOwner() instanceof ServerPlayer player) {
-                    Advancement adv = ((ServerLevel) level()).getServer().getAdvancements().getAdvancement(DinosaurEgg.GOLDEN_EGG_ADV);
+                    AdvancementHolder adv = ((ServerLevel) level()).getServer().getAdvancements().get(DinosaurEgg.GOLDEN_EGG_ADV);
                     if (adv != null && player.getAdvancements().getOrStartProgress(adv).isDone()) {
                         ((DinosaurEgg) hatchling).setGoldenEgg(random.nextFloat() < 0.05);
                     }
@@ -1069,7 +1181,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
             hatchling.moveTo(getX(), getY(), getZ(), yBodyRot, 0);
             if (hatchling instanceof Prehistoric prehistoricHatchling) {
                 prehistoricHatchling.finalizeSpawn((ServerLevelAccessor) level(), level().getCurrentDifficultyAt(blockPosition()),
-                        MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0), null);
+                        MobSpawnType.BREEDING, new Prehistoric.PrehistoricGroupData(0));
                 prehistoricHatchling.grow(0);
             }
             level().addFreshEntity(hatchling);
@@ -1191,7 +1303,7 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
         if (hurt) {
             if (getLastHurtByMob() instanceof Player player && getOwner() == player && moodSystem.getMoodFace() == PrehistoricMoodType.SAD) {
                 setOwnerUUID(null);
-                setTame(false);
+                setTame(false, true);
                 moodSystem.increaseMood(-15);
                 player.displayClientMessage(Component.translatable("entity.fossil.situation.betrayed", getName()), true);
             }
@@ -1207,7 +1319,8 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     }
 
     @Override
-    protected void reassessTameGoals() {
+    protected void applyTamingSideEffects() {
+        //PORT(1.21.1): was reassessTameGoals()
         if (!isTame()) {
             setCurrentOrder(OrderType.WANDER);
         }
@@ -1517,11 +1630,11 @@ public abstract class Prehistoric extends TamableAnimal implements GeckoLibMulti
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
         if (Platform.isFabric()) {
             synTime = level().getGameTime() + 20;
         }
-        return NetworkManager.createAddEntityPacket(this);
+        return NetworkManager.createAddEntityPacket(this, serverEntity);
     }
 
     public abstract PrehistoricEntityInfo info();

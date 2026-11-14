@@ -18,7 +18,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
-import software.bernie.geckolib.util.RenderUtils;
+import software.bernie.geckolib.util.RenderUtil;
 
 public class SkeletonRenderer extends EntityRenderer<PrehistoricSkeleton> implements GeoRenderer<PrehistoricSkeleton> {
     private final GeoModel<PrehistoricSkeleton> geoModel;
@@ -54,7 +54,7 @@ public class SkeletonRenderer extends EntityRenderer<PrehistoricSkeleton> implem
     }
 
     @Override
-    public void preRender(PoseStack poseStack, PrehistoricSkeleton animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void preRender(PoseStack poseStack, PrehistoricSkeleton animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         this.entityRenderTranslations = new Matrix4f(poseStack.last().pose());
         scaleModelForRender(animatable.getScale(), animatable.getScale(), poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
     }
@@ -66,41 +66,44 @@ public class SkeletonRenderer extends EntityRenderer<PrehistoricSkeleton> implem
     }
 
     @Override
-    public void actuallyRender(PoseStack poseStack, PrehistoricSkeleton animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void actuallyRender(PoseStack poseStack, PrehistoricSkeleton animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         poseStack.pushPose();
         modelRenderTranslations = new Matrix4f(poseStack.last().pose());
         if (!animatable.isInvisibleTo(Minecraft.getInstance().player)) {
             poseStack.mulPose(Axis.YP.rotationDegrees(180f - animatable.getYRot()));
-            GeoRenderer.super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+            GeoRenderer.super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
         }
         poseStack.popPose();
     }
 
     @Override
-    public void renderRecursively(PoseStack poseStack, PrehistoricSkeleton animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void renderRecursively(PoseStack poseStack, PrehistoricSkeleton animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         poseStack.pushPose();
-        RenderUtils.translateMatrixToBone(poseStack, bone);
-        RenderUtils.translateToPivotPoint(poseStack, bone);
-        RenderUtils.rotateMatrixAroundBone(poseStack, bone);
-        RenderUtils.scaleMatrixForBone(poseStack, bone);
+        RenderUtil.translateMatrixToBone(poseStack, bone);
+        RenderUtil.translateToPivotPoint(poseStack, bone);
+        RenderUtil.rotateMatrixAroundBone(poseStack, bone);
+        RenderUtil.scaleMatrixForBone(poseStack, bone);
 
         if (bone.isTrackingMatrices()) {
             Matrix4f poseState = new Matrix4f(poseStack.last().pose());
-            Matrix4f localMatrix = RenderUtils.invertAndMultiplyMatrices(poseState, entityRenderTranslations);
+            Matrix4f localMatrix = RenderUtil.invertAndMultiplyMatrices(poseState, entityRenderTranslations);
 
-            bone.setModelSpaceMatrix(RenderUtils.invertAndMultiplyMatrices(poseState, modelRenderTranslations));
+            bone.setModelSpaceMatrix(RenderUtil.invertAndMultiplyMatrices(poseState, modelRenderTranslations));
             bone.setLocalSpaceMatrix(localMatrix.translation(new Vector3f(getRenderOffset(this.animatable, 1).toVector3f())));
             bone.setWorldSpaceMatrix(new Matrix4f(localMatrix).translation(new Vector3f(this.animatable.position().toVector3f())));
         }
 
-        RenderUtils.translateAwayFromPivotPoint(poseStack, bone);
+        RenderUtil.translateAwayFromPivotPoint(poseStack, bone);
 
-        renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        //PORT(1.21.1): same buffer refresh GeckoLib 4.9 does in GeoEntityRenderer#renderRecursively (1.21 ends BufferBuilders on RenderType switch)
+        buffer = checkAndRefreshBuffer(isReRender, buffer, bufferSource, renderType);
+
+        renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour);
 
         if (!isReRender)
             applyRenderLayersForBone(poseStack, animatable, bone, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
 
-        renderChildBones(poseStack, animatable, bone, renderType, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        renderChildBones(poseStack, animatable, bone, renderType, bufferSource, buffer, false, partialTick, packedLight, packedOverlay, colour);
 
         poseStack.popPose();
     }

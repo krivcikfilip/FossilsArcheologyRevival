@@ -34,11 +34,12 @@ public class Quetzalcoatlus extends PrehistoricFlying {
     }
 
     @Override
-    public @NotNull EntityDimensions getDimensions(Pose poseIn) {
+    protected @NotNull EntityDimensions getDefaultDimensions(Pose poseIn) {
+        //PORT(1.21.1): was getDimensions(Pose), which is final in LivingEntity now
         if (poseIn == Pose.FALL_FLYING) {
-            return super.getDimensions(poseIn).scale(1.8f, 0.2f);
+            return super.getDefaultDimensions(poseIn).scale(1.8f, 0.2f);
         }
-        return super.getDimensions(poseIn);
+        return super.getDefaultDimensions(poseIn);
     }
 
     @Override

@@ -14,11 +14,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.core.object.Color;
+import software.bernie.geckolib.util.Color;
 
 import static com.github.teamfossilsarcheology.fossil.client.gui.debug.navigation.PathingDebug.*;
 
@@ -195,7 +195,7 @@ public class PathingRenderer {
                     if (neighbor != null) {
                         poseStack.pushPose();
                         poseStack.translate(neighbor.x, neighbor.y, neighbor.z);
-                        if (neighbor.type == BlockPathTypes.BLOCKED) {
+                        if (neighbor.type == PathType.BLOCKED) {
                             mc.getBlockRenderer().renderSingleBlock(Blocks.IRON_BLOCK.defaultBlockState(), poseStack, buffer, mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTicks), OverlayTexture.NO_OVERLAY);
                         } else {
                             mc.getBlockRenderer().renderSingleBlock(Blocks.COBWEB.defaultBlockState(), poseStack, buffer, mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTicks), OverlayTexture.NO_OVERLAY);

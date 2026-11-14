@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimatableManager;
 
 public abstract class PrehistoricFlying extends Prehistoric implements FlyingAnimal {
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(PrehistoricFlying.class, EntityDataSerializers.BOOLEAN);
@@ -107,11 +107,11 @@ public abstract class PrehistoricFlying extends Prehistoric implements FlyingAni
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(FLYING, false);
-        entityData.define(TAKING_OFF, false);
-        entityData.define(FLYING_UP, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FLYING, false);
+        builder.define(TAKING_OFF, false);
+        builder.define(FLYING_UP, false);
     }
 
     @Override

@@ -25,9 +25,14 @@ import java.util.Set;
 
 /**
  * WalkNodeEvaluator but for the sea floor
+ * <p>
+ * PORT(1.21.1): 1.20.5 pathfinding changes: BlockPathTypes -> PathType, NodeEvaluator#level -> currentContext (PathfindingContext),
+ * getBlockPathType(BlockGetter, x, y, z) -> getPathType(PathfindingContext, x, y, z),
+ * getBlockPathType(BlockGetter, x, y, z, Mob) -> getPathTypeOfMob(PathfindingContext, x, y, z, Mob), getGoal -> getTarget
+ * PORT-TODO(1.21.1): verify trilobite sea floor pathing in game. Like in 1.20.1 the path type cache is never cleared (done() not overridden)
  */
 public class TrilobiteNodeEvaluator extends NodeEvaluator {
-    private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<PathType> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
     private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<>();
 
     @Override
@@ -35,7 +40,7 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
         BlockPos.MutableBlockPos mutableBlockPos = mob.blockPosition().mutable();
         int i = mob.getBlockY();
         if (mob.isInWater()) {
-            while (mutableBlockPos.getY() > level.getMinBuildHeight() && level.getBlockState(mutableBlockPos).isPathfindable(level, mutableBlockPos, PathComputationType.WATER)) {
+            while (mutableBlockPos.getY() > currentContext.level().getMinBuildHeight() && currentContext.getBlockState(mutableBlockPos).isPathfindable(PathComputationType.WATER)) {
                 mutableBlockPos.move(0, -1, 0);
             }
             i = mutableBlockPos.above().getY();
@@ -46,7 +51,7 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
             return node;
         }
         BlockPos blockPos = mob.blockPosition();
-        BlockPathTypes blockPathTypes = getCachedBlockType(mob, blockPos.getX(), i, blockPos.getZ());
+        PathType blockPathTypes = getCachedBlockType(mob, blockPos.getX(), i, blockPos.getZ());
         if (mob.getPathfindingMalus(blockPathTypes) < 0.0F) {
             AABB aABB = mob.getBoundingBox();
             if (hasPositiveMalus(mutableBlockPos.set(aABB.minX, i, aABB.minZ))
@@ -67,12 +72,12 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
     }
 
     public final boolean hasPositiveMalus(BlockPos pos) {
-        BlockPathTypes blockPathTypes = getBlockPathType(mob, pos);
+        PathType blockPathTypes = getBlockPathType(mob, pos);
         return mob.getPathfindingMalus(blockPathTypes) >= 0.0F;
     }
 
     @Override
-    public @NotNull Target getGoal(double x, double y, double z) {
+    public @NotNull Target getTarget(double x, double y, double z) {
         return new Target(this.getNode(Mth.floor(x), Mth.floor(y), Mth.floor(z)));
     }
 
@@ -80,9 +85,9 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
     public int getNeighbors(Node[] nodes, Node node) {
         int i = 0;
         int j = 0;
-        BlockPathTypes blockPathTypes = getCachedBlockType(mob, node.x, node.y + 1, node.z);
-        BlockPathTypes blockPathTypes2 = getCachedBlockType(mob, node.x, node.y, node.z);
-        if (mob.getPathfindingMalus(blockPathTypes) >= 0.0F && blockPathTypes2 != BlockPathTypes.STICKY_HONEY) {
+        PathType blockPathTypes = getCachedBlockType(mob, node.x, node.y + 1, node.z);
+        PathType blockPathTypes2 = getCachedBlockType(mob, node.x, node.y, node.z);
+        if (mob.getPathfindingMalus(blockPathTypes) >= 0.0F && blockPathTypes2 != PathType.STICKY_HONEY) {
             j = Mth.floor(Math.max(1.0F, mob.maxUpStep()));
         }
 
@@ -142,13 +147,13 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
         } else if (node3.y > node.y || node2.y > node.y) {
             return false;
         } else {
-            boolean bl = node3.type == BlockPathTypes.FENCE && node2.type == BlockPathTypes.FENCE && mob.getBbWidth() < 0.5;
+            boolean bl = node3.type == PathType.FENCE && node2.type == PathType.FENCE && mob.getBbWidth() < 0.5;
             return node4.costMalus >= 0.0F && (node3.y < node.y || node3.costMalus >= 0.0F || bl) && (node2.y < node.y || node2.costMalus >= 0.0F || bl);
         }
     }
 
     protected double getFloorLevel(BlockPos pos) {
-        return getFloorLevel(level, pos);
+        return getFloorLevel(currentContext.level(), pos);
     }
 
     public static double getFloorLevel(BlockGetter level, BlockPos pos) {
@@ -158,14 +163,14 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
     }
 
     @Nullable
-    protected Node findAcceptedNode(int x, int y, int z, int i, double d, Direction direction, BlockPathTypes original) {
+    protected Node findAcceptedNode(int x, int y, int z, int i, double d, Direction direction, PathType original) {
         Node node = null;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         double e = getFloorLevel(mutableBlockPos.set(x, y, z));
         if (e - d > 1.125) {
             return null;
         } else {
-            BlockPathTypes type = getCachedBlockType(mob, x, y, z);
+            PathType type = getCachedBlockType(mob, x, y, z);
             float f = mob.getPathfindingMalus(type);
             double g = mob.getBbWidth() / 2.0;
             if (f >= 0.0F) {
@@ -174,18 +179,18 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
                 node.costMalus = Math.max(node.costMalus, f);
             }
 
-            if (type != BlockPathTypes.WALKABLE) {
+            if (type != PathType.WALKABLE) {
                 if ((node == null || node.costMalus < 0.0F) && i > 0) {
                     node = findAcceptedNode(x, y + 1, z, i - 1, d, direction, original);
-                    if (node != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && mob.getBbWidth() < 1.0F) {
+                    if (node != null && (node.type == PathType.OPEN || node.type == PathType.WALKABLE) && mob.getBbWidth() < 1.0F) {
                         double h = (x - direction.getStepX()) + 0.5;
                         double j = (z - direction.getStepZ()) + 0.5;
                         AABB aABB = new AABB(
                                 h - g,
-                                getFloorLevel(level, mutableBlockPos.set(h, (y + 1), j)) + 0.001,
+                                getFloorLevel(currentContext.level(), mutableBlockPos.set(h, (y + 1), j)) + 0.001,
                                 j - g,
                                 h + g,
-                                mob.getBbHeight() + getFloorLevel(level, mutableBlockPos.set(node.x, node.y, node.z)) - 0.002,
+                                mob.getBbHeight() + getFloorLevel(currentContext.level(), mutableBlockPos.set(node.x, node.y, node.z)) - 0.002,
                                 j + g
                         );
                         if (hasCollisions(aABB)) {
@@ -194,14 +199,14 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
                     }
                 }
 
-                if (type == BlockPathTypes.WATER) {
-                    if (this.getCachedBlockType(this.mob, x, y - 1, z) != BlockPathTypes.WATER) {
+                if (type == PathType.WATER) {
+                    if (this.getCachedBlockType(this.mob, x, y - 1, z) != PathType.WATER) {
                         return node;
                     }
 
                     while (y > this.mob.level().getMinBuildHeight()) {
                         type = this.getCachedBlockType(this.mob, x, --y, z);
-                        if (type != BlockPathTypes.WATER) {
+                        if (type != PathType.WATER) {
                             return node;
                         }
 
@@ -211,28 +216,28 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
                     }
                 }
 
-                if (type == BlockPathTypes.OPEN) {
+                if (type == PathType.OPEN) {
                     int k = 0;
                     int l = y;
 
-                    while (type == BlockPathTypes.OPEN) {
+                    while (type == PathType.OPEN) {
                         if (--y < this.mob.level().getMinBuildHeight()) {
                             Node node2 = this.getNode(x, l, z);
-                            node2.type = BlockPathTypes.BLOCKED;
+                            node2.type = PathType.BLOCKED;
                             node2.costMalus = -1.0F;
                             return node2;
                         }
 
                         if (k++ >= this.mob.getMaxFallDistance()) {
                             Node node2 = this.getNode(x, y, z);
-                            node2.type = BlockPathTypes.BLOCKED;
+                            node2.type = PathType.BLOCKED;
                             node2.costMalus = -1.0F;
                             return node2;
                         }
 
                         type = this.getCachedBlockType(this.mob, x, y, z);
                         f = this.mob.getPathfindingMalus(type);
-                        if (type != BlockPathTypes.OPEN && f >= 0.0F) {
+                        if (type != PathType.OPEN && f >= 0.0F) {
                             node = this.getNode(x, y, z);
                             node.type = type;
                             node.costMalus = Math.max(node.costMalus, f);
@@ -241,7 +246,7 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
 
                         if (f < 0.0F) {
                             Node node2 = this.getNode(x, y, z);
-                            node2.type = BlockPathTypes.BLOCKED;
+                            node2.type = PathType.BLOCKED;
                             node2.costMalus = -1.0F;
                             return node2;
                         }
@@ -253,28 +258,28 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
     }
 
     private boolean hasCollisions(AABB aABB) {
-        return collisionCache.computeIfAbsent(aABB, (Object2BooleanFunction<? super AABB>) (object -> !level.noCollision(mob, aABB)));
+        return collisionCache.computeIfAbsent(aABB, (Object2BooleanFunction<? super AABB>) (object -> !currentContext.level().noCollision(mob, aABB)));
     }
 
-    private BlockPathTypes getBlockPathType(Mob entityliving, BlockPos pos) {
+    private PathType getBlockPathType(Mob entityliving, BlockPos pos) {
         return getCachedBlockType(entityliving, pos.getX(), pos.getY(), pos.getZ());
     }
 
     /**
      * Returns a cached path node type for specified position or calculates it
      */
-    protected BlockPathTypes getCachedBlockType(Mob entity, int x, int y, int z) {
-        return pathTypesByPosCache.computeIfAbsent(BlockPos.asLong(x, y, z), l -> getBlockPathType(level, x, y, z, entity));
+    protected PathType getCachedBlockType(Mob entity, int x, int y, int z) {
+        return pathTypesByPosCache.computeIfAbsent(BlockPos.asLong(x, y, z), l -> getPathTypeOfMob(currentContext, x, y, z, entity));
     }
 
     @Override
-    public @NotNull BlockPathTypes getBlockPathType(BlockGetter blockaccess, int x, int y, int z, Mob entityliving) {
-        EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
-        BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
-        blockPathTypes = getBlockPathTypes(blockaccess, x, y, z, enumSet, blockPathTypes);
-        BlockPathTypes result = BlockPathTypes.BLOCKED;
+    public @NotNull PathType getPathTypeOfMob(PathfindingContext context, int x, int y, int z, Mob entityliving) {
+        EnumSet<PathType> enumSet = EnumSet.noneOf(PathType.class);
+        PathType blockPathTypes = PathType.BLOCKED;
+        blockPathTypes = getBlockPathTypes(context, x, y, z, enumSet, blockPathTypes);
+        PathType result = PathType.BLOCKED;
 
-        for (BlockPathTypes tested : enumSet) {
+        for (PathType tested : enumSet) {
             if (entityliving.getPathfindingMalus(tested) < 0) {
                 return tested;
             }
@@ -284,20 +289,20 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
             }
         }
 
-        return blockPathTypes == BlockPathTypes.OPEN && entityliving.getPathfindingMalus(result) == 0 && entityWidth <= 1 ? BlockPathTypes.OPEN : result;
+        return blockPathTypes == PathType.OPEN && entityliving.getPathfindingMalus(result) == 0 && entityWidth <= 1 ? PathType.OPEN : result;
     }
 
     /**
      * Populates the nodeTypeEnum with all the surrounding node types and returns the center one
      */
-    public BlockPathTypes getBlockPathTypes(BlockGetter level, int x, int y, int z, Set<BlockPathTypes> nodeTypeEnum, BlockPathTypes nodeType) {
+    public PathType getBlockPathTypes(PathfindingContext context, int x, int y, int z, Set<PathType> nodeTypeEnum, PathType nodeType) {
         for (int i = 0; i < entityWidth; i++) {
             for (int j = 0; j < entityHeight; j++) {
                 for (int k = 0; k < entityDepth; k++) {
                     int l = i + x;
                     int m = j + y;
                     int n = k + z;
-                    BlockPathTypes blockPathTypes = getBlockPathType(level, l, m, n);
+                    PathType blockPathTypes = getPathType(context, l, m, n);
                     if (i == 0 && j == 0 && k == 0) {
                         nodeType = blockPathTypes;
                     }
@@ -311,32 +316,33 @@ public class TrilobiteNodeEvaluator extends NodeEvaluator {
     }
 
     @Override
-    public @NotNull BlockPathTypes getBlockPathType(BlockGetter level, int x, int y, int z) {
+    public @NotNull PathType getPathType(PathfindingContext context, int x, int y, int z) {
+        BlockGetter level = context.level();
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, y, z);
         int i = pos.getX();
         int j = pos.getY();
         int k = pos.getZ();
-        BlockPathTypes type = getBlockPathTypeRaw(level, pos);
-        if (type == BlockPathTypes.OPEN && j >= level.getMinBuildHeight() + 1) {
-            BlockPathTypes below = getBlockPathTypeRaw(level, pos.set(i, j - 1, k));
-            if (below == BlockPathTypes.DAMAGE_FIRE) {
-                type = BlockPathTypes.DAMAGE_FIRE;
-            } else if (below != BlockPathTypes.OPEN) {
-                type = BlockPathTypes.WALKABLE;
+        PathType type = getBlockPathTypeRaw(level, pos);
+        if (type == PathType.OPEN && j >= level.getMinBuildHeight() + 1) {
+            PathType below = getBlockPathTypeRaw(level, pos.set(i, j - 1, k));
+            if (below == PathType.DAMAGE_FIRE) {
+                type = PathType.DAMAGE_FIRE;
+            } else if (below != PathType.OPEN) {
+                type = PathType.WALKABLE;
             }
         }
         return type;
     }
 
-    protected static BlockPathTypes getBlockPathTypeRaw(BlockGetter level, BlockPos pos) {
+    protected static PathType getBlockPathTypeRaw(BlockGetter level, BlockPos pos) {
         FluidState fluidState = level.getFluidState(pos);
         if (fluidState.is(FluidTags.WATER)) {
-            return BlockPathTypes.OPEN;
+            return PathType.OPEN;
         }
         BlockState blockstate = level.getBlockState(pos);
         if (blockstate.is(Blocks.MAGMA_BLOCK)) {
-            return BlockPathTypes.DAMAGE_FIRE;
+            return PathType.DAMAGE_FIRE;
         }
-        return BlockPathTypes.BLOCKED;
+        return PathType.BLOCKED;
     }
 }

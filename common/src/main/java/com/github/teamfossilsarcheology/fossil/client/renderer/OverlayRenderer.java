@@ -30,14 +30,13 @@ public class OverlayRenderer {
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1);
                 RenderSystem.setShaderTexture(0, ancient ? ANCIENT_HELMET : BONE_HELMET);
-                Tesselator tesselator = Tesselator.getInstance();
-                BufferBuilder bufferbuilder = tesselator.getBuilder();
-                bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                bufferbuilder.vertex(0.0, screenHeight, -90.0).uv(0.0f, 1.0f).endVertex();
-                bufferbuilder.vertex(screenWidth, screenHeight, -90.0).uv(1.0f, 1.0f).endVertex();
-                bufferbuilder.vertex(screenWidth, 0.0, -90.0).uv(1.0f, 0.0f).endVertex();
-                bufferbuilder.vertex(0.0, 0.0, -90.0).uv(0.0f, 0.0f).endVertex();
-                tesselator.end();
+                //PORT(1.21.1): Tesselator#begin returns the BufferBuilder, BufferUploader#drawWithShader replaces Tesselator#end
+                BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                bufferbuilder.addVertex(0.0f, screenHeight, -90.0f).setUv(0.0f, 1.0f);
+                bufferbuilder.addVertex(screenWidth, screenHeight, -90.0f).setUv(1.0f, 1.0f);
+                bufferbuilder.addVertex(screenWidth, 0.0f, -90.0f).setUv(1.0f, 0.0f);
+                bufferbuilder.addVertex(0.0f, 0.0f, -90.0f).setUv(0.0f, 0.0f);
+                BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
                 RenderSystem.disableBlend();
             }
         }
@@ -51,15 +50,13 @@ public class OverlayRenderer {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 0.8f);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tesselator.getBuilder();
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             Matrix4f matrix4f = poseStack.last().pose();
-            vertex(bufferbuilder, matrix4f, -1, -1, -0.5f).uv(0, 1).endVertex();
-            vertex(bufferbuilder, matrix4f, 1, -1, -0.5f).uv(1, 1).endVertex();
-            vertex(bufferbuilder, matrix4f, 1, 1, -0.5f).uv(1, 0).endVertex();
-            vertex(bufferbuilder, matrix4f, -1, 1, -0.5f).uv(0, 0).endVertex();
-            tesselator.end();
+            vertex(bufferbuilder, matrix4f, -1, -1, -0.5f).setUv(0, 1);
+            vertex(bufferbuilder, matrix4f, 1, -1, -0.5f).setUv(1, 1);
+            vertex(bufferbuilder, matrix4f, 1, 1, -0.5f).setUv(1, 0);
+            vertex(bufferbuilder, matrix4f, -1, 1, -0.5f).setUv(0, 0);
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
             RenderSystem.disableBlend();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
@@ -68,6 +65,6 @@ public class OverlayRenderer {
     private static VertexConsumer vertex(BufferBuilder bufferBuilder, Matrix4f matrix4f, float x, float y, float z) {
         Vector4f vector4f = new Vector4f(x, y, z, 1);
         matrix4f.transform(vector4f);
-        return bufferBuilder.vertex(vector4f.x(), vector4f.y(), vector4f.z());
+        return bufferBuilder.addVertex(vector4f.x(), vector4f.y(), vector4f.z());
     }
 }

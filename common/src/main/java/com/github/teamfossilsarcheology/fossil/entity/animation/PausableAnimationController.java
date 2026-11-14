@@ -2,7 +2,7 @@ package com.github.teamfossilsarcheology.fossil.entity.animation;
 
 
 import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationController;
 
 public class PausableAnimationController<T extends GeoEntity> extends AnimationController<T> {
     private boolean paused;

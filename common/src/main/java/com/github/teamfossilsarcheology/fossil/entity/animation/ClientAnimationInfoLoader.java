@@ -13,7 +13,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import software.bernie.geckolib.cache.GeckoLibCache;
-import software.bernie.geckolib.core.animation.Animation;
+import software.bernie.geckolib.animation.Animation;
 import software.bernie.geckolib.loading.object.BakedAnimations;
 
 import java.util.HashMap;

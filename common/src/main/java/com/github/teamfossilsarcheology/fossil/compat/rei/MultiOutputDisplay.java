@@ -13,6 +13,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -24,8 +25,9 @@ public abstract class MultiOutputDisplay implements Display {
     protected final @Nullable ResourceLocation location;
 
 
-    protected MultiOutputDisplay(MultiOutputAndSlotsRecipe recipe) {
-        this(EntryIngredients.ofIngredient(recipe.getInput()), map(recipe.getWeightedOutputs()), recipe.getId());
+    //PORT(1.21.1): REI 16 recipe fillers receive RecipeHolders; the id comes from RecipeHolder#id() (recipes lost getId())
+    protected MultiOutputDisplay(RecipeHolder<? extends MultiOutputAndSlotsRecipe> holder) {
+        this(EntryIngredients.ofIngredient(holder.value().getInput()), map(holder.value().getWeightedOutputs()), holder.id());
     }
 
     private static NavigableMap<Double, EntryIngredient> map(NavigableMap<Double, ItemStack> output) {
@@ -84,11 +86,15 @@ public abstract class MultiOutputDisplay implements Display {
             ListTag items = new ListTag();
             for (Map.Entry<Double, EntryIngredient> entry : display.weightedOutputs.entrySet()) {
                 weights.add(DoubleTag.valueOf(entry.getKey()));
-                weights.add(entry.getValue().saveIngredient());
+                //PORT(1.21.1): pre-existing bug fixed: the ingredient was added to "Weights" (ListTag of doubles -> UnsupportedOperationException)
+                items.add(entry.getValue().saveIngredient());
             }
             tag.put("Weights", weights);
             tag.put("Items", items);
-            tag.putString("Location", display.location.toString());
+            //PORT(1.21.1): tag based displays (AnalyzerTagRecipe) have no location
+            if (display.location != null) {
+                tag.putString("Location", display.location.toString());
+            }
             return tag;
         }
 
@@ -98,14 +104,13 @@ public abstract class MultiOutputDisplay implements Display {
             ListTag weights = tag.getList("Weights", Tag.TAG_DOUBLE);
             ListTag items = tag.getList("Items", Tag.TAG_LIST);
             NavigableMap<Double, EntryIngredient> weighted = new TreeMap<>();
-            double total = 0;
             for (int i = 0; i < items.size(); i++) {
                 EntryIngredient item = EntryIngredient.read(items.getList(i));
-                if (item.isEmpty()) continue;
-                total += weights.getDouble(i);
-                weighted.put(total, item);
+                //PORT(1.21.1): pre-existing bug fixed: the saved keys are already cumulative weights (summing them again was wrong) and
+                //empty entries ("nothing", see MultiOutputAndSlotsRecipe total) must be kept or the probabilities change
+                weighted.put(weights.getDouble(i), item);
             }
-            ResourceLocation location = new ResourceLocation(tag.getString("Location"));
+            ResourceLocation location = tag.contains("Location") ? ResourceLocation.parse(tag.getString("Location")) : null;
             return constructor.construct(input, weighted, location);
         }
 

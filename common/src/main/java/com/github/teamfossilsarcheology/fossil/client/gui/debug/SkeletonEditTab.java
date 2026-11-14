@@ -61,20 +61,29 @@ public class SkeletonEditTab extends DebugTab<PrehistoricSkeleton> {
     private class ModelsList extends ContainerObjectSelectionList<ModelsList.ModelEntry> {
 
         public ModelsList() {
-            super(SkeletonEditTab.this.minecraft, 200, SkeletonEditTab.this.height, 60, SkeletonEditTab.this.height, 25);
+            //PORT(1.21.1): (minecraft, width, height, y, itemHeight); the list height is y1 - y0 of 1.20.1
+            super(SkeletonEditTab.this.minecraft, 200, SkeletonEditTab.this.height - 60, 60, 25);
             List<String> sortedModels = PrehistoricEntityInfo.entitiesWithSkeleton(TimePeriod.values()).stream().map(Enum::name).toList();
             for (String typeName : sortedModels) {
                 addEntry(new ModelEntry(typeName));
             }
-            setRenderBackground(false);
-            setRenderTopAndBottom(false);
-            x0 = (SkeletonEditTab.this.width - SkeletonEditTab.this.width / 4);
-            x1 = x0 + width;
+            //PORT(1.21.1): x0/x1 fields -> widget position (the width stays 200)
+            setX(SkeletonEditTab.this.width - SkeletonEditTab.this.width / 4);
+        }
+
+        //PORT(1.21.1): replaces setRenderBackground(false)
+        @Override
+        protected void renderListBackground(GuiGraphics guiGraphics) {
+        }
+
+        //PORT(1.21.1): replaces setRenderTopAndBottom(false)
+        @Override
+        protected void renderListSeparators(GuiGraphics guiGraphics) {
         }
 
         @Override
         protected int getScrollbarPosition() {
-            return x0 + width - 6;
+            return getX() + width - 6;
         }
 
         private class ModelEntry extends ContainerObjectSelectionList.Entry<ModelEntry> {

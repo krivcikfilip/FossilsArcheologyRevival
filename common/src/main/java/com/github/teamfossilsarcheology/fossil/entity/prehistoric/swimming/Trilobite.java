@@ -16,31 +16,30 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.animation.PlayState;
 
 import java.util.Optional;
 
-import static software.bernie.geckolib.core.animation.Animation.LoopType.LOOP;
-import static software.bernie.geckolib.core.animation.Animation.LoopType.PLAY_ONCE;
+import static software.bernie.geckolib.animation.Animation.LoopType.LOOP;
+import static software.bernie.geckolib.animation.Animation.LoopType.PLAY_ONCE;
 
 public abstract class Trilobite extends PrehistoricSwimmingBucketable {
 
     protected Trilobite(EntityType<? extends Trilobite> entityType, Level level) {
         super(entityType, level, FossilMod.location("animations/entity/trilobite.animation.json"));
-        this.setPathfindingMalus(BlockPathTypes.WATER, 0);
+        this.setPathfindingMalus(PathType.WATER, 0);
         moveControl = new TrilobiteMoveControl();
     }
 
@@ -77,8 +76,10 @@ public abstract class Trilobite extends PrehistoricSwimmingBucketable {
     }
 
     @Override
-    public @NotNull MobType getMobType() {
-        return MobType.ARTHROPOD;
+    public boolean isWaterMobType() {
+        //PORT(1.21.1): getMobType() returned MobType.ARTHROPOD. MobType was removed in 1.20.5, vanilla uses the
+        // minecraft:arthropod entity type tag now (requested from data/build)
+        return false;
     }
 
     @Override

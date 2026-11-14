@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -188,20 +188,20 @@ public class SweepPathNavigation extends PlayerPathNavigation {
     private boolean isCollisionAtColumn(int x, int minY, int z, int maxY, int stepY, BlockPos.MutableBlockPos pos) {
         for (int y = minY; y != maxY; y += stepY) {
             BlockState block = level.getBlockState(pos.set(x, y, z));
-            if (!block.isPathfindable(level, pos, PathComputationType.LAND)) {
+            if (!block.isPathfindable(PathComputationType.LAND)) {
                 return true;
             }
         }
-        BlockPathTypes in = nodeEvaluator.getBlockPathType(level, x, minY, z);
+        PathType in = nodeEvaluator.getBlockPathType(level, x, minY, z);
         float malus = PathingDebug.getPathfindingMalus(in);
         if (malus < 0.0F || malus >= 8.0F) {
             return true;
         }
-        BlockPathTypes below = nodeEvaluator.getBlockPathType(level, x, minY - 1, z);
-        if (below == BlockPathTypes.WATER || below == BlockPathTypes.LAVA || below == BlockPathTypes.OPEN) {
+        PathType below = nodeEvaluator.getBlockPathType(level, x, minY - 1, z);
+        if (below == PathType.WATER || below == PathType.LAVA || below == PathType.OPEN) {
             return true;
         }
-        return in == BlockPathTypes.DAMAGE_FIRE || in == BlockPathTypes.DANGER_FIRE || in == BlockPathTypes.DAMAGE_OTHER;
+        return in == PathType.DAMAGE_FIRE || in == PathType.DANGER_FIRE || in == PathType.DAMAGE_OTHER;
     }
 
     static float chooseLengthForAxis(Direction.Axis axis, Vec3 vec) {

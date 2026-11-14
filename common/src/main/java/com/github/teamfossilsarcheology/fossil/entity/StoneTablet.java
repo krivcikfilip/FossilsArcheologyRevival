@@ -9,6 +9,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -16,6 +18,7 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +54,13 @@ public class StoneTablet extends HangingEntity implements EntitySpawnExtension {
         this.setDirection(direction);
     }
 
+    /**
+     * PORT(1.21.1): HangingEntity no longer implements the (now abstract) Entity#defineSynchedData(Builder). 1.20.1 HangingEntity's was empty
+     */
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
@@ -66,7 +76,38 @@ public class StoneTablet extends HangingEntity implements EntitySpawnExtension {
         setDirection(direction);
     }
 
+    /**
+     * PORT(1.21.1): HangingEntity#getWidth/getHeight/recalculateBoundingBox logic was replaced by calculateBoundingBox(BlockPos, Direction).
+     * This is the 1.20.1 HangingEntity#recalculateBoundingBox math (sizes in pixels)
+     * PORT-TODO(1.21.1): verify placement/hitbox of all tablet sizes in game (1.21 HangingEntity sets the position to the box center)
+     */
     @Override
+    protected @NotNull AABB calculateBoundingBox(BlockPos pos, Direction direction) {
+        double x = pos.getX() + 0.5 - direction.getStepX() * 0.46875;
+        double y = pos.getY() + 0.5 + offs(getHeight());
+        double z = pos.getZ() + 0.5 - direction.getStepZ() * 0.46875;
+        Direction counterClockWise = direction.getCounterClockWise();
+        double widthOffset = offs(getWidth());
+        x += widthOffset * counterClockWise.getStepX();
+        z += widthOffset * counterClockWise.getStepZ();
+        double xSize = getWidth();
+        double ySize = getHeight();
+        double zSize = getWidth();
+        if (direction.getAxis() == Direction.Axis.Z) {
+            zSize = 1;
+        } else {
+            xSize = 1;
+        }
+        xSize /= 32;
+        ySize /= 32;
+        zSize /= 32;
+        return new AABB(x - xSize, y - ySize, z - zSize, x + xSize, y + ySize, z + zSize);
+    }
+
+    private static double offs(int pixels) {
+        return pixels % 32 == 0 ? 0.5 : 0;
+    }
+
     public int getWidth() {
         if (variant == null) {
             return 0;
@@ -74,7 +115,6 @@ public class StoneTablet extends HangingEntity implements EntitySpawnExtension {
         return variant.sizeX;
     }
 
-    @Override
     public int getHeight() {
         if (variant == null) {
             return 0;
@@ -101,8 +141,8 @@ public class StoneTablet extends HangingEntity implements EntitySpawnExtension {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkManager.createAddEntityPacket(this);
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+        return NetworkManager.createAddEntityPacket(this, serverEntity);
     }
 
     @Override

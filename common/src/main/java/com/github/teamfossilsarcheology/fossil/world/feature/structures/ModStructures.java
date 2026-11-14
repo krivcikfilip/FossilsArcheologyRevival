@@ -6,7 +6,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
@@ -50,7 +50,7 @@ public class ModStructures {
         return ResourceKey.create(Registries.STRUCTURE, FossilMod.location(name));
     }
 
-    public static void bootstrap(BootstapContext<Structure> context) {
+    public static void bootstrap(BootstrapContext<Structure> context) {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
         HolderGetter<StructureTemplatePool> templates = context.lookup(Registries.TEMPLATE_POOL);
         context.register(ANU_CASTLE_KEY, new AnuCastleStructure(
@@ -80,7 +80,7 @@ public class ModStructures {
         sites(TAR_SITE_TENT_SNOWY_KEY, 3, ModTemplatePools.TAR_SITE_TENT_SNOWY_START_KEY, context, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA);
     }
 
-    private static void sites(ResourceKey<Structure> key, int size, ResourceKey<StructureTemplatePool> pool, BootstapContext<Structure> context, ResourceKey<Biome>... biome) {
+    private static void sites(ResourceKey<Structure> key, int size, ResourceKey<StructureTemplatePool> pool, BootstrapContext<Structure> context, ResourceKey<Biome>... biome) {
         var biomes = Arrays.stream(biome).map(biomeResourceKey -> context.lookup(Registries.BIOME).getOrThrow(biomeResourceKey)).toArray(Holder[]::new);
         context.register(key, new JigsawStructure(structure(HolderSet.direct(biomes), TerrainAdjustment.NONE),
                 context.lookup(Registries.TEMPLATE_POOL).getOrThrow(pool),
@@ -88,7 +88,7 @@ public class ModStructures {
                 true, Heightmap.Types.WORLD_SURFACE_WG));
     }
 
-    private static void simple(ResourceKey<Structure> key, ResourceKey<StructureTemplatePool> pool, BootstapContext<Structure> context, TagKey<Biome> biome) {
+    private static void simple(ResourceKey<Structure> key, ResourceKey<StructureTemplatePool> pool, BootstrapContext<Structure> context, TagKey<Biome> biome) {
         context.register(key, new JigsawStructure(structure(context.lookup(Registries.BIOME).getOrThrow(biome), TerrainAdjustment.NONE),
                 context.lookup(Registries.TEMPLATE_POOL).getOrThrow(pool),
                 1, ConstantHeight.of(VerticalAnchor.absolute(0)),

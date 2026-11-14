@@ -6,7 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -58,7 +58,7 @@ public class ModTemplatePools {
     public static final ResourceKey<StructureTemplatePool> ARCHEOLOGIST_KEY = createKey("villagers/archeologist");
     public static final ResourceKey<StructureTemplatePool> PALEONTOLOGIST_KEY = createKey("villagers/paleontologist");
 
-    public static void bootstrap(BootstapContext<StructureTemplatePool> context) {
+    public static void bootstrap(BootstrapContext<StructureTemplatePool> context) {
         HolderGetter<StructureTemplatePool> pools = context.lookup(Registries.TEMPLATE_POOL);
         Holder<StructureTemplatePool> emptyPool = pools.getOrThrow(Pools.EMPTY);
         simple(ANU_CASTLE_START, "fossil:anu_castle_nw", context);
@@ -120,7 +120,7 @@ public class ModTemplatePools {
                 StructureTemplatePool.Projection.RIGID));
     }
 
-    private static void simple(ResourceKey<StructureTemplatePool> key, String location, BootstapContext<StructureTemplatePool> context) {
+    private static void simple(ResourceKey<StructureTemplatePool> key, String location, BootstrapContext<StructureTemplatePool> context) {
         HolderGetter<StructureTemplatePool> pools = context.lookup(Registries.TEMPLATE_POOL);
         Holder<StructureTemplatePool> emptyPool = pools.getOrThrow(Pools.EMPTY);
         context.register(key, new StructureTemplatePool(emptyPool, ImmutableList.of(

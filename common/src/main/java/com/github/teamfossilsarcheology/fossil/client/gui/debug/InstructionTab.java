@@ -210,16 +210,16 @@ public class InstructionTab extends DebugTab<Prehistoric> {
             if (!controllers.isEmpty()) {
                 currentControllerName = controllers.get(0);
                 addWidget(CycleButton.builder(Component::literal).withValues(controllers).withInitialValue(currentControllerName)
-                        .create(buttonX, y0, 100, 20, Component.literal(""),
+                        .create(buttonX, getY(), 100, 20, Component.literal(""),
                                 (cycleButton, controller) -> currentControllerName = controller));
             }
-            addWidget(new DebugSlider(buttonX, y0 + 25, 100, 20, Component.literal("Count: "), Component.literal(""), 0, 20, transitionLength, 1, 3, true) {
+            addWidget(new DebugSlider(buttonX, getY() + 25, 100, 20, Component.literal("Count: "), Component.literal(""), 0, 20, transitionLength, 1, 3, true) {
                 @Override
                 protected void applyValue() {
                     transitionLength = (int) (stepSize * Math.round(Mth.lerp(value, minValue, maxValue) / stepSize));
                 }
             });
-            addWidget(CycleButton.onOffBuilder(loop).create(buttonX, y0 + 50, 100, 20,
+            addWidget(CycleButton.onOffBuilder(loop).create(buttonX, getY() + 50, 100, 20,
                     Component.literal("Time based"), (button, loop) -> this.loop = loop));
         }
     }

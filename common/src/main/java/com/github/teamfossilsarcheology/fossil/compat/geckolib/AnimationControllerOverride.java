@@ -1,12 +1,15 @@
 package com.github.teamfossilsarcheology.fossil.compat.geckolib;
 
-import com.eliotlash.mclib.math.Constant;
-import com.eliotlash.mclib.math.IValue;
-import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationProcessor;
-import software.bernie.geckolib.core.keyframe.*;
-import software.bernie.geckolib.core.state.BoneSnapshot;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.AnimationProcessor;
+import software.bernie.geckolib.animation.keyframe.AnimationPoint;
+import software.bernie.geckolib.animation.keyframe.BoneAnimation;
+import software.bernie.geckolib.animation.keyframe.BoneAnimationQueue;
+import software.bernie.geckolib.animation.keyframe.Keyframe;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.loading.math.MathValue;
+import software.bernie.geckolib.loading.math.value.Constant;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,8 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * PORT(1.21.1): GeckoLib 4.9.3 (1.21.1): core.* packages flattened, mclib IValue/Constant -> GeckoLib MathValue/Constant (record),
+ * CoreGeoBone -> GeoBone. Verified against refs/geckolib (tag 4.9.3) AnimationController#process / BoneAnimationQueue.
+ */
 public class AnimationControllerOverride {
-    private static final Keyframe<IValue> ZERO_KEYFRAME = new Keyframe<>(0.0, new Constant(0), new Constant(0));
+    private static final Keyframe<MathValue> ZERO_KEYFRAME = new Keyframe<>(0.0, new Constant(0), new Constant(0));
     private static final AnimationPoint POINT = new AnimationPoint(ZERO_KEYFRAME, 0, 0, 0, 0);
     private static final AnimationPoint SCALE_POINT = new AnimationPoint(ZERO_KEYFRAME, 0, 0, 1, 1);
 
@@ -23,7 +30,7 @@ public class AnimationControllerOverride {
      * Adds transition logic to {@link AnimationController#process}
      * with the goal of adding a transition animation for bones that have no animation points in the new animation.
      */
-    public static void fixTransitions(Map<String, CoreGeoBone> bones, AnimationProcessor.QueuedAnimation currentAnimation, Map<String, BoneSnapshot> boneSnapshots,
+    public static void fixTransitions(Map<String, GeoBone> bones, AnimationProcessor.QueuedAnimation currentAnimation, Map<String, BoneSnapshot> boneSnapshots,
                                       double adjustedTick, boolean firstTick, Map<String, BoneSnapshot> snapshots,
                                       double transitionLength, Map<String, BoneAnimationQueue> boneAnimationQueues) {
         Set<String> previousBones = new HashSet<>(boneSnapshots.keySet());
@@ -38,7 +45,7 @@ public class AnimationControllerOverride {
             if (!bones.containsKey(boneName)) {
                 continue;
             }
-            CoreGeoBone bone = bones.get(boneName);
+            GeoBone bone = bones.get(boneName);
 
             BoneAnimationQueue boneAnimationQueue = boneAnimationQueues.get(boneName);
 

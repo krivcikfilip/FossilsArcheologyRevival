@@ -3,6 +3,7 @@ package com.github.teamfossilsarcheology.fossil.client.gui.debug.instruction;
 import com.github.teamfossilsarcheology.fossil.client.gui.debug.InstructionTab;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -28,7 +29,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class InstructionsList extends AbstractContainerEventHandler implements Renderable {
-    static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
+    //PORT(1.21.1): textures/gui/resource_packs.png was split into GUI sprites (1.20.2)
+    static final ResourceLocation MOVE_UP_SPRITE = ResourceLocation.withDefaultNamespace("transferable_list/move_up");
+    static final ResourceLocation MOVE_DOWN_SPRITE = ResourceLocation.withDefaultNamespace("transferable_list/move_down");
     private static final int WIDTH = 200;
     private static final int ITEM_HEIGHT = 20;
     private static final int Y_0 = 5;
@@ -81,7 +84,9 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
                 super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
                 int left = getX() + width / 2;
                 int top = getY() + (height - 8) / 2;
-                guiGraphics.blit(ICON_OVERLAY_LOCATION, left - 8, top - 5, 111, 0, 32, 32, 256, 256);
+                //1.20.1: blit(resource_packs.png, u 111, v 0, 32x32) = right part of the move up icon (u 96)
+                //PORT-TODO(1.21.1): visual check of the arrow icon
+                guiGraphics.blitSprite(MOVE_UP_SPRITE, 32, 32, 15, 0, left - 8, top - 5, 17, 32);
             }
         };
         downButton = new MoveButton(X_0 + 80, Y_1 + 5, 20, 20, Component.literal(""), button -> {
@@ -96,7 +101,9 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
                 super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
                 int left = getX() + width / 2;
                 int top = getY() + (height - 8) / 2;
-                guiGraphics.blit(ICON_OVERLAY_LOCATION, left - 23, top - 4, 64, 16, 32, 32, 256, 256);
+                //1.20.1: blit(resource_packs.png, u 64, v 16, 32x32) = lower half of the move down icon (u 64)
+                //PORT-TODO(1.21.1): visual check of the arrow icon
+                guiGraphics.blitSprite(MOVE_DOWN_SPRITE, 32, 32, 0, 16, left - 23, top - 4, 32, 16);
             }
         };
     }
@@ -220,19 +227,20 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         hovered = isMouseOver(mouseX, mouseY) ? getEntryAtPosition(mouseX, mouseY) : null;
         //if (renderBackground) {
-        RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
+        //PORT(1.21.1): Screen.BACKGROUND_LOCATION (options_background.png) no longer exists, MENU_BACKGROUND replaced it in vanilla
+        //PORT-TODO(1.21.1): visual check (was the darkened dirt texture)
+        RenderSystem.setShaderTexture(0, Screen.MENU_BACKGROUND);
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(X_0, Y_1, 0).uv(X_0 / 32f, Y_1 / 32f).color(32, 32, 32, 255).endVertex();
-        bufferBuilder.vertex(X_1, Y_1, 0).uv(X_1 / 32f, Y_1 / 32f).color(32, 32, 32, 255).endVertex();
-        bufferBuilder.vertex(X_1, Y_0, 0).uv(X_1 / 32f, Y_0 / 32f).color(32, 32, 32, 255).endVertex();
-        bufferBuilder.vertex(X_0, Y_0, 0).uv(X_0 / 32f, Y_0 / 32f).color(32, 32, 32, 255).endVertex();
-        tesselator.end();
+        //PORT(1.21.1): Tesselator#begin returns the builder, BufferUploader#drawWithShader replaces Tesselator#end
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(X_0, Y_1, 0).setUv(X_0 / 32f, Y_1 / 32f).setColor(32, 32, 32, 255);
+        bufferBuilder.addVertex(X_1, Y_1, 0).setUv(X_1 / 32f, Y_1 / 32f).setColor(32, 32, 32, 255);
+        bufferBuilder.addVertex(X_1, Y_0, 0).setUv(X_1 / 32f, Y_0 / 32f).setColor(32, 32, 32, 255);
+        bufferBuilder.addVertex(X_0, Y_0, 0).setUv(X_0 / 32f, Y_0 / 32f).setColor(32, 32, 32, 255);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         //}
 
         int rowLeft = X_0 + WIDTH / 2 - ROW_WIDTH / 2 + 2;
@@ -246,8 +254,6 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
 
     protected void renderList(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, float partialTick) {
         int itemCount = children.size();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
 
         int rowLeft = getRowLeft();
         int rowRight = rowLeft + ROW_WIDTH;
@@ -258,7 +264,7 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
             if (rowBottom >= Y_0 && rowTop <= Y_1) {
                 InstructionEntry entry = children.get(i);
                 if (Objects.equals(selected, entry)) {
-                    renderEntry(tesselator, bufferBuilder, rowLeft, rowRight, rowTop, rowHeight);
+                    renderEntry(rowLeft, rowRight, rowTop, rowHeight);
                 }
                 entry.render(guiGraphics, rowTop, rowLeft, Objects.equals(hovered, entry) && dragging == null);
 
@@ -266,7 +272,7 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
                     int dragLeft = (int) ((dragStartX + dragMoveX) + WIDTH / 2d - ROW_WIDTH / 2d);
                     int dragRight = (int) ((dragStartX + dragMoveX) + WIDTH / 2d + ROW_WIDTH / 2d);
                     int dragTop = (int) (rowTop + ((dragStartY + dragMoveY) - Y_0));
-                    renderEntry(tesselator, bufferBuilder, dragLeft, dragRight, dragTop, rowHeight);
+                    renderEntry(dragLeft, dragRight, dragTop, rowHeight);
                     entry.render(guiGraphics, dragTop, dragLeft, true);
                 }
             }
@@ -281,31 +287,31 @@ public class InstructionsList extends AbstractContainerEventHandler implements R
             } else {
                 RenderSystem.setShaderColor(0.5f, 1, 0.5f, 1);
             }
-            bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
-            bufferBuilder.vertex(arrowLeft, arrowTop + arrowHeight + 4, 0.0).endVertex();
-            bufferBuilder.vertex(arrowLeft + 6, arrowTop + arrowHeight / 2d + 2, 0.0).endVertex();
-            bufferBuilder.vertex(arrowLeft, arrowTop, 0.0).endVertex();
-            tesselator.end();
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION);
+            bufferBuilder.addVertex(arrowLeft, arrowTop + arrowHeight + 4, 0);
+            bufferBuilder.addVertex(arrowLeft + 6, (float) (arrowTop + arrowHeight / 2d + 2), 0);
+            bufferBuilder.addVertex(arrowLeft, arrowTop, 0);
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         }
     }
 
-    private void renderEntry(Tesselator tesselator, BufferBuilder bufferBuilder, int rowLeft, int rowRight, int rowTop, int rowHeight) {
+    private void renderEntry(int rowLeft, int rowRight, int rowTop, int rowHeight) {
         RenderSystem.setShader(GameRenderer::getPositionShader);
         float f = 0.75f;
         RenderSystem.setShaderColor(f, f, f, 1);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(rowLeft, rowTop + rowHeight + 2, 0.0).endVertex();
-        bufferBuilder.vertex(rowRight, rowTop + rowHeight + 2, 0.0).endVertex();
-        bufferBuilder.vertex(rowRight, rowTop - 2, 0.0).endVertex();
-        bufferBuilder.vertex(rowLeft, rowTop - 2, 0.0).endVertex();
-        tesselator.end();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        bufferBuilder.addVertex(rowLeft, rowTop + rowHeight + 2, 0);
+        bufferBuilder.addVertex(rowRight, rowTop + rowHeight + 2, 0);
+        bufferBuilder.addVertex(rowRight, rowTop - 2, 0);
+        bufferBuilder.addVertex(rowLeft, rowTop - 2, 0);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
         RenderSystem.setShaderColor(0, 0, 0, 1);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(rowLeft + 1, rowTop + rowHeight + 1, 0.0).endVertex();
-        bufferBuilder.vertex(rowRight - 1, rowTop + rowHeight + 1, 0.0).endVertex();
-        bufferBuilder.vertex(rowRight - 1, rowTop - 1, 0.0).endVertex();
-        bufferBuilder.vertex(rowLeft + 1, rowTop - 1, 0.0).endVertex();
-        tesselator.end();
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        bufferBuilder.addVertex(rowLeft + 1, rowTop + rowHeight + 1, 0);
+        bufferBuilder.addVertex(rowRight - 1, rowTop + rowHeight + 1, 0);
+        bufferBuilder.addVertex(rowRight - 1, rowTop - 1, 0);
+        bufferBuilder.addVertex(rowLeft + 1, rowTop - 1, 0);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
     }
 
     static class MoveButton extends Button {

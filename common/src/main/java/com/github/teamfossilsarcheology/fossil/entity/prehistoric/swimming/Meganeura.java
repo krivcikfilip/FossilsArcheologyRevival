@@ -27,7 +27,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -49,16 +48,16 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.Animation;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animation.Animation;
+import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.animation.PlayState;
 
 import java.util.Optional;
 
-import static software.bernie.geckolib.core.animation.Animation.LoopType.LOOP;
-import static software.bernie.geckolib.core.animation.Animation.LoopType.PLAY_ONCE;
+import static software.bernie.geckolib.animation.Animation.LoopType.LOOP;
+import static software.bernie.geckolib.animation.Animation.LoopType.PLAY_ONCE;
 
 
 public class Meganeura extends Prehistoric implements FlyingAnimal, SwimmingAnimal {
@@ -114,13 +113,13 @@ public class Meganeura extends Prehistoric implements FlyingAnimal, SwimmingAnim
     }
 
     @Override
-    public void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(ATTACHED_X, 0f);
-        entityData.define(ATTACHED_Y, 0f);
-        entityData.define(ATTACHED_Z, 0f);
-        entityData.define(ATTACHED_FACE, Direction.UP);
-        entityData.define(ATTACHED, false);
+    public void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ATTACHED_X, 0f);
+        builder.define(ATTACHED_Y, 0f);
+        builder.define(ATTACHED_Z, 0f);
+        builder.define(ATTACHED_FACE, Direction.UP);
+        builder.define(ATTACHED, false);
     }
 
     @Override
@@ -162,11 +161,12 @@ public class Meganeura extends Prehistoric implements FlyingAnimal, SwimmingAnim
     }
 
     @Override
-    public @NotNull EntityDimensions getDimensions(Pose poseIn) {
+    protected @NotNull EntityDimensions getDefaultDimensions(Pose poseIn) {
+        //PORT(1.21.1): was getDimensions(Pose), which is final in LivingEntity now
         if (usesAttachHitBox()) {
-            return super.getDimensions(poseIn).scale(1, 2);
+            return super.getDefaultDimensions(poseIn).scale(1, 2);
         }
-        return super.getDimensions(poseIn);
+        return super.getDefaultDimensions(poseIn);
     }
 
     @Override
@@ -288,8 +288,14 @@ public class Meganeura extends Prehistoric implements FlyingAnimal, SwimmingAnim
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
-        return isBaby();
+    public void baseTick() {
+        super.baseTick();
+        //PORT(1.21.1): 1.20.1 overrode canBreatheUnderwater() with isBaby(). That method is final and tag based in 1.21.1
+        // (minecraft:can_breathe_under_water), which can't depend on the age. Meganeura stays out of the tag (adults drown like
+        // before) and larvae get their air refilled every tick instead, so they never drown.
+        if (isBaby() && isAlive()) {
+            setAirSupply(getMaxAirSupply());
+        }
     }
 
     @Override
@@ -322,10 +328,8 @@ public class Meganeura extends Prehistoric implements FlyingAnimal, SwimmingAnim
         return isBaby() ? PrehistoricEntityInfoAI.Moving.SEMI_AQUATIC : PrehistoricEntityInfoAI.Moving.FLIGHT;
     }
 
-    @Override
-    public @NotNull MobType getMobType() {
-        return MobType.ARTHROPOD;
-    }
+    //PORT(1.21.1): getMobType() returned MobType.ARTHROPOD. MobType was removed in 1.20.5, vanilla uses the
+    // minecraft:arthropod entity type tag now (requested from data/build)
 
     @Nullable
     @Override

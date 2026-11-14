@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,9 +34,10 @@ public class AnuDeadRenderer extends EntityRenderer<AnuDead> implements Renderer
         int m = LivingEntityRenderer.getOverlayCoords(entity, 0);
         if (entity.tickCount > 40) {
             float alpha = (float) Math.max(0.05, 1 - (entity.tickCount + 25) / 63f * 0.01f);
-            model.renderToBuffer(poseStack, vertexConsumer, packedLight, m, 1, 1, 1, alpha);
+            //PORT(1.21.1): tint is a packed ARGB int
+            model.renderToBuffer(poseStack, vertexConsumer, packedLight, m, FastColor.ARGB32.color(Mth.floor(alpha * 255), 255, 255, 255));
         } else {
-            model.renderToBuffer(poseStack, vertexConsumer, packedLight, m, 1, 1, 1, 1);
+            model.renderToBuffer(poseStack, vertexConsumer, packedLight, m);
         }
         poseStack.popPose();
     }

@@ -3,7 +3,7 @@ package com.github.teamfossilsarcheology.fossil.world.feature.structures;
 import com.github.teamfossilsarcheology.fossil.FossilMod;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
@@ -23,6 +23,7 @@ import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.jetbrains.annotations.NotNull;
@@ -35,8 +36,12 @@ import java.util.*;
  */
 public class AnuCastleStructure extends Structure {
 
-    public static final Codec<AnuCastleStructure> CODEC = RecordCodecBuilder
-            .create(instance -> instance.group(settingsCodec(instance)).apply(instance, AnuCastleStructure::new));
+    //PORT(1.21.1): StructureType#codec is a MapCodec since 1.20.5
+    public static final MapCodec<AnuCastleStructure> CODEC = RecordCodecBuilder
+            .mapCodec(instance -> instance.group(settingsCodec(instance)).apply(instance, AnuCastleStructure::new));
+
+    //PORT-TODO(1.21.1): verify the anu castle generates completely (jigsaw children, waterlogging) in a new anu_lair dimension
+    private static final LiquidSettings LIQUID_SETTINGS = LiquidSettings.APPLY_WATERLOGGING;
 
     public AnuCastleStructure(Structure.StructureSettings settings) {
         super(settings);
@@ -50,8 +55,12 @@ public class AnuCastleStructure extends Structure {
     }
 
     /**
-     * Copy of {@link JigsawPlacement#addPieces(GenerationContext, Holder, Optional, int, BlockPos, boolean, Optional, int)}
+     * Copy of {@link JigsawPlacement#addPieces}
      * that we can optimize a bit because we always place the castle at 0, 63, 0 with no rotation
+     * <p>
+     * PORT(1.21.1): pieces take {@link LiquidSettings} (1.21). {@link LiquidSettings#APPLY_WATERLOGGING} is the vanilla jigsaw
+     * default ({@code JigsawStructure.DEFAULT_LIQUID_SETTINGS}) and the 1.20.1 behaviour (waterloggable blocks in water got waterlogged).
+     * Pool aliases and dimension padding (1.20.2/1.21) are not used by the castle.
      */
     private static Optional<GenerationStub> addPieces(GenerationContext context, BlockPos blockPos) {
         RegistryAccess registryAccess = context.registryAccess();
@@ -68,7 +77,8 @@ public class AnuCastleStructure extends Structure {
                 blockPos,
                 structurePoolElement.getGroundLevelDelta(),
                 rotation,
-                structurePoolElement.getBoundingBox(structureTemplateManager, blockPos, rotation)
+                structurePoolElement.getBoundingBox(structureTemplateManager, blockPos, rotation),
+                LIQUID_SETTINGS
         );
         BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
         int posY = blockPos.getY();
@@ -93,7 +103,7 @@ public class AnuCastleStructure extends Structure {
 
     @Override
     public @NotNull StructureType<?> type() {
-        return ModStructureType.ANU_CASTLE;
+        return ModStructureType.ANU_CASTLE.get();
     }
 
     private static final class PieceState {
@@ -130,7 +140,7 @@ public class AnuCastleStructure extends Structure {
             BoundingBox baseStructureBoundingBox = baseStructurePiece.getBoundingBox();
             block0:
             for (StructureTemplate.StructureBlockInfo baseStructureJigSaw : structurePoolElement.getShuffledJigsawBlocks(structureTemplateManager, baseStructurePosition, baseStructureRotation, random)) {
-                ResourceLocation poolLocation = new ResourceLocation(baseStructureJigSaw.nbt().getString("pool"));
+                ResourceLocation poolLocation = ResourceLocation.parse(baseStructureJigSaw.nbt().getString("pool"));
                 Optional<StructureTemplatePool> baseTargetPool = pools.getOptional(poolLocation);
                 if (baseTargetPool.isEmpty() || baseTargetPool.get().size() == 0 && !Objects.equals(poolLocation, Pools.EMPTY.location())) {
                     FossilMod.LOGGER.warn("Empty or non-existent pool: {}", poolLocation);
@@ -156,7 +166,7 @@ public class AnuCastleStructure extends Structure {
                     BlockPos targetJigsawPosition = targetJigsaw.pos();
                     BlockPos vecToTargetJigsaw = expectedJigsawPosition.subtract(targetJigsawPosition);
                     BoundingBox targetBoundingBox = targetElement.getBoundingBox(structureTemplateManager, vecToTargetJigsaw, baseStructureRotation);
-                    PoolElementStructurePiece poolElementStructurePiece2 = new PoolElementStructurePiece(structureTemplateManager, targetElement, vecToTargetJigsaw, groundLevelDelta, baseStructureRotation, targetBoundingBox);
+                    PoolElementStructurePiece poolElementStructurePiece2 = new PoolElementStructurePiece(structureTemplateManager, targetElement, vecToTargetJigsaw, groundLevelDelta, baseStructureRotation, targetBoundingBox, LIQUID_SETTINGS);
                     baseStructurePiece.addJunction(new JigsawJunction(expectedJigsawPosition.getX(), baseMinY + groundLevelDelta, expectedJigsawPosition.getZ(), 0, targetElement.getProjection()));
                     poolElementStructurePiece2.addJunction(new JigsawJunction(baseJigsawPosition.getX(), baseMinY + baseJigsawOffset - targetJigsawPosition.getY() + groundLevelDelta, baseJigsawPosition.getZ(), 0, projection));
                     pieces.add(poolElementStructurePiece2);

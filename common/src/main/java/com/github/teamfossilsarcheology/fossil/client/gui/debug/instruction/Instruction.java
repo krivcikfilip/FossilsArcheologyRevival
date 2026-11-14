@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,26 @@ public abstract class Instruction {
         }
     }
 
+    /**
+     * PORT(1.21.1): NbtUtils#writeBlockPos now writes an int array and readBlockPos(tag, key) returns an Optional.
+     * The 1.20.1 {X, Y, Z} compound format is kept here, because instructions are saved in the entity NBT.
+     */
+    private static CompoundTag writeBlockPos(BlockPos pos) {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("X", pos.getX());
+        tag.putInt("Y", pos.getY());
+        tag.putInt("Z", pos.getZ());
+        return tag;
+    }
+
+    private static BlockPos readBlockPos(CompoundTag tag, String key) {
+        if (tag.contains(key, Tag.TAG_COMPOUND)) {
+            CompoundTag posTag = tag.getCompound(key);
+            return new BlockPos(posTag.getInt("X"), posTag.getInt("Y"), posTag.getInt("Z"));
+        }
+        return NbtUtils.readBlockPos(tag, key).orElse(BlockPos.ZERO);
+    }
+
     public static List<Instruction> decodeBuffer(FriendlyByteBuf buf) {
         List<Instruction> list = new ArrayList<>();
         while (buf.isReadable()) {
@@ -82,13 +103,13 @@ public abstract class Instruction {
         @Override
         public CompoundTag encodeTag() {
             CompoundTag tag = super.encodeTag();
-            tag.put("Target", NbtUtils.writeBlockPos(target));
+            tag.put("Target", writeBlockPos(target));
             tag.putInt("Rotation", rotation);
             return tag;
         }
 
         protected static Instruction decodeTag(CompoundTag tag) {
-            return new TeleportTo(NbtUtils.readBlockPos(tag.getCompound("Target")), tag.getInt("Rotation"));
+            return new TeleportTo(readBlockPos(tag, "Target"), tag.getInt("Rotation"));
         }
 
         @Override
@@ -112,7 +133,7 @@ public abstract class Instruction {
         @Override
         public CompoundTag encodeTag() {
             CompoundTag tag = super.encodeTag();
-            tag.put("Target", NbtUtils.writeBlockPos(target));
+            tag.put("Target", writeBlockPos(target));
             tag.putInt("Direction", direction.ordinal());
             tag.putDouble("LocationX", location.x);
             tag.putDouble("LocationY", location.y);
@@ -121,7 +142,7 @@ public abstract class Instruction {
         }
 
         protected static Instruction decodeTag(CompoundTag tag) {
-            return new AttachTo(NbtUtils.readBlockPos(tag.getCompound("Target")), Direction.values()[tag.getInt("Direction")], new Vec3(tag.getDouble("LocationX"), tag.getDouble("LocationY"), tag.getDouble("LocationZ")));
+            return new AttachTo(readBlockPos(tag, "Target"), Direction.values()[tag.getInt("Direction")], new Vec3(tag.getDouble("LocationX"), tag.getDouble("LocationY"), tag.getDouble("LocationZ")));
         }
 
         @Override
@@ -141,12 +162,12 @@ public abstract class Instruction {
         @Override
         public CompoundTag encodeTag() {
             CompoundTag tag = super.encodeTag();
-            tag.put("Target", NbtUtils.writeBlockPos(target));
+            tag.put("Target", writeBlockPos(target));
             return tag;
         }
 
         protected static Instruction decodeTag(CompoundTag tag) {
-            return new MoveTo(NbtUtils.readBlockPos(tag.getCompound("Target")));
+            return new MoveTo(readBlockPos(tag, "Target"));
         }
 
         @Override
@@ -166,12 +187,12 @@ public abstract class Instruction {
         @Override
         public CompoundTag encodeTag() {
             CompoundTag tag = super.encodeTag();
-            tag.put("Target", NbtUtils.writeBlockPos(target));
+            tag.put("Target", writeBlockPos(target));
             return tag;
         }
 
         protected static Instruction decodeTag(CompoundTag tag) {
-            return new FlyTo(NbtUtils.readBlockPos(tag.getCompound("Target")));
+            return new FlyTo(readBlockPos(tag, "Target"));
         }
 
         @Override
@@ -191,12 +212,12 @@ public abstract class Instruction {
         @Override
         public CompoundTag encodeTag() {
             CompoundTag tag = super.encodeTag();
-            tag.put("Target", NbtUtils.writeBlockPos(target));
+            tag.put("Target", writeBlockPos(target));
             return tag;
         }
 
         protected static Instruction decodeTag(CompoundTag tag) {
-            return new FlyLand(NbtUtils.readBlockPos(tag.getCompound("Target")));
+            return new FlyLand(readBlockPos(tag, "Target"));
         }
 
         @Override

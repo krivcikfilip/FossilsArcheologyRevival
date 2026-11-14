@@ -93,7 +93,7 @@ public class AnubiteModel extends EntityModel<Anubite> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        model.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        model.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 }

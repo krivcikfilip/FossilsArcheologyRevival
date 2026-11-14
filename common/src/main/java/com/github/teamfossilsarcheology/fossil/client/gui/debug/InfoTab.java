@@ -56,9 +56,10 @@ public class InfoTab extends DebugTab<Prehistoric> {
                 ageInTicks = (int) (stepSize * Math.round(Mth.lerp(value, minValue, maxValue) / stepSize));
             }
 
+            //PORT(1.21.1): AbstractWidget#render is final, the widget specific part is renderWidget
             @Override
-            public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.render(guiGraphics, mouseX, mouseY, partialTick);
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
                 int j = active ? 16777215 : 10526880;
                 EntityDataLoader.Data data = entity.data();
                 DecimalFormat format = new DecimalFormat("0.00");
@@ -84,9 +85,10 @@ public class InfoTab extends DebugTab<Prehistoric> {
                 entity.setScaleOverride((float) scaleOverride);
             }
 
+            //PORT(1.21.1): AbstractWidget#render is final, the widget specific part is renderWidget
             @Override
-            public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                super.render(guiGraphics, mouseX, mouseY, partialTick);
+            public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
                 int j = active ? 16777215 : 10526880;
                 EntityDataLoader.Data data = entity.data();
                 String min = String.valueOf(0);

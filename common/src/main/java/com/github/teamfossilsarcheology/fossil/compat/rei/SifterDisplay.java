@@ -5,6 +5,7 @@ import com.github.teamfossilsarcheology.fossil.recipe.MultiOutputAndSlotsRecipe;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NavigableMap;
@@ -12,7 +13,7 @@ import java.util.NavigableMap;
 public class SifterDisplay extends MultiOutputDisplay {
     public static final CategoryIdentifier<SifterDisplay> ID = CategoryIdentifier.of(FossilMod.location("sifter"));
 
-    public SifterDisplay(MultiOutputAndSlotsRecipe recipe) {
+    public SifterDisplay(RecipeHolder<? extends MultiOutputAndSlotsRecipe> recipe) {
         super(recipe);
     }
 
