@@ -45,7 +45,7 @@ runtime (`TinyRemapper`, `ReadClasspathProviderImpl`) leaves non-daemon thread p
 | `forge/tests/RecipeTests.java` | – | failure message of `worktableRecipes` shows recipe id and machine state |
 | `entity/ai/navigation/FlightPathNavigation.java` | the centered `getPathTypeWithinMobBB` override was dead code in 1.20.1 (1.20.1 `FlyNodeEvaluator` called it with `invokespecial`, checked in the 1.20.1 bytecode) but 1.21.1 calls it virtually → flying pathing would change | renamed (no longer overrides) to keep the 1.20.1 behaviour; rename back to enable |
 
-### Game tests: 27 / 29 pass
+### Game tests: 30 / 32 pass (incl. the new DinoInteractionTests)
 - `worktablerecipes` fails: **pre-existing gameplay bug**, not a port regression. `WorktableBlockEntity#setItem` resets the progress on
   an input change but does not recompute `cookingTotalTime`; while the same fuel keeps burning, the next item inherits the total
   time of the previous recipe (here 3000 instead of 300). Same code in 1.20.1. Fix would be one line (recompute `cookingTotalTime`
@@ -59,6 +59,28 @@ loot / advancement / tag parse errors (1940 recipes, 1866 advancements). Remaini
 GeckoLib warns about `animations/entity/data/*.json` (our own animation category data inside the folder GeckoLib scans; it skips
 them), config `version` 0 → 1 correction (default 0 outside the range [1,1], same as 1.20.1), nightconfig `NoSuchFileException`
 for `fossil-client.new.tmp.toml` (file-watcher race in NeoForge config saving), REI reload warnings, vanilla goat horn sounds.
+
+## Automated in-game testing (dedicated server + dev client, driven over RCON, screenshots of the client window)
+
+Fixes found this way:
+| File | Problem | Fix |
+|---|---|---|
+| `forge/ForgeFossilMod.java` | **crash/hang generating the anu lair** (and placing a comfy bed): `Invalid block entity minecraft:bed ... got fossil:comfy_bed`. ComfyBedBlock extends BedBlock and gets a vanilla BedBlockEntity; since 1.20.5 the BlockEntity constructor validates the block | `BlockEntityTypeAddBlocksEvent`: comfy bed added to `BlockEntityType.BED` (keeps the 1.20.1 behaviour) |
+| `world/feature/structures/{ModStructureType,HellBoatPiece,TreasureRoomStructure}.java` | **server hang in the nether**: the pieces used the vanilla `NETHER_FOSSIL` piece type, so a start reloaded from disk became a vanilla `NetherFossilPiece`, whose `postProcess` places the whole template in every touched chunk ("setBlock in a far chunk"); placing it over its own jukebox throws in 1.21.1 (`JukeboxBlockEntity#setTheItem` without a level) | own piece types `fossil:hell_boat` / `fossil:treasure_room` (+ load constructor for the treasure room piece). Starts saved by older versions still carry `NeFos` |
+| `forge/tests/DinoInteractionTests.java` (new) | – | game tests: feeding, owner-only leash, owner-only whip mounting |
+
+Verified working:
+- all ~75 mod entities summoned next to the client: no render errors, models/scale plausible (no double scaling), anu totem beams render
+- `finalizeSpawn` adults via `/summon`, egg hatching (`HatchingTime`), aging, imprint taming on hatch (owner, chat message, `incubate_egg` advancement)
+- riding (seat on the back), feeding, owner-only leash and whip (game tests)
+- REI inventory overlay with the tar fluid entry (crash fixed), tar renders in the world
+- TerraBlender volcano biome, all 13 overworld structures (`/locate` + `/place`), hell boat (`/locate`, `/place`, reload across a restart)
+- anu lair: teleport through `fossil:anu_portal`, the whole castle generates, explosion protection while Anu lives and lifted after
+  his death (`AnuLair` saved data), `fossil:home_portal` back to the overworld; treasure room dimension generates
+- dinopedia: 64 English bios loaded on the client (so `ensurealldinoshavebio` passes there)
+
+Test environment notes: `runServer` needs `sync-chunk-writes=false` on macOS or `/locate` trips the watchdog (vanilla fsync);
+the game test server must not share the `world` folder (it rewrites it to a flat world) – fixed with `--world gametestworld`.
 
 ## PORT-TODOs
 Verified by compile / datagen / run / sources and changed to `PORT(1.21.1, verified phase 2)`: all build coordinates,
