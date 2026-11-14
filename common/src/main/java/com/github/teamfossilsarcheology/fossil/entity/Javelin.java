@@ -196,8 +196,7 @@ public class Javelin extends AbstractArrow {
 
     private static ItemStack createStack(Item item, int itemDamage) {
         ItemStack stack = new ItemStack(item);
-        //PORT(1.21.1): Damage is the DAMAGE data component now. Undamaged javelins do not get the component (JavelinProperties has no
-        //default DAMAGE), so returned undamaged javelins still stack with fresh ones
+        //PORT(1.21.1): Damage is the DAMAGE data component now (default 0, javelins stack to 1 since phase 2, see JavelinItem)
         int damage = stack.getMaxDamage() - itemDamage;
         if (damage > 0) {
             stack.setDamageValue(damage);

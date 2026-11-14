@@ -8,6 +8,11 @@ pluginManagement {
     }
 }
 
+plugins {
+    // PORT(1.21.1): lets Gradle auto-provision the Java 21 toolchain when no local JDK 21 is installed
+    id "org.gradle.toolchains.foojay-resolver-convention" version "0.9.0"
+}
+
 include("common")
 // PORT(1.21.1): the fabric/ and forge/ folders stay on disk but are no longer part of the build.
 //include("fabric")

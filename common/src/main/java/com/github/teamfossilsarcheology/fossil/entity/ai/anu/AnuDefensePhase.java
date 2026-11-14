@@ -105,7 +105,8 @@ public class AnuDefensePhase extends AbstractAnuPhaseInstance {
                 }
                 for (int i = 0; i < 4; ++i) {
                     blockPos.move(random.nextInt(8) - random.nextInt(8), random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
-                    if (level.isEmptyBlock(blockPos) && ModBlocks.OBSIDIAN_SPIKES.get().canSurvive(level.getBlockState(blockPos.below()), level, blockPos)) {
+                    //PORT(1.21.1): BlockBehaviour#canSurvive is protected now -> BlockState#canSurvive (ObsidianSpikesBlock ignores the state)
+                    if (level.isEmptyBlock(blockPos) && ModBlocks.OBSIDIAN_SPIKES.get().defaultBlockState().canSurvive(level, blockPos)) {
                         level.setBlock(blockPos, ModBlocks.OBSIDIAN_SPIKES.get().defaultBlockState(), 2);
                     }
                 }

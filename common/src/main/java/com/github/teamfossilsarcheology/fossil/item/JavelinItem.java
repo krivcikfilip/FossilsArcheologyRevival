@@ -20,7 +20,11 @@ public class JavelinItem extends TieredItem {
     private final boolean ancient;
 
     public JavelinItem(Tier tier, boolean ancient) {
-        super(tier, new JavelinProperties().stacksToWithDurability(16, 30).arch$tab(ModTabs.FA_OTHER_ITEM_TAB));
+        //PORT(1.21.1): decision (phase 2): javelins stack to 1 like the trident. 1.21.1 ItemStack#validateComponents rejects
+        //MAX_DAMAGE together with MAX_STACK_SIZE > 1 (creative inventory packets fail to decode and disconnect the player).
+        //Durability (30), Unbreaking, Mending and anvil repair stay vanilla. 1.20.1: stack of 16 with 30 durability:
+        //super(tier, new JavelinProperties().stacksToWithDurability(16, 30).arch$tab(ModTabs.FA_OTHER_ITEM_TAB));
+        super(tier, new JavelinProperties().lockedDurability(30).arch$tab(ModTabs.FA_OTHER_ITEM_TAB));
         this.ancient = ancient;
     }
 
@@ -103,11 +107,21 @@ public class JavelinItem extends TieredItem {
          * We only set MAX_DAMAGE + MAX_STACK_SIZE, the DAMAGE component gets added by ItemStack#setDamageValue/hurtAndBreak.
          * TieredItem's constructor calls durability(tier.getUses()), which would override the javelin durability
          * (1.20.1 used defaultDurability, which did not), so further durability calls are ignored.
-         * PORT-TODO(1.21.1): verify in game that damaged javelin stacks (DAMAGE + max stack size 16) save/load and sync fine
+         * PORT(1.21.1): no longer used (javelins stack to 1, see lockedDurability); kept for reference.
          */
         public JavelinProperties stacksToWithDurability(int maxStackSize, int durability) {
             component(DataComponents.MAX_DAMAGE, durability);
             component(DataComponents.MAX_STACK_SIZE, maxStackSize);
+            durabilityLocked = true;
+            return this;
+        }
+
+        /**
+         * PORT(1.21.1): vanilla durability (MAX_DAMAGE, DAMAGE=0, MAX_STACK_SIZE=1). Locked so that TieredItem's
+         * durability(tier.getUses()) does not override the javelin durability (1.20.1 used defaultDurability, which did not).
+         */
+        public JavelinProperties lockedDurability(int durability) {
+            super.durability(durability);
             durabilityLocked = true;
             return this;
         }
