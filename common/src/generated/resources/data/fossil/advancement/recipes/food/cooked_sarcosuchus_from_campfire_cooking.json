@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_sarcosuchus"
-            ]
+            "items": "fossil:meat_sarcosuchus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_sarcosuchus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_sarcosuchus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_sarcosuchus_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

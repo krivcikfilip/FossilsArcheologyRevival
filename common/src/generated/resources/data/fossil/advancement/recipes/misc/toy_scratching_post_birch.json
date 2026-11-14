@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:birch_slab"
-            ]
+            "items": "minecraft:birch_slab"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_slab",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_slab"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:toy_scratching_post_birch"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

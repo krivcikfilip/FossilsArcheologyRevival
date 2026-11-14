@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:fossil_bio"
-            ]
+            "items": "fossil:fossil_bio"
           }
         ]
       },
@@ -17,9 +15,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:fossil_plant"
-            ]
+            "items": "fossil:fossil_plant"
           }
         ]
       },
@@ -29,9 +25,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:fossil_shale"
-            ]
+            "items": "fossil:fossil_shale"
           }
         ]
       },
@@ -41,9 +35,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:relic_scrap"
-            ]
+            "items": "fossil:relic_scrap"
           }
         ]
       },
@@ -53,9 +45,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:skull"
-            ]
+            "items": "fossil:skull"
           }
         ]
       },
@@ -63,17 +53,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.break_fossil.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:relic_scrap"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.break_fossil.title"
     }

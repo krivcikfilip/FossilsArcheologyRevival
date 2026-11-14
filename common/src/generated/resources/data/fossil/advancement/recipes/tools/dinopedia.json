@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:fossil_bio"
-            ]
+            "items": "fossil:fossil_bio"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_bio_fossil",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_bio_fossil"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:dinopedia"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

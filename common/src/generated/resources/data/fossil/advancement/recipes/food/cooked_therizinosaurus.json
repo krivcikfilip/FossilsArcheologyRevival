@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_therizinosaurus"
-            ]
+            "items": "fossil:meat_therizinosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_therizinosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_therizinosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_therizinosaurus"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

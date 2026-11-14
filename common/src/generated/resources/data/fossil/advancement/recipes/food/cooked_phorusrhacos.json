@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_phorusrhacos"
-            ]
+            "items": "fossil:meat_phorusrhacos"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_phorusrhacos",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_phorusrhacos"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_phorusrhacos"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

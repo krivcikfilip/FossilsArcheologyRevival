@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:vase_amphora_restored"
-            ]
+            "items": "fossil:vase_amphora_restored"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_restored_vase",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_restored_vase"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:vase_amphora_light_blue"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

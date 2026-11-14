@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:ancient_stone"
-            ]
+            "items": "fossil:ancient_stone"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_ancient_stone",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_ancient_stone"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:ancient_stone_stairs_from_ancient_stone_stonecutting"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

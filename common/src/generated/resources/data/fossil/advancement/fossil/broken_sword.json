@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:broken_helmet"
-            ]
+            "items": "fossil:broken_helmet"
           }
         ]
       },
@@ -17,9 +15,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:broken_sword"
-            ]
+            "items": "fossil:broken_sword"
           }
         ]
       },
@@ -27,17 +23,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.broken_sword.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:broken_sword"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.broken_sword.title"
     }

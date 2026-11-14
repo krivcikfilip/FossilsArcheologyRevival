@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_diplocaulus"
-            ]
+            "items": "fossil:meat_diplocaulus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_diplocaulus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_diplocaulus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_diplocaulus"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

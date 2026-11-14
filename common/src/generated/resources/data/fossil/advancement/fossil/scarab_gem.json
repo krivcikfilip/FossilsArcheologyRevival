@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:scarab_gem"
-            ]
+            "items": "fossil:scarab_gem"
           }
         ]
       },
@@ -15,17 +13,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.scarab_gem.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:scarab_gem"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.scarab_gem.title"
     }

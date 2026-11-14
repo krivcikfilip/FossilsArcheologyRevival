@@ -20,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_fossil",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_fossil"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:analyzer"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

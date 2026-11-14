@@ -20,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_dino_egg",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_dino_egg"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:bubble_blower"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

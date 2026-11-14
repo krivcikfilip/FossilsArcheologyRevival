@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:pottery_shard"
-            ]
+            "items": "fossil:pottery_shard"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_pottery_shard",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_pottery_shard"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:vase_amphora_damaged"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

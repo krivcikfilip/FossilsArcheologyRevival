@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:scarab_gem"
-            ]
+            "items": "fossil:scarab_gem"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_scarab_gem",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_scarab_gem"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:scarab_gem_aquatic"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

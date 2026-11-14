@@ -13,17 +13,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.fossil_seeds.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:fossil_seed_fern"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.fossil_seeds.title"
     }

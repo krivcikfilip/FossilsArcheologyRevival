@@ -1,6 +1,5 @@
 {
   "type": "fossil:worktable",
-  "duration": 300,
   "fuel": {
     "item": "fossil:pottery_shard"
   },
@@ -8,6 +7,7 @@
     "item": "fossil:vase_amphora_damaged"
   },
   "result": {
+    "count": 1,
     "id": "fossil:vase_amphora_restored"
   }
 }

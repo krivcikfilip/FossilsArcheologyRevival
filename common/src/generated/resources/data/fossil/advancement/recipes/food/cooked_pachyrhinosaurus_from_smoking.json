@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_pachyrhinosaurus"
-            ]
+            "items": "fossil:meat_pachyrhinosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_pachyrhinosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_pachyrhinosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_pachyrhinosaurus_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

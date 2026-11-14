@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_megalograptus"
-            ]
+            "items": "fossil:meat_megalograptus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_megalograptus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_megalograptus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_megalograptus"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

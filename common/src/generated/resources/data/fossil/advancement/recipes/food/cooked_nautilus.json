@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_nautilus"
-            ]
+            "items": "fossil:meat_nautilus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_nautilus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_nautilus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_nautilus"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

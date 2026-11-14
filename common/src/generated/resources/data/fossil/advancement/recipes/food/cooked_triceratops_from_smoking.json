@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_triceratops"
-            ]
+            "items": "fossil:meat_triceratops"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_triceratops",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_triceratops"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_triceratops_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

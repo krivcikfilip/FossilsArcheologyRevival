@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_ankylosaurus"
-            ]
+            "items": "fossil:meat_ankylosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_ankylosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_ankylosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_ankylosaurus_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

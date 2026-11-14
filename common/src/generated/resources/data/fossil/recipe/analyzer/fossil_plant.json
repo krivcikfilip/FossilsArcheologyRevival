@@ -137,10 +137,6 @@
       "weight": 1.0
     },
     {
-      "id": "minecraft:short_grass",
-      "weight": 1.5
-    },
-    {
       "id": "minecraft:oxeye_daisy",
       "weight": 1.5
     },
@@ -155,6 +151,10 @@
     {
       "id": "minecraft:sand",
       "weight": 25.0
+    },
+    {
+      "id": "minecraft:short_grass",
+      "weight": 1.5
     }
   ]
 }

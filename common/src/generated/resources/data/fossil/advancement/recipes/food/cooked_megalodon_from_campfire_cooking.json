@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_megalodon"
-            ]
+            "items": "fossil:meat_megalodon"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_megalodon",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_megalodon"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_megalodon_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

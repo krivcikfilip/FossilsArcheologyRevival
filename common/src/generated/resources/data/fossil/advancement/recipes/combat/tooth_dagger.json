@@ -11,9 +11,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:bone_unique_tyrannosaurus"
-            ]
+            "items": "fossil:bone_unique_tyrannosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_tooth",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_tooth"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:tooth_dagger"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:chicken_soup_cooked"
-            ]
+            "items": "fossil:chicken_soup_cooked"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_cooked_chicken_soup",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_cooked_chicken_soup"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:essence_chicken"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

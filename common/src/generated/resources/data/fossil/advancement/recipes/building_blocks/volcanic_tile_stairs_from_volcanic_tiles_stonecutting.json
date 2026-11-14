@@ -11,9 +11,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:volcanic_tiles"
-            ]
+            "items": "fossil:volcanic_tiles"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_volcanic_tiles",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_volcanic_tiles"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:volcanic_tile_stairs_from_volcanic_tiles_stonecutting"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

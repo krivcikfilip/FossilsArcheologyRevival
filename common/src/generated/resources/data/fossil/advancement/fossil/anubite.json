@@ -17,17 +17,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.anubite.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:anubite_statue"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.anubite.title"
     }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_alligator_gar"
-            ]
+            "items": "fossil:meat_alligator_gar"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_alligator_gar",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_alligator_gar"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_alligator_gar_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

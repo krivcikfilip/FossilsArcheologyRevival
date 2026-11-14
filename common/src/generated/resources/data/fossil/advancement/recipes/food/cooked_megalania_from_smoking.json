@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_megalania"
-            ]
+            "items": "fossil:meat_megalania"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_megalania",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_megalania"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_megalania_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

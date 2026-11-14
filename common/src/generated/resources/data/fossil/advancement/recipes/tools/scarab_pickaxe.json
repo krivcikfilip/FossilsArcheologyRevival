@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:scarab_gem"
-            ]
+            "items": "fossil:scarab_gem"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_item",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_item"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:scarab_pickaxe"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

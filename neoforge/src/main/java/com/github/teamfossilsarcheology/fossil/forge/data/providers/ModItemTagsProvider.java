@@ -268,11 +268,12 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         copy(ModBlockTags.C_GLASS_BLOCKS, ModItemTags.C_GLASS_BLOCKS);
         addTag(ModItemTags.C_FOODS, ModItemTags.UNCOOKED_MEAT, ModItemTags.COOKED_MEAT);
         addTag(ModItemTags.C_FOODS, COOKED_CHICKEN_SOUP, RAW_CHICKEN_SOUP, COOKED_EGG);
-        addTag(ModItemTags.C_SWORDS, ANCIENT_SWORD, SCARAB_SWORD);
-        addTag(ModItemTags.C_PICKAXES, SCARAB_PICKAXE);
-        addTag(ModItemTags.C_AXES, SCARAB_AXE);
-        addTag(ModItemTags.C_SHOVELS, SCARAB_SHOVEL);
-        addTag(ModItemTags.C_HOES, SCARAB_HOE);
+        //PORT(1.21.1): ModItemTags.C_SWORDS..C_HOES alias the vanilla ItemTags.SWORDS..HOES now (filled above), these would only add duplicates
+        //addTag(ModItemTags.C_SWORDS, ANCIENT_SWORD, SCARAB_SWORD);
+        //addTag(ModItemTags.C_PICKAXES, SCARAB_PICKAXE);
+        //addTag(ModItemTags.C_AXES, SCARAB_AXE);
+        //addTag(ModItemTags.C_SHOVELS, SCARAB_SHOVEL);
+        //addTag(ModItemTags.C_HOES, SCARAB_HOE);
         if (ModList.get().isLoaded(ModConstants.PREHISTORIC_FAUNA)) {
             PFaunaTagsProvider.addItemTags(this);
         }

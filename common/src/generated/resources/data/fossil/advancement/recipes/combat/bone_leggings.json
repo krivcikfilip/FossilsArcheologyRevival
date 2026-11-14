@@ -20,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_bones",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_bones"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:bone_leggings"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

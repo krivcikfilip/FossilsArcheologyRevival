@@ -7,6 +7,7 @@
     "item": "fossil:meat_alligator_gar"
   },
   "result": {
+    "count": 1,
     "id": "fossil:cooked_alligator_gar"
   }
 }

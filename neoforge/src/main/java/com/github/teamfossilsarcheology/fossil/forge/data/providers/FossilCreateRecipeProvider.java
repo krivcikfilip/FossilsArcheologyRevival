@@ -6,6 +6,8 @@ import net.minecraft.data.recipes.RecipeOutput;
  * PORT-TODO(1.21.1): Create 6 (1.21.1) replaced ProcessingRecipeBuilder/FinishedRecipe/CraftingHelper conditions;
  * port against create-1.21.1 6.0.x in phase 2. Until then the crushing recipes already generated (and converted to
  * "neoforge:conditions" by the data agent) in common/src/generated stay in use.
+ * PORT(1.21.1, phase 2): datagen no longer emits them, so the 7 converted crushing recipes were moved to
+ * common/src/main/resources/data/fossil/recipe/crushing (delete them there once this provider is ported).
  */
 public class FossilCreateRecipeProvider {
     public static void buildCraftingRecipes(RecipeOutput consumer) {

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_mammoth"
-            ]
+            "items": "fossil:meat_mammoth"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_mammoth",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_mammoth"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_mammoth_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

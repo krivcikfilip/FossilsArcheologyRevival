@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_liopleurodon"
-            ]
+            "items": "fossil:meat_liopleurodon"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_liopleurodon",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_liopleurodon"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_liopleurodon"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

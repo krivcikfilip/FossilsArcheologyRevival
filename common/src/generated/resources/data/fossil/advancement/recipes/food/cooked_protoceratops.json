@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_protoceratops"
-            ]
+            "items": "fossil:meat_protoceratops"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_protoceratops",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_protoceratops"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_protoceratops"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

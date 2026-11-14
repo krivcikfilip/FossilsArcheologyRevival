@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:toy_ball_white"
-            ]
+            "items": "fossil:toy_ball_white"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_ball",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_ball"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:toy_ball_white_to_orange"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

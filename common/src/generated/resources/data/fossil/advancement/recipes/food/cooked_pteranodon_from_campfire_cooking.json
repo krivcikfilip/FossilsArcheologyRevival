@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_pteranodon"
-            ]
+            "items": "fossil:meat_pteranodon"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_pteranodon",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_pteranodon"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_pteranodon_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_henodus"
-            ]
+            "items": "fossil:meat_henodus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_henodus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_henodus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_henodus"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

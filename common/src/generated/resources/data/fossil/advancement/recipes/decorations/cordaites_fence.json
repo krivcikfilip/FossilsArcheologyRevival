@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:cordaites_planks"
-            ]
+            "items": "fossil:cordaites_planks"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_planks",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_planks"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cordaites_fence"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

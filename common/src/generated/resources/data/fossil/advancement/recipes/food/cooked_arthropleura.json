@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_arthropleura"
-            ]
+            "items": "fossil:meat_arthropleura"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_arthropleura",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_arthropleura"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_arthropleura"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

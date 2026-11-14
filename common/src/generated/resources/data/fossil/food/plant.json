@@ -117,10 +117,6 @@
       "value": 5
     },
     {
-      "block": "minecraft:short_grass",
-      "value": 5
-    },
-    {
       "block": "minecraft:hay_block",
       "value": 75
     },
@@ -159,6 +155,10 @@
     {
       "tag": "minecraft:saplings",
       "value": 15
+    },
+    {
+      "block": "minecraft:short_grass",
+      "value": 5
     },
     {
       "block": "minecraft:sugar_cane",

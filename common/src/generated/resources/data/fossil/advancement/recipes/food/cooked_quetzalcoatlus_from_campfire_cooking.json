@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_quetzalcoatlus"
-            ]
+            "items": "fossil:meat_quetzalcoatlus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_quetzalcoatlus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_quetzalcoatlus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_quetzalcoatlus_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

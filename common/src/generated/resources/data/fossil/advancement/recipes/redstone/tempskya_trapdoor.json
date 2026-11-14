@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:tempskya_planks"
-            ]
+            "items": "fossil:tempskya_planks"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_planks",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_planks"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:tempskya_trapdoor"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

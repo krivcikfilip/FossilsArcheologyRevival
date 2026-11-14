@@ -11,9 +11,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:volcanic_ash"
-            ]
+            "items": "fossil:volcanic_ash"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_volcanic_ash",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_volcanic_ash"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:bone_meal_from_ash"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_edaphosaurus"
-            ]
+            "items": "fossil:meat_edaphosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_edaphosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_edaphosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_edaphosaurus"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

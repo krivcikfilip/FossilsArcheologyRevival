@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_quagga"
-            ]
+            "items": "fossil:meat_quagga"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_quagga",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_quagga"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_quagga"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

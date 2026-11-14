@@ -17,17 +17,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.kill_anu.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:ancient_key"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.kill_anu.title"
     }

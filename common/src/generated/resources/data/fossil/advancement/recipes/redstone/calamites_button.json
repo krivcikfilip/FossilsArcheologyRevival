@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:calamites_planks"
-            ]
+            "items": "fossil:calamites_planks"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_planks",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_planks"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:calamites_button"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

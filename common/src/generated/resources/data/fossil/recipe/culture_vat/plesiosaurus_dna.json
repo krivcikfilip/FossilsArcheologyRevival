@@ -1,6 +1,5 @@
 {
   "type": "fossil:culture_vat",
-  "duration": 6000,
   "fuel": {
     "item": "fossil:bio_goo"
   },
@@ -8,6 +7,7 @@
     "item": "fossil:plesiosaurus_dna"
   },
   "result": {
+    "count": 1,
     "id": "fossil:egg_item_plesiosaurus"
   }
 }

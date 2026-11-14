@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:stone_tablet"
-            ]
+            "items": "fossil:stone_tablet"
           }
         ]
       },
@@ -15,17 +13,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.stone_tablet.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:stone_tablet"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.stone_tablet.title"
     }

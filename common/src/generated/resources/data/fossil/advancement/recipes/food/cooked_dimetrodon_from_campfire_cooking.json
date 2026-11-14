@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_dimetrodon"
-            ]
+            "items": "fossil:meat_dimetrodon"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_dimetrodon",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_dimetrodon"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_dimetrodon_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

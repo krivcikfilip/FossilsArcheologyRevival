@@ -4,6 +4,8 @@ package com.github.teamfossilsarcheology.fossil.forge.data.providers;
 /**
  * PORT-TODO(1.21.1): Prehistoric Fauna has no 1.21.1 release, so PFTags cannot be compiled against.
  * The methods are no-ops; the original code (and the already generated tag JSON in common/src/generated) is kept.
+ * PORT(1.21.1, phase 2): datagen no longer emits the tags, so the generated JSON was moved to
+ * common/src/main/resources/data/prehistoricfauna/tags (delete it there once this provider is restored).
  */
 public class PFaunaTagsProvider {
     protected static void addBlockTags(ModBlockTagsProvider provider) {

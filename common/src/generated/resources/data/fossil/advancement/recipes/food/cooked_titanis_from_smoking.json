@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_titanis"
-            ]
+            "items": "fossil:meat_titanis"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_titanis",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_titanis"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_titanis_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

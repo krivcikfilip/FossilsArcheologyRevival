@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_sturgeon"
-            ]
+            "items": "fossil:meat_sturgeon"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_sturgeon",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_sturgeon"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_sturgeon_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

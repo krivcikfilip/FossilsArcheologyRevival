@@ -13,17 +13,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.figurines.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:figurine_steve_destroyed"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.figurines.title"
     }

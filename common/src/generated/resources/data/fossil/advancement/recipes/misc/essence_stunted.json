@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:essence_chicken"
-            ]
+            "items": "fossil:essence_chicken"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_chicken_essence",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_chicken_essence"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:essence_stunted"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

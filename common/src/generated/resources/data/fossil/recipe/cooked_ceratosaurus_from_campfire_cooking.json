@@ -7,6 +7,7 @@
     "item": "fossil:meat_ceratosaurus"
   },
   "result": {
+    "count": 1,
     "id": "fossil:cooked_ceratosaurus"
   }
 }

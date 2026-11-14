@@ -9,17 +9,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.anu_lair.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:anu_statue"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.anu_lair.title"
     }

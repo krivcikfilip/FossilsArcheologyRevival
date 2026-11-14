@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_deinonychus"
-            ]
+            "items": "fossil:meat_deinonychus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_deinonychus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_deinonychus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_deinonychus_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

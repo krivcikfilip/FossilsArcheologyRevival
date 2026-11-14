@@ -4,9 +4,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:crafting_table"
-            ]
+            "items": "minecraft:crafting_table"
           }
         ]
       },
@@ -19,13 +17,10 @@
     "description": {
       "translate": "advancements.fossil.root.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:fossil_bio"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.root.title"
     }

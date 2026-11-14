@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_platybelodon"
-            ]
+            "items": "fossil:meat_platybelodon"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_platybelodon",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_platybelodon"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_platybelodon_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

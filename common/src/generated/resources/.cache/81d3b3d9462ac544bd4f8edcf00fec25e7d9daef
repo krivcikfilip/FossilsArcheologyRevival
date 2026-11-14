@@ -1,4 +1,4 @@
-// 1.20.1	2026-06-07T22:53:37.7344314	Item Models: fossil
+// 1.21.1	2026-11-14T18:24:16.816714	Item Models: fossil
 85278cf934a028444f8b185c2c311b061e0ea0bd assets/fossil/models/item/alligator_gar_dna.json
 51ab511af360e56776aeb0c4922c7c04017afa87 assets/fossil/models/item/allosaurus_dna.json
 b458ee5f9ac82ed2ec7bae00192d422e4c39a3a5 assets/fossil/models/item/ancient_clock.json
@@ -122,7 +122,6 @@ ceafaae169df64c2cb47ab643249436b6437ee65 assets/fossil/models/item/bone_foot_ste
 ce82457913101ed0b2668833506ddfcc52566785 assets/fossil/models/item/bone_foot_tyrannosaurus.json
 9ef7d2a13c0cfb173ce7fdf7e0f3f0d5377cdae5 assets/fossil/models/item/bone_foot_velociraptor.json
 43789a7c84bb7ba6f89d05ec40fd0fe7d50484bf assets/fossil/models/item/bone_helmet.json
-c138ed6ad9ba7b9f362fc413d2d1bdd4c016ab4e assets/fossil/models/item/bone_leggings.json
 4fa9844ab6f2efae477ebbea0caf397444305913 assets/fossil/models/item/bone_leg_allosaurus.json
 0021cb024a79d021758e1c089f10b0429599297c assets/fossil/models/item/bone_leg_ankylosaurus.json
 c01c6594c58cf9d9cfaa2d64526d9f843e322014 assets/fossil/models/item/bone_leg_brachiosaurus.json
@@ -174,6 +173,7 @@ fbff8231ed8b49bac1e9e6f7900a596bfd4fa255 assets/fossil/models/item/bone_leg_smil
 d54ed61f1caa9c0e555af184b268fd56a7915393 assets/fossil/models/item/bone_leg_triceratops.json
 68fbb01b776981de821fe8650cb86b5f99a696f2 assets/fossil/models/item/bone_leg_tyrannosaurus.json
 c92206623ab30dec230022e77adbed543dc21b1a assets/fossil/models/item/bone_leg_velociraptor.json
+c138ed6ad9ba7b9f362fc413d2d1bdd4c016ab4e assets/fossil/models/item/bone_leggings.json
 69451c671236bfaea97d6ce369d8f87611eea788 assets/fossil/models/item/bone_ribcage_allosaurus.json
 b51650d0944db5a493e0ba26632f296a558fe4ee assets/fossil/models/item/bone_ribcage_ankylosaurus.json
 3accdfd521a96e6de83fbaebe7c91db38f172ee3 assets/fossil/models/item/bone_ribcage_brachiosaurus.json

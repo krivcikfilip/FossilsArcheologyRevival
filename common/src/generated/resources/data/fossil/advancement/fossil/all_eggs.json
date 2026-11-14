@@ -815,17 +815,14 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.all_eggs.description"
     },
     "frame": "challenge",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:egg_item_tyrannosaurus"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.all_eggs.title"
     }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:dinopedia"
-            ]
+            "items": "fossil:dinopedia"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_dinopedia",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_dinopedia"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:whip"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

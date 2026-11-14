@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:skull"
-            ]
+            "items": "fossil:skull"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_skull_block",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_skull_block"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:skull_stick"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

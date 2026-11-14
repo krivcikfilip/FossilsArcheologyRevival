@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_stegosaurus"
-            ]
+            "items": "fossil:meat_stegosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_stegosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_stegosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_stegosaurus_from_campfire_cooking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

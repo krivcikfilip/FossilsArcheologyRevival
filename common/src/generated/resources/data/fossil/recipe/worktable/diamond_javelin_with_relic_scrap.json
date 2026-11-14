@@ -1,6 +1,5 @@
 {
   "type": "fossil:worktable",
-  "duration": 300,
   "fuel": {
     "item": "fossil:relic_scrap"
   },
@@ -8,6 +7,7 @@
     "item": "fossil:diamond_javelin"
   },
   "result": {
+    "count": 1,
     "id": "fossil:diamond_javelin"
   }
 }

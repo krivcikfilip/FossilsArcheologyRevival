@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_psittacosaurus"
-            ]
+            "items": "fossil:meat_psittacosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_psittacosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_psittacosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_psittacosaurus_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_dodo"
-            ]
+            "items": "fossil:meat_dodo"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_dodo",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_dodo"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_dodo_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

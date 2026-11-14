@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_megaloceros"
-            ]
+            "items": "fossil:meat_megaloceros"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_megaloceros",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_megaloceros"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_megaloceros"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

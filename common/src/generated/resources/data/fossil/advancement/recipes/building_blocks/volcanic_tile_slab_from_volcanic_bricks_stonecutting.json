@@ -11,9 +11,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:volcanic_bricks"
-            ]
+            "items": "fossil:volcanic_bricks"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_volcanic_bricks",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_volcanic_bricks"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:volcanic_tile_slab_from_volcanic_bricks_stonecutting"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

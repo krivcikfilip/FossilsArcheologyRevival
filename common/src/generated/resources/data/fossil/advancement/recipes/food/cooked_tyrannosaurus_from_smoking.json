@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_tyrannosaurus"
-            ]
+            "items": "fossil:meat_tyrannosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_tyrannosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_tyrannosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_tyrannosaurus_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

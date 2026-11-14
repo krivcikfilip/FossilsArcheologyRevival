@@ -7,6 +7,7 @@
     "item": "fossil:meat_brachiosaurus"
   },
   "result": {
+    "count": 1,
     "id": "fossil:cooked_brachiosaurus"
   }
 }

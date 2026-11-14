@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:frozen_meat"
-            ]
+            "items": "fossil:frozen_meat"
           }
         ]
       },
@@ -15,17 +13,13 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
     "description": {
       "translate": "advancements.fossil.frozen_meat.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
       "count": 1,
       "id": "fossil:frozen_meat"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.fossil.frozen_meat.title"
     }

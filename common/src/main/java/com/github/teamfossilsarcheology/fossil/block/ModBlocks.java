@@ -67,9 +67,11 @@ public class ModBlocks {
             () -> new AnubiteStatueBlock(Properties.of().noOcclusion().strength(-1, 60000000)),
             block -> AnubiteStatueBlockItem.get(block, new Item.Properties().arch$tab(ModTabs.FA_BLOCK_TAB)));
     public static final RegistrySupplier<AnuBarrierOriginBlock> ANU_BARRIER_ORIGIN = blockWithDebugItem("anu_barrier_origin",
-            () -> new AnuBarrierOriginBlock(Properties.ofLegacyCopy(Blocks.BARRIER)));
+            //PORT(1.21.1): vanilla barrier uses waterloggedMapColor (reads WATERLOGGED, which our block lacks) -> plain NONE like 1.20.1
+            () -> new AnuBarrierOriginBlock(Properties.ofLegacyCopy(Blocks.BARRIER).mapColor(MapColor.NONE)));
     public static final RegistrySupplier<AnuBarrierFaceBlock> ANU_BARRIER_FACE = blockWithDebugItem("anu_barrier_face",
-            () -> new AnuBarrierFaceBlock(Properties.ofLegacyCopy(Blocks.BARRIER)));
+            //PORT(1.21.1): vanilla barrier uses waterloggedMapColor (reads WATERLOGGED, which our block lacks) -> plain NONE like 1.20.1
+            () -> new AnuBarrierFaceBlock(Properties.ofLegacyCopy(Blocks.BARRIER).mapColor(MapColor.NONE)));
     public static final RegistrySupplier<AnuPortal> ANU_PORTAL = blockWithDebugItem("anu_portal",
             () -> new AnuPortal(Properties.ofLegacyCopy(Blocks.NETHER_PORTAL)));
     public static final RegistrySupplier<HomePortal> HOME_PORTAL = blockWithDebugItem("home_portal",

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_scotoharpes"
-            ]
+            "items": "fossil:meat_scotoharpes"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_scotoharpes",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_scotoharpes"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_scotoharpes"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

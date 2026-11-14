@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "fossil:meat_brachiosaurus"
-            ]
+            "items": "fossil:meat_brachiosaurus"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_meat_brachiosaurus",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_meat_brachiosaurus"
     ]
   ],
   "rewards": {
     "recipes": [
       "fossil:cooked_brachiosaurus_from_smoking"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }
