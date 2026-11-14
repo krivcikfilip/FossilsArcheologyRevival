@@ -1,6 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.forge;
 
 import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.material.ModFluids;
 import com.github.teamfossilsarcheology.fossil.advancements.ModTriggers;
 import com.github.teamfossilsarcheology.fossil.client.ClientInit;
@@ -37,6 +38,8 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -60,6 +63,7 @@ public class ForgeFossilMod {
         modEventBus.addListener(this::onCommon);
         modEventBus.addListener(this::registerSpawnPlacements);
         modEventBus.addListener(this::registerChunkGenerators);
+        modEventBus.addListener(ForgeFossilMod::addBlockEntityValidBlocks);
         //Mod bus events of ForgeModEvents (that class itself only subscribes to the game bus)
         modEventBus.addListener(ForgeModEvents::registerTests);
         modEventBus.addListener(ForgeConfigFix::fixConfig);
@@ -91,6 +95,16 @@ public class ForgeFossilMod {
             Regions.register(new ForgeFossilRegion("overworld", RegionType.OVERWORLD, 4));
             SurfaceRuleManager.addSurfaceRules(SurfaceRuleManager.RuleCategory.OVERWORLD, FossilMod.MOD_ID, ModSurfaceRules.VOLCANIC_SURFACE_RULE);
         });
+    }
+
+    /**
+     * PORT(1.21.1, phase 2): ComfyBedBlock extends BedBlock, so it creates a vanilla BedBlockEntity (as in 1.20.1). Since 1.20.5 the
+     * BlockEntity constructor rejects blocks that are not valid for the type ("Invalid block entity minecraft:bed"), which crashed the
+     * chunk generation of the anu lair (its castle contains comfy beds) and placing a comfy bed. Adding it to the valid blocks keeps the
+     * 1.20.1 behaviour.
+     */
+    private static void addBlockEntityValidBlocks(BlockEntityTypeAddBlocksEvent event) {
+        event.modify(BlockEntityType.BED, ModBlocks.COMFY_BED.get());
     }
 
     /**

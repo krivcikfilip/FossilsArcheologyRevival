@@ -45,7 +45,14 @@ public class TreasureRoomStructure extends Structure {
         private static final ResourceLocation STRUCTURE = FossilMod.location("treasure_room");
 
         public TreasureRoomPiece(StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation) {
-            super(StructurePieceType.NETHER_FOSSIL, 0, structureTemplateManager, STRUCTURE, STRUCTURE.toString(), makeSettings(rotation), blockPos);
+            //PORT(1.21.1, phase 2): own piece type, see ModStructureType#TREASURE_ROOM_PIECE. 1.20.1: StructurePieceType.NETHER_FOSSIL
+            super(ModStructureType.TREASURE_ROOM_PIECE.get(), 0, structureTemplateManager, STRUCTURE, STRUCTURE.toString(), makeSettings(rotation), blockPos);
+        }
+
+        //PORT(1.21.1, phase 2): load constructor for the own piece type (same as HellBoatPiece)
+        public TreasureRoomPiece(StructureTemplateManager structureTemplateManager, CompoundTag compoundTag) {
+            super(ModStructureType.TREASURE_ROOM_PIECE.get(), compoundTag, structureTemplateManager,
+                    (ResourceLocation resourceLocation) -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
         }
 
         private static StructurePlaceSettings makeSettings(Rotation rotation) {

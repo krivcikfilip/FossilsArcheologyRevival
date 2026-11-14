@@ -7,6 +7,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 
 /**
  * PORT(1.21.1): 1.20.1 called {@code Registry.register(BuiltInRegistries.STRUCTURE_TYPE, ...)} from a static initializer that ran
@@ -21,6 +22,18 @@ public class ModStructureType {
     public static final RegistrySupplier<StructureType<AnuCastleStructure>> ANU_CASTLE = register("anu_castle", AnuCastleStructure.CODEC);
     public static final RegistrySupplier<StructureType<HellBoatStructure>> HELL_BOAT = register("hell_boat", HellBoatStructure.CODEC);
     public static final RegistrySupplier<StructureType<TreasureRoomStructure>> TREASURE_ROOM = register("treasure_room", TreasureRoomStructure.CODEC);
+
+    /**
+     * PORT(1.21.1, phase 2): the hell boat / treasure room pieces used the vanilla StructurePieceType.NETHER_FOSSIL, so a structure start
+     * reloaded from disk came back as a vanilla NetherFossilPiece. Its postProcess encapsulates the whole template, so the boat was placed
+     * again in every chunk it touches; in 1.21.1 placing the template over its own jukebox crashes (JukeboxBlockEntity#setTheItem needs a
+     * level, which is null during world generation) and the chunk never finishes. Own piece types fix the reload.
+     */
+    public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECES = DeferredRegister.create(FossilMod.MOD_ID, Registries.STRUCTURE_PIECE);
+    public static final RegistrySupplier<StructurePieceType> HELL_BOAT_PIECE = STRUCTURE_PIECES.register("hell_boat",
+            () -> (StructurePieceType.StructureTemplateType) HellBoatPiece::new);
+    public static final RegistrySupplier<StructurePieceType> TREASURE_ROOM_PIECE = STRUCTURE_PIECES.register("treasure_room",
+            () -> (StructurePieceType.StructureTemplateType) TreasureRoomStructure.TreasureRoomPiece::new);
 
     private static boolean registered;
 
@@ -37,5 +50,6 @@ public class ModStructureType {
         }
         registered = true;
         STRUCTURE_TYPES.register();
+        STRUCTURE_PIECES.register();
     }
 }

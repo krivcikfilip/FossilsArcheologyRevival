@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.TemplateStructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
@@ -18,11 +17,12 @@ public class HellBoatPiece extends TemplateStructurePiece {
     private static final ResourceLocation STRUCTURE = FossilMod.location("hell_boat");
 
     public HellBoatPiece(StructureTemplateManager structureManager, BlockPos blockPos, Rotation rotation) {
-        super(StructurePieceType.NETHER_FOSSIL, 0, structureManager, STRUCTURE, STRUCTURE.toString(), makeSettings(rotation), blockPos);
+        //PORT(1.21.1, phase 2): own piece type, see ModStructureType#HELL_BOAT_PIECE. 1.20.1: StructurePieceType.NETHER_FOSSIL
+        super(ModStructureType.HELL_BOAT_PIECE.get(), 0, structureManager, STRUCTURE, STRUCTURE.toString(), makeSettings(rotation), blockPos);
     }
 
     public HellBoatPiece(StructureTemplateManager structureManager, CompoundTag compoundTag) {
-        super(StructurePieceType.NETHER_FOSSIL, compoundTag, structureManager,
+        super(ModStructureType.HELL_BOAT_PIECE.get(), compoundTag, structureManager,
                 (ResourceLocation resourceLocation) -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot"))));
     }
 
