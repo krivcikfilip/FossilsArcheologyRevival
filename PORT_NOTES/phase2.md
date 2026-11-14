@@ -45,11 +45,11 @@ runtime (`TinyRemapper`, `ReadClasspathProviderImpl`) leaves non-daemon thread p
 | `forge/tests/RecipeTests.java` | – | failure message of `worktableRecipes` shows recipe id and machine state |
 | `entity/ai/navigation/FlightPathNavigation.java` | the centered `getPathTypeWithinMobBB` override was dead code in 1.20.1 (1.20.1 `FlyNodeEvaluator` called it with `invokespecial`, checked in the 1.20.1 bytecode) but 1.21.1 calls it virtually → flying pathing would change | renamed (no longer overrides) to keep the 1.20.1 behaviour; rename back to enable |
 
-### Game tests: 30 / 32 pass (incl. the new DinoInteractionTests)
-- `worktablerecipes` fails: **pre-existing gameplay bug**, not a port regression. `WorktableBlockEntity#setItem` resets the progress on
-  an input change but does not recompute `cookingTotalTime`; while the same fuel keeps burning, the next item inherits the total
-  time of the previous recipe (here 3000 instead of 300). Same code in 1.20.1. Fix would be one line (recompute `cookingTotalTime`
-  in `setItem`, like the vanilla furnace) – left as is (behaviour change, outside the port).
+### Game tests: 31 / 32 pass (incl. the new DinoInteractionTests)
+- `worktablerecipes` failed on a **pre-existing gameplay bug** (same code in 1.20.1): `WorktableBlockEntity#setItem` reset the progress on
+  an input change but did not recompute `cookingTotalTime`; while the same fuel kept burning, the next item inherited the total
+  time of the previous recipe (here 3000 instead of 300). **Fixed on request** (behaviour fix for our modpack): `setItem` recomputes
+  `cookingTotalTime` like the vanilla furnace. The test passes now.
 - `ensurealldinoshavebio` fails on the dedicated game-test server by design: it reads the client-side `DinopediaBioLoader`.
   Run it in the client with `/test runthese` to check it.
 

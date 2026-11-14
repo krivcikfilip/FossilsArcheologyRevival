@@ -210,6 +210,9 @@ public class WorktableBlockEntity extends MachineContainerBlockEntity {
         }
         if (slot == WorktableMenu.INPUT_SLOT_ID && !sameItem) {
             cookingProgress = 0;
+            //Fix (also present in 1.20.1): the total time was only computed when new fuel was lit, so while the same fuel kept
+            //burning the next item inherited the duration of the previous recipe. Recompute it like the vanilla furnace does
+            cookingTotalTime = timeToSmelt(stack, fuel);
             level.setBlock(getBlockPos(), getBlockState().setValue(CustomEntityBlock.ACTIVE, false), 3);
         }
         setChanged();
