@@ -579,7 +579,7 @@
       "fossil:prehistoric/ichthyosaurus_outside1",
       "fossil:prehistoric/ichthyosaurus_outside2"
     ],
-    "subtitle": "subtitle.fossil.ichthyosaurus_outside"
+    "subtitle": "subtitle.fossil.ichthyosaurus_ambient_outside"
   },
   "liopleurodon_ambient_inside": {
     "category": "neutral",

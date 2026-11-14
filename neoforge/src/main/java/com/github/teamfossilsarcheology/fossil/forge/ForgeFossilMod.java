@@ -1,6 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.forge;
 
 import com.github.teamfossilsarcheology.fossil.FossilMod;
+import com.github.teamfossilsarcheology.fossil.material.ModFluids;
 import com.github.teamfossilsarcheology.fossil.advancements.ModTriggers;
 import com.github.teamfossilsarcheology.fossil.client.ClientInit;
 import com.github.teamfossilsarcheology.fossil.client.model.block.PlantBlockModel;
@@ -36,6 +37,9 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import terrablender.api.RegionType;
 import terrablender.api.Regions;
@@ -64,6 +68,7 @@ public class ForgeFossilMod {
         //PORT(1.21.1): DistExecutor was removed from FML
         if (FMLEnvironment.dist.isClient()) {
             modEventBus.addListener(ForgeFossilMod::onModelRegistryEvent);
+            modEventBus.addListener(ForgeFossilMod::onRegisterClientExtensions);
             ClientInit.immediate();
         }
     }
@@ -108,6 +113,22 @@ public class ForgeFossilMod {
         event.register(ModEntities.COELACANTH.get(), SpawnPlacementTypes.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Coelacanth::canCoelacanthSpawn, RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(ModEntities.NAUTILUS.get(), SpawnPlacementTypes.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PrehistoricFish::canSpawn, RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(ModEntities.STURGEON.get(), SpawnPlacementTypes.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PrehistoricFish::canSpawn, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        //PORT(1.21.1): sentry piglins spawn from the anu_lair biome but never had a placement. NeoForge logs an error for that; these are
+        //exactly the vanilla defaults for an unregistered type (SpawnPlacements#getPlacementType/getHeightmapType/checkSpawnRules)
+        event.register(ModEntities.SENTRY_PIGLIN.get(), SpawnPlacementTypes.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (type, level, spawnType, pos, random) -> true, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+    }
+
+    /**
+     * PORT(1.21.1): Architectury 13 creates the tar FluidType (ArchitecturyFluidAttributesForge) but never registers it in
+     * NeoForgeRegistries.FLUID_TYPES, so NeoForge's ClientExtensionsManager never calls its initializeClient. Without this the tar has no
+     * still/flowing texture on the client (REI crashed rendering the fluid entry: TextureAtlas#getSprite(null)).
+     * Skipped if the extensions are already present (a later Architectury that registers the type), duplicates throw.
+     */
+    private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        FluidType tarType = ModFluids.TAR.get().getFluidType();
+        if (IClientFluidTypeExtensions.of(tarType) == IClientFluidTypeExtensions.DEFAULT) {
+            tarType.initializeClient(extensions -> event.registerFluidType(extensions, tarType));
+        }
     }
 
     private static void onModelRegistryEvent(ModelEvent.RegisterGeometryLoaders event) {

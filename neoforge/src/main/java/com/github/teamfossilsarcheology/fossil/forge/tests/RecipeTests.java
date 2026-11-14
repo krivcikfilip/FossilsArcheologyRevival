@@ -275,7 +275,9 @@ public class RecipeTests {
                 });
                 helper.runAtTickTime(startTick + 2, () -> {
                     if (!ItemStack.isSameItem(worktableEntity.getItem(CultureVatMenu.OUTPUT_SLOT_ID), recipe.getResultItem(null))) {
-                        throw new GameTestAssertException("Output does not contain " + recipe.getResultItem(null).getItem() + " but instead " + worktableEntity.getItem(WorktableMenu.OUTPUT_SLOT_ID));
+                        throw new GameTestAssertException("Output does not contain " + recipe.getResultItem(null).getItem() + " but instead " + worktableEntity.getItem(WorktableMenu.OUTPUT_SLOT_ID)
+                                + " (recipe " + holder.id() + ", input " + worktableEntity.getItem(WorktableMenu.INPUT_SLOT_ID) + ", fuel " + worktableEntity.getItem(WorktableMenu.FUEL_SLOT_ID)
+                                + ", litTime " + dataAccess.get(0) + ", progress " + dataAccess.get(2) + "/" + dataAccess.get(3) + ")");
                     }
                     worktableEntity.setItem(WorktableMenu.OUTPUT_SLOT_ID, ItemStack.EMPTY);
                 });

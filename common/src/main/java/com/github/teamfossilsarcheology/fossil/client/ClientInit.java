@@ -1,5 +1,7 @@
 package com.github.teamfossilsarcheology.fossil.client;
 
+import software.bernie.geckolib.loading.math.MathParser;
+import software.bernie.geckolib.loading.math.value.Variable;
 import com.github.teamfossilsarcheology.fossil.block.ModBlocks;
 import com.github.teamfossilsarcheology.fossil.block.PrehistoricPlantInfo;
 import com.github.teamfossilsarcheology.fossil.block.custom_blocks.VaseBlock;
@@ -78,6 +80,10 @@ public class ClientInit {
 
 
     public static void immediate() {
+        //PORT(1.21.1): GeckoLib 4.9's molang parser rejects unknown plain identifiers (mclib in 4.2 created them with value 0), which made
+        //the quetzalcoatlus "fly"/"dive" animations fail to load. The pitch_root rotation itself is set in PrehistoricGeoModel.
+        MathParser.registerVariable(new Variable("rider_rot_x", 0));
+        MathParser.registerVariable(new Variable("rider_rot_z", 0));
         if (Version.debugEnabled()) {
             debugScreenKey = new KeyMapping("key.fossil.debug_screen", InputConstants.Type.KEYSYM, InputConstants.KEY_Y,
                     "category.fossil.debug");

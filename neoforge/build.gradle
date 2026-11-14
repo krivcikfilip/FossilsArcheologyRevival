@@ -121,6 +121,12 @@ loom {
             programArgs "--output", project(":common").file("src/generated/resources/").absolutePath
             programArgs "--existing", project(":common").file("src/main/resources/").absolutePath
         }
+        // PORT(1.21.1): headless game test server (runs the @GameTestHolder classes in forge/tests and exits with the failure count)
+        gameTestServer {
+            server()
+            property "neoforge.gameTestServer", "true"
+            property "neoforge.enabledGameTestNamespaces", "$mod_id"
+        }
     }
     // PORT(1.21.1): NeoForge has no "forge { mixinConfig ... }": mixin configs are declared in META-INF/neoforge.mods.toml
     // ([[mixins]] entries) and the access widener is converted to an access transformer by remapJar (atAccessWideners).
