@@ -126,6 +126,8 @@ loom {
             server()
             property "neoforge.gameTestServer", "true"
             property "neoforge.enabledGameTestNamespaces", "$mod_id"
+            // own world, so it does not collide with (or overwrite) the runServer world in the shared run directory
+            programArgs "--world", "gametestworld"
         }
     }
     // PORT(1.21.1): NeoForge has no "forge { mixinConfig ... }": mixin configs are declared in META-INF/neoforge.mods.toml
